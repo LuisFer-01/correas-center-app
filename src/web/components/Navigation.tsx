@@ -4,10 +4,17 @@ import { ChevronDown, Menu, Phone, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
+// Mapeo de iconos de Font Awesome a Lucide (para mantener compatibilidad con los datos de la DB)
+const faToLucide: Record<string, string> = {
+  'fa-box': '📦',
+  'fa-industry': '🏭',
+  'fa-wrench': '🔧',
+}
+
 export const Navigation = () => {
   const { data: globals, isLoading } = useGlobalData()
   const location = useLocation()
-  
+
   const [isOpen, setIsOpen] = useState(false)
   const [showProducts, setShowProducts] = useState(false)
   const [activeCategory, setActiveCategory] = useState<number | null>(null)
@@ -16,6 +23,7 @@ export const Navigation = () => {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchContainerRef = useRef<HTMLDivElement>(null)
 
+  // Menús agrupados desde el nuevo servicio
   const menusProductos = globals?.menus?.Producto || []
   const menusAplicaciones = globals?.menus?.Aplicacion || []
   const menusServicios = globals?.menus?.Servicio || []
@@ -32,7 +40,9 @@ export const Navigation = () => {
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset'
-    return () => { document.body.style.overflow = 'unset' }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
   }, [isOpen])
 
   // Cerrar menú móvil al cambiar de ruta
@@ -46,6 +56,7 @@ export const Navigation = () => {
       window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
       setSearchQuery('')
       setShowSuggestions(false)
+      setIsOpen(false)
     }
   }
 
@@ -53,8 +64,10 @@ export const Navigation = () => {
     window.location.href = `/search?q=${encodeURIComponent(suggestion)}`
     setSearchQuery('')
     setShowSuggestions(false)
+    setIsOpen(false)
   }
 
+  // Función para generar la URL del logo desde Supabase Storage
   const getLogoUrl = () => {
     if (!globals?.empresa?.logo) return null
     return getSupabaseImageUrl(globals.empresa.logo, 'logos-empresas')
@@ -62,15 +75,24 @@ export const Navigation = () => {
 
   const logoUrl = getLogoUrl()
 
+  // Obtener submenús desde menu_item (nueva estructura)
   const getSubmenusForMenu = (menu: any) => {
-    if (!menu.detalle_menus || menu.detalle_menus.length === 0) {
+    if (!menu.menu_item || menu.menu_item.length === 0) {
       return []
     }
-    return menu.detalle_menus.map((detalle: any) => ({
-      id: detalle.id,
-      ruta: detalle.ruta,
-      orden: detalle.orden,
+    return menu.menu_item.map((item: any) => ({
+      id: item.id,
+      ruta: item.ruta,
+      orden: item.orden,
     }))
+  }
+
+  // Renderizar icono (soporta tanto Font Awesome como Lucide)
+  const renderIcon = (iconName: string | null, size: 'xs' | 'sm' = 'sm') => {
+    if (!iconName) return null
+    const emoji = faToLucide[iconName]
+    if (emoji) return <span className={size === 'xs' ? 'text-xs' : 'text-sm'}>{emoji}</span>
+    return <span className={size === 'xs' ? 'text-xs' : 'text-sm'}>{iconName}</span>
   }
 
   if (isLoading) {
@@ -118,12 +140,18 @@ export const Navigation = () => {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true) }}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setShowSuggestions(true)
+                  }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Buscar productos..."
                   className="w-48 xl:w-64 px-3 xl:px-4 py-2 rounded-l-md border-0 bg-[#C0939A] focus:bg-[#D9B0B6] focus:outline-none focus:ring-2 focus:ring-white text-gray-900 placeholder:text-gray-700 transition-colors duration-200 text-sm xl:text-base"
                 />
-                <button type="submit" className="bg-white text-[#ea0a2cf8] px-3 xl:px-4 py-2 rounded-r-md hover:bg-gray-100 transition-colors">
+                <button
+                  type="submit"
+                  className="bg-white text-[#ea0a2cf8] px-3 xl:px-4 py-2 rounded-r-md hover:bg-gray-100 transition-colors"
+                >
                   <Search size={24} />
                 </button>
               </form>
@@ -156,44 +184,78 @@ export const Navigation = () => {
             </div>
 
             {/* PRODUCTOS - MEGA MENÚ */}
-            <div className="relative" onMouseEnter={() => setShowProducts(true)} onMouseLeave={() => { setShowProducts(false); setActiveCategory(null) }}>
+            <div
+              className="relative"
+              onMouseEnter={() => setShowProducts(true)}
+              onMouseLeave={() => {
+                setShowProducts(false)
+                setActiveCategory(null)
+              }}
+            >
               <button className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium">
                 Productos
-                <ChevronDown size={18} className={`transition-transform duration-200 ${showProducts ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform duration-200 ${showProducts ? 'rotate-180' : ''}`}
+                />
               </button>
-              <div className={`absolute top-full left-0 w-[600px] bg-white rounded-lg shadow-2xl border border-gray-200 p-6 -translate-x-1/4 transition-all duration-300 max-h-[85vh] overflow-y-auto ${showProducts ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'}`}>
+              <div
+                className={`absolute top-full left-0 w-[600px] bg-white rounded-lg shadow-2xl border border-gray-200 p-6 -translate-x-1/4 transition-all duration-300 max-h-[85vh] overflow-y-auto ${
+                  showProducts
+                    ? 'opacity-100 visible translate-y-0'
+                    : 'opacity-0 invisible -translate-y-2 pointer-events-none'
+                }`}
+              >
                 <div className="grid grid-cols-2 gap-4">
-                  {menusProductos.map((menu, index) => {
-                    const producto = globals?.productos.find((p) => p.id === menu.campo_id)
+                  {menusProductos.map((menu: any, index: number) => {
+                    const producto = globals?.productos.find((p) => p.id === menu.registro_id)
                     if (!producto) return null
                     const submenus = getSubmenusForMenu(menu)
-                    
+
                     return (
                       <div key={menu.id} className="relative">
                         <div
                           className="flex items-center justify-between cursor-pointer group pb-2 border-b-2 border-[#EA0A2A]"
                           onClick={() => setActiveCategory(activeCategory === index ? null : index)}
                         >
-                          <Link to={menu.ruta} className="flex items-center gap-2 font-bold text-[#EA0A2A] text-sm uppercase tracking-wide hover:underline">
-                            {menu.icon && <span className="text-[#EA0A2A]">{menu.icon}</span>}
+                          <Link
+                            to={menu.ruta}
+                            className="flex items-center gap-2 font-bold text-[#EA0A2A] text-sm uppercase tracking-wide hover:underline"
+                          >
+                            {renderIcon(menu.icono)}
                             {producto.nombre}
                           </Link>
                           {submenus.length > 0 && (
-                            <ChevronDown size={16} className={`text-[#EA0A2A] transition-transform duration-300 ${activeCategory === index ? 'rotate-180' : ''}`} />
+                            <ChevronDown
+                              size={16}
+                              className={`text-[#EA0A2A] transition-transform duration-300 ${
+                                activeCategory === index ? 'rotate-180' : ''
+                              }`}
+                            />
                           )}
                         </div>
                         {submenus.length > 0 && (
-                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${activeCategory === index ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+                          <div
+                            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                              activeCategory === index
+                                ? 'max-h-[500px] opacity-100 mt-2'
+                                : 'max-h-0 opacity-0 mt-0'
+                            }`}
+                          >
                             <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
                               <ul className="space-y-1">
-                                {submenus.map((submenu) => (
+                                {submenus.map((submenu: any) => (
                                   <li key={submenu.id}>
                                     <Link
                                       to={submenu.ruta}
                                       className="flex items-center gap-2 text-gray-700 hover:text-[#EA0A2A] text-sm block py-1.5 px-3 rounded hover:bg-white transition-all"
                                     >
-                                      {menu.icon && <span className="text-[#EA0A2A]/60">{menu.icon}</span>}
-                                      {submenu.ruta.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                      {renderIcon(menu.icono, 'xs')}
+                                      {submenu.ruta
+                                        .split('/')
+                                        .pop()
+                                        ?.replace(/-/g, ' ')
+                                        .replace(/\b\w/g, (l) => l.toUpperCase())}
                                     </Link>
                                   </li>
                                 ))}
@@ -215,8 +277,8 @@ export const Navigation = () => {
                 <ChevronDown size={18} className="transition-transform duration-200 group-hover:rotate-180" />
               </button>
               <div className="absolute top-full left-0 w-64 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                {menusAplicaciones.map((menu) => {
-                  const industria = globals?.industrias.find((i) => i.id === menu.campo_id)
+                {menusAplicaciones.map((menu: any) => {
+                  const industria = globals?.industrias.find((i) => i.id === menu.registro_id)
                   if (!industria) return null
                   return (
                     <Link
@@ -224,7 +286,7 @@ export const Navigation = () => {
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
                     >
-                      {menu.icon && <span className="text-[#EA0A2A]">{menu.icon}</span>}
+                      {renderIcon(menu.icono)}
                       <span>{industria.nombre}</span>
                     </Link>
                   )
@@ -239,8 +301,8 @@ export const Navigation = () => {
                 <ChevronDown size={18} className="transition-transform duration-200 group-hover:rotate-180" />
               </button>
               <div className="absolute top-full left-0 w-72 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                {menusServicios.map((menu) => {
-                  const servicio = globals?.servicios.find((s) => s.id === menu.campo_id)
+                {menusServicios.map((menu: any) => {
+                  const servicio = globals?.servicios.find((s) => s.id === menu.registro_id)
                   if (!servicio) return null
                   return (
                     <Link
@@ -248,7 +310,7 @@ export const Navigation = () => {
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
                     >
-                      {menu.icon && <span className="text-[#EA0A2A]">{menu.icon}</span>}
+                      {renderIcon(menu.icono)}
                       <span>{servicio.nombre}</span>
                     </Link>
                   )
@@ -256,12 +318,20 @@ export const Navigation = () => {
               </div>
             </div>
 
-            <Link to="/about" className="text-white hover:text-gray-200 transition-colors font-medium">Acerca de</Link>
-            <Link to="/contact" className="text-white hover:text-gray-200 transition-colors font-medium">Contacto</Link>
+            <Link to="/about" className="text-white hover:text-gray-200 transition-colors font-medium">
+              Acerca de
+            </Link>
+            <Link to="/contact" className="text-white hover:text-gray-200 transition-colors font-medium">
+              Contacto
+            </Link>
           </div>
 
           {/* BOTÓN HAMBURGUESA */}
-          <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-white p-2 hover:bg-white/10 rounded-md transition-colors" aria-label="Toggle menu">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="lg:hidden text-white p-2 hover:bg-white/10 rounded-md transition-colors"
+            aria-label="Toggle menu"
+          >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -286,17 +356,16 @@ export const Navigation = () => {
                   <Search size={20} />
                 </button>
               </form>
-              
               <div className="border-t border-white/20"></div>
-              
+
               {/* Productos acordeón */}
               <div className="space-y-1">
                 <p className="text-white font-bold text-xs uppercase tracking-wider px-2 py-2">Productos</p>
-                {menusProductos.map((menu, index) => {
-                  const producto = globals?.productos.find((p) => p.id === menu.campo_id)
+                {menusProductos.map((menu: any, index: number) => {
+                  const producto = globals?.productos.find((p) => p.id === menu.registro_id)
                   if (!producto) return null
                   const submenus = getSubmenusForMenu(menu)
-                  
+
                   return (
                     <div key={menu.id} className="rounded-md overflow-hidden">
                       <button
@@ -304,30 +373,48 @@ export const Navigation = () => {
                         className="w-full flex items-center justify-between px-3 py-2.5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
                       >
                         <span className="flex items-center gap-2">
-                          {menu.icon && <span>{menu.icon}</span>}
+                          {renderIcon(menu.icono)}
                           {producto.nombre}
                         </span>
                         {submenus.length > 0 && (
-                          <ChevronDown size={16} className={`text-white/80 transition-transform duration-300 ${mobileActiveCategory === index ? 'rotate-180' : ''}`} />
+                          <ChevronDown
+                            size={16}
+                            className={`text-white/80 transition-transform duration-300 ${
+                              mobileActiveCategory === index ? 'rotate-180' : ''
+                            }`}
+                          />
                         )}
                       </button>
                       {submenus.length > 0 && (
-                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${mobileActiveCategory === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            mobileActiveCategory === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                          }`}
+                        >
                           <div className="bg-black/20 pl-4 py-2 space-y-1">
                             <Link
                               to={menu.ruta}
                               className="block text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all font-semibold"
+                              onClick={() => setIsOpen(false)}
                             >
                               Ver todo →
                             </Link>
-                            {submenus.map((submenu) => (
+                            {submenus.map((submenu: any) => (
                               <Link
                                 key={submenu.id}
                                 to={submenu.ruta}
                                 className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all"
+                                onClick={() => setIsOpen(false)}
                               >
-                                {menu.icon && <span className="text-white/60">{menu.icon}</span>}
-                                <span>• {submenu.ruta.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                {renderIcon(menu.icono, 'xs')}
+                                <span>
+                                  •{' '}
+                                  {submenu.ruta
+                                    .split('/')
+                                    .pop()
+                                    ?.replace(/-/g, ' ')
+                                    .replace(/\b\w/g, (l) => l.toUpperCase())}
+                                </span>
                               </Link>
                             ))}
                           </div>
@@ -337,56 +424,67 @@ export const Navigation = () => {
                   )
                 })}
               </div>
-              
               <div className="border-t border-white/20"></div>
-              
+
               {/* Aplicaciones */}
               <div className="space-y-1">
                 <p className="text-white font-bold text-xs uppercase tracking-wider px-2 py-2">Aplicaciones</p>
-                {menusAplicaciones.map((menu) => {
-                  const industria = globals?.industrias.find((i) => i.id === menu.campo_id)
+                {menusAplicaciones.map((menu: any) => {
+                  const industria = globals?.industrias.find((i) => i.id === menu.registro_id)
                   if (!industria) return null
                   return (
                     <Link
                       key={menu.id}
                       to={menu.ruta}
                       className="flex items-center gap-3 text-white hover:bg-white/10 px-3 py-2.5 rounded-md transition-colors text-sm"
+                      onClick={() => setIsOpen(false)}
                     >
-                      {menu.icon && <span>{menu.icon}</span>}
+                      {renderIcon(menu.icono)}
                       <span>{industria.nombre}</span>
                     </Link>
                   )
                 })}
               </div>
-              
               <div className="border-t border-white/20"></div>
-              
+
               {/* Servicios */}
               <div className="space-y-1">
                 <p className="text-white font-bold text-xs uppercase tracking-wider px-2 py-2">Servicios</p>
-                {menusServicios.map((menu) => {
-                  const servicio = globals?.servicios.find((s) => s.id === menu.campo_id)
+                {menusServicios.map((menu: any) => {
+                  const servicio = globals?.servicios.find((s) => s.id === menu.registro_id)
                   if (!servicio) return null
                   return (
                     <Link
                       key={menu.id}
                       to={menu.ruta}
                       className="flex items-center gap-3 text-white hover:bg-white/10 px-3 py-2.5 rounded-md transition-colors text-sm"
+                      onClick={() => setIsOpen(false)}
                     >
-                      {menu.icon && <span>{menu.icon}</span>}
+                      {renderIcon(menu.icono)}
                       <span>{servicio.nombre}</span>
                     </Link>
                   )
                 })}
               </div>
-              
               <div className="border-t border-white/20"></div>
-              
+
               <div className="space-y-1">
-                <Link to="/about" className="block text-white hover:bg-white/10 px-3 py-3 rounded-md transition-colors text-sm font-medium">Acerca de</Link>
-                <Link to="/contact" className="block text-white hover:bg-white/10 px-3 py-3 rounded-md transition-colors text-sm font-medium">Contacto</Link>
+                <Link
+                  to="/about"
+                  className="block text-white hover:bg-white/10 px-3 py-3 rounded-md transition-colors text-sm font-medium"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Acerca de
+                </Link>
+                <Link
+                  to="/contact"
+                  className="block text-white hover:bg-white/10 px-3 py-3 rounded-md transition-colors text-sm font-medium"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Contacto
+                </Link>
               </div>
-              
+
               <a
                 href={`tel:+${globals?.whatsapp?.numero || '59177306576'}`}
                 className="flex items-center justify-center gap-2 bg-white text-[#EA0A2A] px-4 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors"
@@ -397,9 +495,12 @@ export const Navigation = () => {
           </div>
         </>
       )}
-      
+
       <style>{`
-        @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slide-in {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
         .animate-slide-in { animation: slide-in 0.3s ease-out; }
       `}</style>
     </nav>
