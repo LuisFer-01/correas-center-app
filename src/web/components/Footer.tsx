@@ -183,9 +183,7 @@ export const Footer = () => {
           {/* COLUMNA 1: Logo y descripción */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 cursor-pointer mb-4">
-              <h3 className="text-2xl font-bold tracking-tight">
-                {globals?.empresa?.nombre || 'CORREAS CENTER'}
-              </h3>
+              <h3 className="text-2xl font-bold tracking-tight">{globals?.empresa?.nombre || 'CORREAS CENTER'}</h3>
             </Link>
             <p className="text-gray-400 mb-6 text-sm leading-relaxed">
               Líderes en soluciones industriales, hidráulicas, neumáticas y transmisión de potencia en Bolivia. Más de

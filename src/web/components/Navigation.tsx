@@ -1,15 +1,9 @@
+import Icon from '@/components/Icon'
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { getSupabaseImageUrl } from '@/lib/supabase'
 import { ChevronDown, Menu, Phone, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-
-// Mapeo de iconos de Font Awesome a Lucide (para mantener compatibilidad con los datos de la DB)
-const faToLucide: Record<string, string> = {
-  'fa-box': '📦',
-  'fa-industry': '🏭',
-  'fa-wrench': '🔧',
-}
 
 export const Navigation = () => {
   const { data: globals, isLoading } = useGlobalData()
@@ -83,16 +77,8 @@ export const Navigation = () => {
     return menu.menu_item.map((item: any) => ({
       id: item.id,
       ruta: item.ruta,
-      orden: item.orden,
+      orden: item.orden
     }))
-  }
-
-  // Renderizar icono (soporta tanto Font Awesome como Lucide)
-  const renderIcon = (iconName: string | null, size: 'xs' | 'sm' = 'sm') => {
-    if (!iconName) return null
-    const emoji = faToLucide[iconName]
-    if (emoji) return <span className={size === 'xs' ? 'text-xs' : 'text-sm'}>{emoji}</span>
-    return <span className={size === 'xs' ? 'text-xs' : 'text-sm'}>{iconName}</span>
   }
 
   if (isLoading) {
@@ -222,7 +208,8 @@ export const Navigation = () => {
                             to={menu.ruta}
                             className="flex items-center gap-2 font-bold text-[#EA0A2A] text-sm uppercase tracking-wide hover:underline"
                           >
-                            {renderIcon(menu.icono)}
+                            {/* ✅ CORREGIDO: Usar menu.icono en lugar de menu.icon */}
+                            {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
                             {producto.nombre}
                           </Link>
                           {submenus.length > 0 && (
@@ -250,7 +237,7 @@ export const Navigation = () => {
                                       to={submenu.ruta}
                                       className="flex items-center gap-2 text-gray-700 hover:text-[#EA0A2A] text-sm block py-1.5 px-3 rounded hover:bg-white transition-all"
                                     >
-                                      {renderIcon(menu.icono, 'xs')}
+                                      {menu.icono && <Icon name={menu.icono} size="xs" className="text-[#EA0A2A]/60" />}
                                       {submenu.ruta
                                         .split('/')
                                         .pop()
@@ -286,7 +273,8 @@ export const Navigation = () => {
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
                     >
-                      {renderIcon(menu.icono)}
+                      {/* ✅ CORREGIDO: Usar menu.icono */}
+                      {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
                       <span>{industria.nombre}</span>
                     </Link>
                   )
@@ -310,7 +298,8 @@ export const Navigation = () => {
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
                     >
-                      {renderIcon(menu.icono)}
+                      {/* ✅ CORREGIDO: Usar menu.icono */}
+                      {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
                       <span>{servicio.nombre}</span>
                     </Link>
                   )
@@ -373,7 +362,8 @@ export const Navigation = () => {
                         className="w-full flex items-center justify-between px-3 py-2.5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
                       >
                         <span className="flex items-center gap-2">
-                          {renderIcon(menu.icono)}
+                          {/* ✅ CORREGIDO: Usar menu.icono */}
+                          {menu.icono && <Icon name={menu.icono} size="sm" />}
                           {producto.nombre}
                         </span>
                         {submenus.length > 0 && (
@@ -406,7 +396,7 @@ export const Navigation = () => {
                                 className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all"
                                 onClick={() => setIsOpen(false)}
                               >
-                                {renderIcon(menu.icono, 'xs')}
+                                {menu.icono && <Icon name={menu.icono} size="xs" />}
                                 <span>
                                   •{' '}
                                   {submenu.ruta
@@ -439,7 +429,7 @@ export const Navigation = () => {
                       className="flex items-center gap-3 text-white hover:bg-white/10 px-3 py-2.5 rounded-md transition-colors text-sm"
                       onClick={() => setIsOpen(false)}
                     >
-                      {renderIcon(menu.icono)}
+                      {menu.icono && <Icon name={menu.icono} size="sm" />}
                       <span>{industria.nombre}</span>
                     </Link>
                   )
@@ -460,7 +450,7 @@ export const Navigation = () => {
                       className="flex items-center gap-3 text-white hover:bg-white/10 px-3 py-2.5 rounded-md transition-colors text-sm"
                       onClick={() => setIsOpen(false)}
                     >
-                      {renderIcon(menu.icono)}
+                      {menu.icono && <Icon name={menu.icono} size="sm" />}
                       <span>{servicio.nombre}</span>
                     </Link>
                   )
