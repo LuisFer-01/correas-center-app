@@ -41,6 +41,16 @@ export interface Servicio {
   imagen: string | null
 }
 
+export interface PasoWizard {
+  id: number
+  identificador: string
+  titulo: string
+  descripcion: string
+  fuente_datos: string
+  campo_filtro: string | null
+  orden: number
+}
+
 export interface MenuItem {
   id: number
   ruta: string
@@ -65,6 +75,7 @@ export interface FooterItem {
   url: string | null
   icono: string | null
   orden: number
+  registro_id: number | null
 }
 
 export interface GlobalData {
@@ -74,6 +85,7 @@ export interface GlobalData {
   productos_populares: Producto[]
   industrias: Industria[]
   servicios: Servicio[]
+  pasos_wizard: PasoWizard[]
   menus: {
     Producto?: Menu[]
     Aplicacion?: Menu[]
@@ -103,21 +115,60 @@ export const globalsService = {
 
     const empresaId = empresaData?.id || 1
 
-    // 2. Obtener sucursales, productos, industrias y servicios en paralelo para optimizar
+    // 2. Obtener todos los datos en paralelo para optimizar
     const [
       { data: sucursalesData },
       { data: productosData },
       { data: industriasData },
       { data: serviciosData },
+      { data: pasosWizardData },
       { data: menusData },
       { data: footersData }
     ] = await Promise.all([
-      supabase.from('sucursales').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('industrias').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('servicios').select('id, nombre, descripcion, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true })
+      supabase
+        .from('sucursales')
+        .select('*')
+        .eq('empresa_id', empresaId)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true }),
+      supabase
+        .from('productos')
+        .select('id, nombre, slug, imagen')
+        .eq('empresa_id', empresaId)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true }),
+      supabase
+        .from('industrias')
+        .select('id, nombre, slug, imagen')
+        .eq('empresa_id', empresaId)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true }),
+      supabase
+        .from('servicios')
+        .select('id, nombre, descripcion, imagen')
+        .eq('empresa_id', empresaId)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true }),
+      supabase
+        .from('pasos_wizard')
+        .select('*')
+        .eq('empresa_id', empresaId)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true }),
+      supabase
+        .from('menus')
+        .select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)')
+        .eq('empresa_id', empresaId)
+        .eq('mostrar', true)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true }),
+      supabase
+        .from('footers')
+        .select('id, tipo, titulo, url, icono, orden, registro_id')
+        .eq('empresa_id', empresaId)
+        .eq('mostrar', true)
+        .eq('estado', 'activo')
+        .order('orden', { ascending: true })
     ])
 
     // 3. Agrupar menús por grupo (Producto, Aplicacion, Servicio)
@@ -141,7 +192,7 @@ export const globalsService = {
 
     // 6. WhatsApp (Hardcodeado por ahora o desde tabla de configuración si existe)
     const whatsapp = {
-      numero: '59177306576', 
+      numero: '59177306576',
       mensaje: 'Hola, necesito información sobre sus productos y servicios'
     }
 
@@ -152,6 +203,7 @@ export const globalsService = {
       productos_populares,
       industrias: industriasData || [],
       servicios: serviciosData || [],
+      pasos_wizard: pasosWizardData || [],
       menus: menusAgrupados,
       footer_productos,
       footer_industrias,

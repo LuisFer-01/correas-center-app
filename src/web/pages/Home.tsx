@@ -8,11 +8,11 @@ import { Locations } from '@/web/components/landing/Locations'
 import { Products } from '@/web/components/landing/Products'
 import { Services } from '@/web/components/landing/Services'
 import { ProductSelector } from '@/web/components/ProductSelector'
-import { AppLayout } from '@/web/layouts/AppLayout'
 
+// Correcion de doble footer y doble menu en la pagina de inicio
 export const Home = () => {
   return (
-    <AppLayout showBreadcrumbs={false}>
+    <>
       <Hero />
       <ProductSelector />
       <Products />
@@ -23,6 +23,6 @@ export const Home = () => {
       <Differentials />
       <Locations />
       <Contact />
-    </AppLayout>
+    </>
   )
 }
