@@ -1,7 +1,6 @@
+import Icon from '@/components/Icon'
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { supabase } from '@/lib/supabase'
-import { faFacebookF, faInstagram, faTiktok, faYoutube } from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ArrowUp, Clock, Mail, MapPin, Phone, Send } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -72,15 +71,7 @@ export const Footer = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Mapeo de iconos de Font Awesome
-  const iconMap: Record<string, any> = {
-    faFacebookF: faFacebookF,
-    faInstagram: faInstagram,
-    faTiktok: faTiktok,
-    faYoutube: faYoutube,
-  }
-
-  // Color de hover para cada red social
+  // Color de hover para cada red social (mapeo de iconos Font Awesome a colores)
   const socialColors: Record<string, string> = {
     faFacebookF: 'hover:bg-[#1877F2]',
     faInstagram: 'hover:bg-gradient-to-br hover:from-[#833AB4] hover:via-[#FD1D1D] hover:to-[#F77737]',
@@ -183,14 +174,16 @@ export const Footer = () => {
           {/* COLUMNA 1: Logo y descripción */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 cursor-pointer mb-4">
-              <h3 className="text-2xl font-bold tracking-tight">{globals?.empresa?.nombre || 'CORREAS CENTER'}</h3>
+              <h3 className="text-2xl font-bold tracking-tight">
+                {globals?.empresa?.nombre || 'CORREAS CENTER'}
+              </h3>
             </Link>
             <p className="text-gray-400 mb-6 text-sm leading-relaxed">
               Líderes en soluciones industriales, hidráulicas, neumáticas y transmisión de potencia en Bolivia. Más de
               25 años brindando calidad y servicio técnico especializado.
             </p>
 
-            {/* Redes sociales */}
+            {/* Redes sociales - ✅ USANDO COMPONENTE Icon */}
             <div className="flex gap-3 mb-6">
               {globals?.footer_redes_sociales &&
                 globals.footer_redes_sociales.map((red) => (
@@ -205,9 +198,8 @@ export const Footer = () => {
                     aria-label={red.titulo || 'Red social'}
                     title={red.titulo || ''}
                   >
-                    {red.icono && iconMap[red.icono] && (
-                      <FontAwesomeIcon icon={iconMap[red.icono]} size="lg" />
-                    )}
+                    {/* ✅ CAMBIO: Usar componente Icon en lugar de FontAwesomeIcon */}
+                    {red.icono && <Icon name={red.icono} size="lg" />}
                   </a>
                 ))}
             </div>

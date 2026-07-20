@@ -17,7 +17,6 @@ export const Navigation = () => {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchContainerRef = useRef<HTMLDivElement>(null)
 
-  // Menús agrupados desde el nuevo servicio
   const menusProductos = globals?.menus?.Producto || []
   const menusAplicaciones = globals?.menus?.Aplicacion || []
   const menusServicios = globals?.menus?.Servicio || []
@@ -39,7 +38,6 @@ export const Navigation = () => {
     }
   }, [isOpen])
 
-  // Cerrar menú móvil al cambiar de ruta
   useEffect(() => {
     setIsOpen(false)
   }, [location])
@@ -61,7 +59,6 @@ export const Navigation = () => {
     setIsOpen(false)
   }
 
-  // Función para generar la URL del logo desde Supabase Storage
   const getLogoUrl = () => {
     if (!globals?.empresa?.logo) return null
     return getSupabaseImageUrl(globals.empresa.logo, 'logos-empresas')
@@ -69,7 +66,6 @@ export const Navigation = () => {
 
   const logoUrl = getLogoUrl()
 
-  // Obtener submenús desde menu_item (nueva estructura)
   const getSubmenusForMenu = (menu: any) => {
     if (!menu.menu_item || menu.menu_item.length === 0) {
       return []
@@ -77,7 +73,7 @@ export const Navigation = () => {
     return menu.menu_item.map((item: any) => ({
       id: item.id,
       ruta: item.ruta,
-      orden: item.orden
+      orden: item.orden,
     }))
   }
 
@@ -95,14 +91,14 @@ export const Navigation = () => {
     <nav className="fixed top-0 left-0 right-0 bg-[#b1001b] z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
-          {/* LOGO */}
+          {/* LOGO - ✅ CORREGIDO: Cambiado h1 por span y agregado max-w al logo */}
           <Link to="/" className="flex items-center cursor-pointer group flex-shrink-0">
             <div className="relative h-10 w-auto sm:h-12 md:h-14 flex-shrink-0">
               {logoUrl ? (
                 <img
                   src={logoUrl}
                   alt={globals?.empresa?.nombre || 'Correas Center Logo'}
-                  className="h-full w-auto object-contain group-hover:scale-110 transition-transform duration-500"
+                  className="h-full w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[160px] object-contain group-hover:scale-110 transition-transform duration-500"
                 />
               ) : (
                 <div className="h-full w-full bg-white rounded-full flex items-center justify-center text-[#b1001b] font-bold text-xl">
@@ -111,10 +107,13 @@ export const Navigation = () => {
               )}
             </div>
             <div className="text-white ml-2 sm:ml-3">
-              <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight group-hover:text-gray-200 transition-colors leading-tight">
+              {/* ✅ CORREGIDO: Cambiado h1 por span para evitar estilos globales */}
+              <span className="block text-sm sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight group-hover:text-gray-200 transition-colors leading-tight">
                 {globals?.empresa?.nombre || 'CORREAS CENTER'}
-              </h1>
-              <p className="text-[10px] sm:text-xs text-red-100 leading-tight">Solución Confiable</p>
+              </span>
+              <span className="block text-[10px] sm:text-xs text-red-100 leading-tight">
+                Solución Confiable
+              </span>
             </div>
           </Link>
 
@@ -145,7 +144,9 @@ export const Navigation = () => {
                 <div className="absolute top-full left-0 w-64 xl:w-80 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                   {searchQuery.length === 0 ? (
                     <>
-                      <p className="px-4 py-2 text-xs text-gray-500 font-semibold uppercase">Productos populares</p>
+                      <p className="px-4 py-2 text-xs text-gray-500 font-semibold uppercase">
+                        Productos populares
+                      </p>
                       {globals?.productos_populares && globals.productos_populares.length > 0 ? (
                         globals.productos_populares.map((product) => (
                           <button
@@ -208,7 +209,6 @@ export const Navigation = () => {
                             to={menu.ruta}
                             className="flex items-center gap-2 font-bold text-[#EA0A2A] text-sm uppercase tracking-wide hover:underline"
                           >
-                            {/* ✅ CORREGIDO: Usar menu.icono en lugar de menu.icon */}
                             {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
                             {producto.nombre}
                           </Link>
@@ -273,7 +273,6 @@ export const Navigation = () => {
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
                     >
-                      {/* ✅ CORREGIDO: Usar menu.icono */}
                       {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
                       <span>{industria.nombre}</span>
                     </Link>
@@ -298,7 +297,6 @@ export const Navigation = () => {
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
                     >
-                      {/* ✅ CORREGIDO: Usar menu.icono */}
                       {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
                       <span>{servicio.nombre}</span>
                     </Link>
@@ -362,7 +360,6 @@ export const Navigation = () => {
                         className="w-full flex items-center justify-between px-3 py-2.5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
                       >
                         <span className="flex items-center gap-2">
-                          {/* ✅ CORREGIDO: Usar menu.icono */}
                           {menu.icono && <Icon name={menu.icono} size="sm" />}
                           {producto.nombre}
                         </span>
