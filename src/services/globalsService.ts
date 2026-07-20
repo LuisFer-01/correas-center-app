@@ -92,6 +92,24 @@ export interface FooterItem {
   registro_id: number | null
 }
 
+export interface RegistroAbout {
+  id: number
+  identificador: string
+  nombre: string
+  descripcion: string | null
+  detalles: RegistroContenido[]
+}
+
+export interface RegistroContenido {
+  id: number
+  titulo: string | null
+  subtitulo: string | null
+  descripcion: string | null
+  icono: string | null
+  stats: string | null
+  orden: number
+}
+
 export interface GlobalData {
   empresa: Empresa | null
   sucursales: Sucursal[]
@@ -100,12 +118,13 @@ export interface GlobalData {
   industrias: Industria[]
   servicios: Servicio[]
   pasos_wizard: PasoWizard[]
-  heroes: HeroSlide[] // ✅ NUEVO: Agregado al tipo global
+  heroes: HeroSlide[]
   menus: {
     Producto?: Menu[]
     Aplicacion?: Menu[]
     Servicio?: Menu[]
   }
+  registros_about: RegistroAbout[]
   footer_productos: FooterItem[]
   footer_industrias: FooterItem[]
   footer_servicios: FooterItem[]
@@ -139,7 +158,8 @@ export const globalsService = {
       { data: pasosWizardData },
       { data: menusData },
       { data: footersData },
-      { data: heroesData } // ✅ NUEVO: Consulta de Heroes
+      { data: heroesData },
+      { data: registrosData }
     ] = await Promise.all([
       supabase.from('sucursales').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('productos').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
@@ -156,7 +176,8 @@ export const globalsService = {
         .eq('tipo_seccion_id', 1) // 1 = Hero
         .eq('mostrar', true)
         .eq('estado', 'activo')
-        .order('orden', { ascending: true })
+        .order('orden', { ascending: true }),
+      supabase.from('registros').select('id, identificador, nombre, descripcion, registro_contenido(id, titulo, subtitulo, descripcion, icono, stats, orden)').eq('estado', 'activo').order('orden', { ascending: true })
     ])
 
     // 3. Agrupar menús por grupo (Producto, Aplicacion, Servicio)
@@ -197,6 +218,14 @@ export const globalsService = {
       }
     }) || []
 
+    const registros_about: RegistroAbout[] = registrosData?.map((registro: any) => ({
+      id: registro.id,
+      identificador: registro.identificador,
+      nombre: registro.nombre,
+      descripcion: registro.descripcion,
+      detalles: (registro.registro_contenido || []).sort((a: any, b: any) => a.orden - b.orden)
+    })) || []
+
     // 6. WhatsApp (Hardcodeado por ahora o desde tabla de configuración si existe)
     const whatsapp = {
       numero: '59177306576',
@@ -211,12 +240,13 @@ export const globalsService = {
       industrias: industriasData || [],
       servicios: serviciosData || [],
       pasos_wizard: pasosWizardData || [],
-      heroes, // ✅ NUEVO: Retornado en el objeto global
+      heroes,
       menus: menusAgrupados,
       footer_productos,
       footer_industrias,
       footer_servicios,
       footer_redes_sociales,
+      registros_about,
       whatsapp
     }
   }

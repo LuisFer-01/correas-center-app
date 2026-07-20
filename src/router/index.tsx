@@ -3,6 +3,7 @@ import { AdminLayout } from '@/admin/layouts/AdminLayout'
 import { PublicLayout } from '@/web/layouts/PublicLayout'
 import { Home } from '@/web/pages/Home'
 import { createBrowserRouter } from 'react-router-dom'
+import { About } from '../web/pages/About'
 import { Branches } from '../web/pages/Branches'
 import { Privacy } from '../web/pages/Privacy'
 import { Results } from '../web/pages/Search/Results'
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <Home /> },
+      { path: 'about', element: <About /> },
       { path: 'privacy', element: <Privacy /> },
       { path: 'terms', element: <Terms /> },
       { path: 'search', element: <Results /> },
