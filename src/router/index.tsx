@@ -3,6 +3,8 @@ import { AdminLayout } from '@/admin/layouts/AdminLayout'
 import { PublicLayout } from '@/web/layouts/PublicLayout'
 import { Home } from '@/web/pages/Home'
 import { createBrowserRouter } from 'react-router-dom'
+import { Privacy } from '../web/pages/Privacy'
+import { Terms } from '../web/pages/Terms'
 
 // Placeholder pages (se reemplazarán en las Fases 2 y 4)
 //const HomePage = () => <div className="p-4">Página de Inicio (Web)</div>
@@ -15,6 +17,8 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <Home /> },
+      { path: 'privacy', element: <Privacy /> },
+      { path: 'terms', element: <Terms /> }
       // Fase 2: Aquí irán las rutas públicas (/productos, /industrias, etc.)
     ],
   },

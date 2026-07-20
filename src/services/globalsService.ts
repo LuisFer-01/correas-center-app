@@ -51,6 +51,20 @@ export interface PasoWizard {
   orden: number
 }
 
+export interface HeroSlide {
+  id: number
+  imagen: string | null
+  titulo: string | null
+  subtitulo: string | null
+  descripcion: string | null
+  badge: string | null
+  cta_primary_text: string | null
+  cta_primary_href: string | null
+  cta_secondary_text: string | null
+  cta_secondary_href: string | null
+  orden: number
+}
+
 export interface MenuItem {
   id: number
   ruta: string
@@ -86,6 +100,7 @@ export interface GlobalData {
   industrias: Industria[]
   servicios: Servicio[]
   pasos_wizard: PasoWizard[]
+  heroes: HeroSlide[] // ✅ NUEVO: Agregado al tipo global
   menus: {
     Producto?: Menu[]
     Aplicacion?: Menu[]
@@ -123,49 +138,22 @@ export const globalsService = {
       { data: serviciosData },
       { data: pasosWizardData },
       { data: menusData },
-      { data: footersData }
+      { data: footersData },
+      { data: heroesData } // ✅ NUEVO: Consulta de Heroes
     ] = await Promise.all([
+      supabase.from('sucursales').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('industrias').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('servicios').select('id, nombre, descripcion, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('pasos_wizard').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
+      // ✅ NUEVO: Consulta a contenido_seccion para el Hero (tipo_seccion_id = 1)
       supabase
-        .from('sucursales')
-        .select('*')
+        .from('contenido_seccion')
+        .select('id, titulo, subtitulo, descripcion, imagen, metadata, orden')
         .eq('empresa_id', empresaId)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase
-        .from('productos')
-        .select('id, nombre, slug, imagen')
-        .eq('empresa_id', empresaId)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase
-        .from('industrias')
-        .select('id, nombre, slug, imagen')
-        .eq('empresa_id', empresaId)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase
-        .from('servicios')
-        .select('id, nombre, descripcion, imagen')
-        .eq('empresa_id', empresaId)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase
-        .from('pasos_wizard')
-        .select('*')
-        .eq('empresa_id', empresaId)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase
-        .from('menus')
-        .select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)')
-        .eq('empresa_id', empresaId)
-        .eq('mostrar', true)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase
-        .from('footers')
-        .select('id, tipo, titulo, url, icono, orden, registro_id')
-        .eq('empresa_id', empresaId)
+        .eq('tipo_seccion_id', 1) // 1 = Hero
         .eq('mostrar', true)
         .eq('estado', 'activo')
         .order('orden', { ascending: true })
@@ -190,6 +178,25 @@ export const globalsService = {
     // 5. Productos populares (los primeros 6)
     const productos_populares = productosData?.slice(0, 6) || []
 
+    // ✅ NUEVO: Mapear datos del Hero desde el campo metadata (JSONB)
+    // El metadata viene como: { badge_text, cta_primary_text, cta_primary_href, cta_secondary_text, cta_secondary_href }
+    const heroes = heroesData?.map((item: any) => {
+      const meta = item.metadata || {}
+      return {
+        id: item.id,
+        imagen: item.imagen,
+        titulo: item.titulo,
+        subtitulo: item.subtitulo,
+        descripcion: item.descripcion,
+        badge: meta.badge_text || null, // ✅ CORREGIDO: badge_text desde metadata
+        cta_primary_text: meta.cta_primary_text || null, // ✅ CORREGIDO: cta_primary_text desde metadata
+        cta_primary_href: meta.cta_primary_href || null, // ✅ CORREGIDO: cta_primary_href desde metadata
+        cta_secondary_text: meta.cta_secondary_text || null, // ✅ CORREGIDO: cta_secondary_text desde metadata
+        cta_secondary_href: meta.cta_secondary_href || null, // ✅ CORREGIDO: cta_secondary_href desde metadata
+        orden: item.orden
+      }
+    }) || []
+
     // 6. WhatsApp (Hardcodeado por ahora o desde tabla de configuración si existe)
     const whatsapp = {
       numero: '59177306576',
@@ -204,6 +211,7 @@ export const globalsService = {
       industrias: industriasData || [],
       servicios: serviciosData || [],
       pasos_wizard: pasosWizardData || [],
+      heroes, // ✅ NUEVO: Retornado en el objeto global
       menus: menusAgrupados,
       footer_productos,
       footer_industrias,
