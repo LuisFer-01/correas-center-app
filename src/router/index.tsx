@@ -3,6 +3,7 @@ import { AdminLayout } from '@/admin/layouts/AdminLayout'
 import { PublicLayout } from '@/web/layouts/PublicLayout'
 import { Home } from '@/web/pages/Home'
 import { createBrowserRouter } from 'react-router-dom'
+import { Branches } from '../web/pages/Branches'
 import { Privacy } from '../web/pages/Privacy'
 import { Results } from '../web/pages/Search/Results'
 import { Terms } from '../web/pages/Terms'
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { path: 'privacy', element: <Privacy /> },
       { path: 'terms', element: <Terms /> },
       { path: 'search', element: <Results /> },
+      { path: 'branches', element: <Branches /> }
       // Fase 2: Aquí irán las rutas públicas (/productos, /industrias, etc.)
     ],
   },
