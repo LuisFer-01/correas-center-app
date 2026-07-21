@@ -27,6 +27,31 @@ export interface Producto {
   imagen: string | null
 }
 
+export interface InfraestructuraCaracteristica {
+  id: number
+  titulo: string
+  descripcion: string
+  icono: string | null
+  stats: string | null
+  orden: number
+}
+
+export interface InfraestructuraCapacidad {
+  id: number
+  nombre: string
+  icono: string | null
+  orden: number
+}
+
+export interface Differential {
+  id: number
+  titulo: string
+  subtitulo: string
+  descripcion: string
+  icono: string | null
+  orden: number
+}
+
 export interface Industria {
   id: number
   nombre: string
@@ -125,7 +150,10 @@ export interface GlobalData {
   productos_populares: Producto[]
   industrias: Industria[]
   servicios: Servicio[]
-  marcas: Marca[] // ✅ AGREGADO
+  marcas: Marca[]
+  infraestructura_caracteristicas: InfraestructuraCaracteristica[]
+  infraestructura_capacidades: InfraestructuraCapacidad[]
+  diferenciales: Differential[]
   pasos_wizard: PasoWizard[]
   heroes: HeroSlide[]
   menus: {
@@ -166,7 +194,10 @@ export const globalsService = {
       { data: productosData, error: errorProductos },
       { data: industriasData, error: errorIndustrias },
       { data: serviciosData, error: errorServicios },
-      { data: marcasData, error: errorMarcas }, // ✅ AGREGADO
+      { data: marcasData, error: errorMarcas },
+      { data: infraCaracteristicasData, error: errorInfraCaracteristicas },
+      { data: infraCapacidadesData, error: errorInfraCapacidades },
+      { data: diferencialesData, error: errorDiferenciales },
       { data: pasosWizardData, error: errorWizard },
       { data: menusData, error: errorMenus },
       { data: footersData, error: errorFooters },
@@ -177,8 +208,10 @@ export const globalsService = {
       supabase.from('productos').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      // ✅ AGREGADO: Consulta de marcas (no tiene empresa_id, es global)
       supabase.from('marcas').select('id, nombre, slug, logo, orden').eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, icono, metadata, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 5).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('contenido_seccion').select('id, titulo, icono, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 4).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, icono, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 2).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('pasos_wizard').select('id, identificador, titulo, descripcion, fuente_datos, campo_filtro, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
@@ -188,9 +221,9 @@ export const globalsService = {
     ])
 
     // Log de errores para depuración (puedes eliminarlo en producción)
-    if (errorSucursales || errorProductos || errorIndustrias || errorServicios || errorMarcas || errorWizard || errorMenus || errorFooters || errorHeroes || errorRegistros) {
+    if (errorSucursales || errorProductos || errorIndustrias || errorServicios || errorMarcas || errorInfraCaracteristicas || errorInfraCapacidades || errorDiferenciales || errorWizard || errorMenus || errorFooters || errorHeroes || errorRegistros) {
       console.warn('Algunas consultas de globalsService tuvieron errores:', {
-        errorSucursales, errorProductos, errorIndustrias, errorServicios, errorMarcas, errorWizard, errorMenus, errorFooters, errorHeroes, errorRegistros
+        errorSucursales, errorProductos, errorIndustrias, errorServicios, errorMarcas, errorInfraCaracteristicas, errorInfraCapacidades, errorDiferenciales, errorWizard, errorMenus, errorFooters, errorHeroes, errorRegistros
       })
     }
 
@@ -246,6 +279,32 @@ export const globalsService = {
       mensaje: 'Hola, necesito información sobre sus productos y servicios'
     }
 
+    // 9. Mapear Infraestructura y Diferenciales
+    const infraestructura_caracteristicas = infraCaracteristicasData?.map((item: any) => ({
+      id: item.id,
+      titulo: item.titulo,
+      descripcion: item.descripcion,
+      icono: item.icono,
+      stats: item.metadata?.stats || item.subtitulo, // Fallback a subtitulo si no hay metadata
+      orden: item.orden
+    })) || []
+
+    const infraestructura_capacidades = infraCapacidadesData?.map((item: any) => ({
+      id: item.id,
+      nombre: item.titulo,
+      icono: item.icono,
+      orden: item.orden
+    })) || []
+
+    const diferenciales = diferencialesData?.map((item: any) => ({
+      id: item.id,
+      titulo: item.titulo,
+      subtitulo: item.subtitulo,
+      descripcion: item.descripcion,
+      icono: item.icono,
+      orden: item.orden
+    })) || []
+
     return {
       empresa: empresaData || null,
       sucursales: sucursalesData || [],
@@ -253,7 +312,10 @@ export const globalsService = {
       productos_populares,
       industrias: industriasData || [],
       servicios: serviciosData || [],
-      marcas: marcasData || [], // ✅ AGREGADO
+      marcas: marcasData || [],
+      infraestructura_caracteristicas,
+      infraestructura_capacidades,
+      diferenciales,
       pasos_wizard: pasosWizardData || [],
       heroes,
       menus: menusAgrupados,
