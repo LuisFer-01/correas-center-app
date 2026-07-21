@@ -41,6 +41,14 @@ export interface Servicio {
   imagen: string | null
 }
 
+export interface Marca {
+  id: number
+  nombre: string
+  slug: string
+  logo: string | null
+  orden: number
+}
+
 export interface PasoWizard {
   id: number
   identificador: string
@@ -117,6 +125,7 @@ export interface GlobalData {
   productos_populares: Producto[]
   industrias: Industria[]
   servicios: Servicio[]
+  marcas: Marca[]
   pasos_wizard: PasoWizard[]
   heroes: HeroSlide[]
   menus: {
@@ -155,6 +164,7 @@ export const globalsService = {
       { data: productosData },
       { data: industriasData },
       { data: serviciosData },
+      { data: marcasData },
       { data: pasosWizardData },
       { data: menusData },
       { data: footersData },
@@ -165,6 +175,8 @@ export const globalsService = {
       supabase.from('productos').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('marcas').select('id, nombre, slug, logo, orden').eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('pasos_wizard').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('pasos_wizard').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
@@ -239,6 +251,7 @@ export const globalsService = {
       productos_populares,
       industrias: industriasData || [],
       servicios: serviciosData || [],
+      marcas: marcasData || [],
       pasos_wizard: pasosWizardData || [],
       heroes,
       menus: menusAgrupados,
