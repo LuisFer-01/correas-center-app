@@ -6,6 +6,9 @@ import { createBrowserRouter } from 'react-router-dom'
 import { About } from '../web/pages/About'
 import { Branches } from '../web/pages/Branches'
 import { Privacy } from '../web/pages/Privacy'
+import { CategoryDetail } from '../web/pages/Products/CategoryDetail'
+import { ProductsIndex } from '../web/pages/Products/Index'
+import { ProductShow } from '../web/pages/Products/Show'
 import { Results } from '../web/pages/Search/Results'
 import { ServicesIndex } from '../web/pages/Services/Index'
 import { ServicesShow } from '../web/pages/Services/Show'
@@ -23,6 +26,9 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'search', element: <Results /> },
+      { path: 'products', element: <ProductsIndex /> },
+      { path: 'products/:slug', element: <ProductShow /> },
+      { path: 'products/:productSlug/:categorySlug', element: <CategoryDetail /> },
       { path: 'services', element: <ServicesIndex /> },
       { path: 'services/:slug', element: <ServicesShow /> },
       { path: 'about', element: <About /> },

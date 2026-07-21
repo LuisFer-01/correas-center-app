@@ -25,6 +25,15 @@ export interface Producto {
   nombre: string
   slug: string
   imagen: string | null
+  orden: number
+  categorias?: Array<{
+    id: number
+    nombre: string
+    slug: string
+    descripcion_corta: string | null
+    uso: string | null
+  }>
+  marcas: Marca[]
 }
 
 export interface InfraestructuraCaracteristica {
@@ -73,6 +82,14 @@ export interface Marca {
   slug: string
   logo: string | null
   orden: number
+}
+
+export interface Categoria {
+  id: number
+  nombre: string
+  slug: string
+  imagen: string | null
+  uso: string | null
 }
 
 export interface PasoWizard {
@@ -206,7 +223,7 @@ export const globalsService = {
       { data: registrosData, error: errorRegistros }
     ] = await Promise.all([
       supabase.from('sucursales').select('id, nombre, direccion, telefono, email, horarios, mapa_incrustado, latitud, longitud, es_principal, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias!inner(id, nombre, slug, descripcion_corta, uso),producto_marca!inner(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('marcas').select('id, nombre, slug, logo, orden').eq('estado', 'activo').order('orden', { ascending: true }),
@@ -246,6 +263,17 @@ export const globalsService = {
 
     // 5. Productos populares (los primeros 6)
     const productos_populares = productosData?.slice(0, 6) || []
+
+    const productosProcesados = (productosData || []).map((p: any) => ({
+      id: p.id,
+      nombre: p.nombre,
+      slug: p.slug,
+      imagen: p.imagen,
+      orden: p.orden,
+      categorias: p.categorias || [],
+      // Extraemos solo el objeto 'marca' de la relación 'producto_marca' y eliminamos duplicados
+      marcas: Array.from(new Map(p.producto_marca?.map((pm: any) => [pm.marca.id, pm.marca])).values())
+    }))
 
     // 6. Mapear datos del Hero desde el campo metadata (JSONB)
     const heroes = heroesData?.map((item: any) => {
@@ -309,7 +337,7 @@ export const globalsService = {
     return {
       empresa: empresaData || null,
       sucursales: sucursalesData || [],
-      productos: productosData || [],
+      productos: productosProcesados || [],
       productos_populares,
       industrias: industriasData || [],
       servicios: serviciosData || [],
