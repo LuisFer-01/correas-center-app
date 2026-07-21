@@ -64,6 +64,7 @@ export interface Servicio {
   nombre: string
   descripcion: string | null
   imagen: string | null
+  orden: number
 }
 
 export interface Marca {

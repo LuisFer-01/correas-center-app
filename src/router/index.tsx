@@ -7,6 +7,8 @@ import { About } from '../web/pages/About'
 import { Branches } from '../web/pages/Branches'
 import { Privacy } from '../web/pages/Privacy'
 import { Results } from '../web/pages/Search/Results'
+import { ServicesIndex } from '../web/pages/Services/Index'
+import { ServicesShow } from '../web/pages/Services/Show'
 import { Terms } from '../web/pages/Terms'
 
 // Placeholder pages (se reemplazarán en las Fases 2 y 4)
@@ -20,10 +22,12 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <Home /> },
+      { path: 'search', element: <Results /> },
+      { path: 'services', element: <ServicesIndex /> },
+      { path: 'services/:slug', element: <ServicesShow /> },
       { path: 'about', element: <About /> },
       { path: 'privacy', element: <Privacy /> },
       { path: 'terms', element: <Terms /> },
-      { path: 'search', element: <Results /> },
       { path: 'branches', element: <Branches /> }
       // Fase 2: Aquí irán las rutas públicas (/productos, /industrias, etc.)
     ],

@@ -13,14 +13,14 @@ import { ProductSelector } from '@/web/components/ProductSelector'
 export const Home = () => {
   return (
     <>
-      <Hero />
-      <ProductSelector />
+      <Hero /> {/* ComponenteHero Completo*/}
+      <ProductSelector /> {/* Componente ProductSelector A medio implementar */}
       <Products />
-      <Brands />
-      <Services />
+      <Brands /> {/* Componente Marcas Completo */}
+      <Services /> {/* Componente Servicios Completo */}
       <Industries />
-      <Infrastructure />
-      <Differentials />
+      <Infrastructure /> {/* Componente Infraestructura Completo */}
+      <Differentials /> {/* Componente Diferenciales Completo */}
       <Locations />
       <Contact />
     </>
