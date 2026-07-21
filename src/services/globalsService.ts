@@ -125,7 +125,7 @@ export interface GlobalData {
   productos_populares: Producto[]
   industrias: Industria[]
   servicios: Servicio[]
-  marcas: Marca[]
+  marcas: Marca[] // ✅ AGREGADO
   pasos_wizard: PasoWizard[]
   heroes: HeroSlide[]
   menus: {
@@ -154,43 +154,45 @@ export const globalsService = {
       .limit(1)
       .single()
 
-    if (empresaError && empresaError.code !== 'PGRST116') throw empresaError
+    if (empresaError && empresaError.code !== 'PGRST116') {
+      console.error('Error al obtener empresa:', empresaError)
+    }
 
     const empresaId = empresaData?.id || 1
 
     // 2. Obtener todos los datos en paralelo para optimizar
     const [
-      { data: sucursalesData },
-      { data: productosData },
-      { data: industriasData },
-      { data: serviciosData },
-      { data: marcasData },
-      { data: pasosWizardData },
-      { data: menusData },
-      { data: footersData },
-      { data: heroesData },
-      { data: registrosData }
+      { data: sucursalesData, error: errorSucursales },
+      { data: productosData, error: errorProductos },
+      { data: industriasData, error: errorIndustrias },
+      { data: serviciosData, error: errorServicios },
+      { data: marcasData, error: errorMarcas }, // ✅ AGREGADO
+      { data: pasosWizardData, error: errorWizard },
+      { data: menusData, error: errorMenus },
+      { data: footersData, error: errorFooters },
+      { data: heroesData, error: errorHeroes },
+      { data: registrosData, error: errorRegistros }
     ] = await Promise.all([
-      supabase.from('sucursales').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('industrias').select('id, nombre, slug, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('servicios').select('id, nombre, descripcion, imagen').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('sucursales').select('id, nombre, direccion, telefono, email, horarios, mapa_incrustado, latitud, longitud, es_principal, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      // ✅ AGREGADO: Consulta de marcas (no tiene empresa_id, es global)
       supabase.from('marcas').select('id, nombre, slug, logo, orden').eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('pasos_wizard').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('pasos_wizard').select('*').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('pasos_wizard').select('id, identificador, titulo, descripcion, fuente_datos, campo_filtro, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
-      // ✅ NUEVO: Consulta a contenido_seccion para el Hero (tipo_seccion_id = 1)
-      supabase
-        .from('contenido_seccion')
-        .select('id, titulo, subtitulo, descripcion, imagen, metadata, orden')
-        .eq('empresa_id', empresaId)
-        .eq('tipo_seccion_id', 1) // 1 = Hero
-        .eq('mostrar', true)
-        .eq('estado', 'activo')
-        .order('orden', { ascending: true }),
-      supabase.from('registros').select('id, identificador, nombre, descripcion, registro_contenido(id, titulo, subtitulo, descripcion, icono, stats, orden)').eq('estado', 'activo').order('orden', { ascending: true })
+      supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, imagen, metadata, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 1).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
+      // ✅ CORREGIDO: Filtro explícito en la relación anidada para respetar RLS
+      supabase.from('registros').select('id, identificador, nombre, descripcion, registro_contenido(id, titulo, subtitulo, descripcion, icono, stats, orden)').eq('registro_contenido.empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true })
     ])
+
+    // Log de errores para depuración (puedes eliminarlo en producción)
+    if (errorSucursales || errorProductos || errorIndustrias || errorServicios || errorMarcas || errorWizard || errorMenus || errorFooters || errorHeroes || errorRegistros) {
+      console.warn('Algunas consultas de globalsService tuvieron errores:', {
+        errorSucursales, errorProductos, errorIndustrias, errorServicios, errorMarcas, errorWizard, errorMenus, errorFooters, errorHeroes, errorRegistros
+      })
+    }
 
     // 3. Agrupar menús por grupo (Producto, Aplicacion, Servicio)
     const menusAgrupados: GlobalData['menus'] = {}
@@ -211,8 +213,7 @@ export const globalsService = {
     // 5. Productos populares (los primeros 6)
     const productos_populares = productosData?.slice(0, 6) || []
 
-    // ✅ NUEVO: Mapear datos del Hero desde el campo metadata (JSONB)
-    // El metadata viene como: { badge_text, cta_primary_text, cta_primary_href, cta_secondary_text, cta_secondary_href }
+    // 6. Mapear datos del Hero desde el campo metadata (JSONB)
     const heroes = heroesData?.map((item: any) => {
       const meta = item.metadata || {}
       return {
@@ -221,15 +222,16 @@ export const globalsService = {
         titulo: item.titulo,
         subtitulo: item.subtitulo,
         descripcion: item.descripcion,
-        badge: meta.badge_text || null, // ✅ CORREGIDO: badge_text desde metadata
-        cta_primary_text: meta.cta_primary_text || null, // ✅ CORREGIDO: cta_primary_text desde metadata
-        cta_primary_href: meta.cta_primary_href || null, // ✅ CORREGIDO: cta_primary_href desde metadata
-        cta_secondary_text: meta.cta_secondary_text || null, // ✅ CORREGIDO: cta_secondary_text desde metadata
-        cta_secondary_href: meta.cta_secondary_href || null, // ✅ CORREGIDO: cta_secondary_href desde metadata
+        badge: meta.badge_text || null,
+        cta_primary_text: meta.cta_primary_text || null,
+        cta_primary_href: meta.cta_primary_href || null,
+        cta_secondary_text: meta.cta_secondary_text || null,
+        cta_secondary_href: meta.cta_secondary_href || null,
         orden: item.orden
       }
     }) || []
 
+    // 7. Mapear registros about
     const registros_about: RegistroAbout[] = registrosData?.map((registro: any) => ({
       id: registro.id,
       identificador: registro.identificador,
@@ -238,7 +240,7 @@ export const globalsService = {
       detalles: (registro.registro_contenido || []).sort((a: any, b: any) => a.orden - b.orden)
     })) || []
 
-    // 6. WhatsApp (Hardcodeado por ahora o desde tabla de configuración si existe)
+    // 8. WhatsApp (Hardcodeado por ahora o desde tabla de configuración si existe)
     const whatsapp = {
       numero: '59177306576',
       mensaje: 'Hola, necesito información sobre sus productos y servicios'
@@ -251,7 +253,7 @@ export const globalsService = {
       productos_populares,
       industrias: industriasData || [],
       servicios: serviciosData || [],
-      marcas: marcasData || [],
+      marcas: marcasData || [], // ✅ AGREGADO
       pasos_wizard: pasosWizardData || [],
       heroes,
       menus: menusAgrupados,
