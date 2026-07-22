@@ -19,11 +19,14 @@ serve(async (req) => {
     if (!nombre || !email || !mensaje) {
       return new Response(
         JSON.stringify({ error: 'Nombre, email y mensaje son obligatorios' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
-    // 2. Obtener credenciales desde los Secrets de Supabase (NUNCA en el código)
+    // 2. Obtener credenciales desde los Secrets de Supabase
     const smtpHost = Deno.env.get('SMTP_HOST')
     const smtpPort = Number(Deno.env.get('SMTP_PORT'))
     const smtpUser = Deno.env.get('SMTP_USER')
@@ -48,7 +51,7 @@ serve(async (req) => {
     // 4. Crear el contenido del correo
     const mailOptions = {
       from: `"Correas Center Web" <${smtpFrom}>`,
-      to: 'ventas@correascenter.com, luis.gallegos@correascenter.com', // Destinatarios
+      to: 'ventas@correascenter.com, luis.gallegos@correascenter.com',
       subject: `Nuevo Mensaje de Contacto: ${nombre}`,
       html: `
         <h2>Nuevo mensaje desde el sitio web</h2>
@@ -66,14 +69,19 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, messageId: info.messageId }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
-
   } catch (error) {
     console.error('Error en Edge Function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
   }
 })

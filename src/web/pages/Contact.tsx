@@ -50,43 +50,48 @@ export const Contact = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setIsSubmitting(true)
-  setErrors({})
+    e.preventDefault()
+    if (!validateForm()) return
 
-  try {
-    // 1. (Opcional pero recomendado) Guardar en la BD primero
-    const { error: dbError } = await supabase.from('contactos').insert({
-      empresa_id: globals?.empresa?.id || 1,
-      nombre: formData.nombre,
-      empresa: formData.empresa || null,
-      telefono: formData.telefono,
-      email: formData.email,
-      mensaje: formData.mensaje,
-      estado: 'nuevo',
-    })
+    setIsSubmitting(true)
+    setSubmitMessage(null)
 
-    if (dbError) throw new Error('Error al guardar en la base de datos')
+    try {
+      // 1. Guardar en la base de datos
+      const { error: dbError } = await supabase.from('contactos').insert({
+        empresa_id: globals?.empresa?.id || 1,
+        nombre: formData.nombre,
+        empresa: formData.empresa || null,
+        telefono: formData.telefono,
+        email: formData.email,
+        mensaje: formData.mensaje,
+        estado: 'nuevo',
+      })
 
-    // 2. Llamar a la Edge Function para enviar el correo
-    const { data, error: fnError } = await supabase.functions.invoke('send-contact-email', {
-      body: formData,
-    })
+      if (dbError) throw new Error('Error al guardar en la base de datos')
 
-    if (fnError) throw fnError
+      // 2. Llamar a la Edge Function para enviar el correo
+      const { data, error: fnError } = await supabase.functions.invoke('send-contact-email', {
+        body: formData,
+      })
 
-    // 3. Éxito
-    setMessage({ type: 'success', text: '¡Mensaje enviado correctamente! Nos pondremos en contacto contigo pronto.' })
-    setFormData({ nombre: '', empresa: '', telefono: '', email: '', mensaje: '' })
-    
-  } catch (err: any) {
-    console.error('Error en contacto:', err)
-    setMessage({ 
-      type: 'error', 
-      text: err.message || 'Hubo un error al enviar el mensaje. Por favor intenta nuevamente.' 
-    })
-  } finally {
-    setIsSubmitting(false)
+      if (fnError) throw fnError
+
+      // 3. Éxito
+      setSubmitMessage({ 
+        type: 'success', 
+        text: '¡Mensaje enviado correctamente! Nos pondremos en contacto contigo pronto.' 
+      })
+      setFormData({ nombre: '', empresa: '', telefono: '', email: '', mensaje: '' })
+    } catch (err: any) {
+      console.error('Error en contacto:', err)
+      setSubmitMessage({ 
+        type: 'error', 
+        text: err.message || 'Hubo un error al enviar el mensaje. Por favor intenta nuevamente.' 
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -110,8 +115,7 @@ export const Contact = () => {
       {/* Contenido principal */}
       <section className="py-12 md:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Mensaje de estado (reemplazo de flash messages) */}
+          {/* Mensaje de estado */}
           {submitMessage && (
             <div className={`mb-8 rounded-lg p-4 flex items-start gap-3 ${
               submitMessage.type === 'success' 
@@ -135,7 +139,7 @@ export const Contact = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-            {/* Información de contacto (Dinámica desde globals) */}
+            {/* Información de contacto */}
             <div className="space-y-6">
               <div className="bg-gradient-to-br from-[#EA0A2A] to-[#c90825] rounded-2xl p-8 text-white">
                 <h3 className="text-2xl font-bold mb-6">Información de Contacto</h3>
