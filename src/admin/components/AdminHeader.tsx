@@ -9,10 +9,13 @@ export const AdminHeader = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
 
-  // Cargar preferencia de dark mode
+  // Cargar preferencia de dark mode al montar
   useEffect(() => {
-    const isDark = localStorage.getItem('darkMode') === 'true'
+    const savedDarkMode = localStorage.getItem('adminDarkMode')
+    const isDark = savedDarkMode === 'true'
     setIsDarkMode(isDark)
+    
+    // Aplicar clase al html
     if (isDark) {
       document.documentElement.classList.add('dark')
     } else {
@@ -23,7 +26,8 @@ export const AdminHeader = () => {
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode
     setIsDarkMode(newDarkMode)
-    localStorage.setItem('darkMode', String(newDarkMode))
+    localStorage.setItem('adminDarkMode', String(newDarkMode))
+    
     if (newDarkMode) {
       document.documentElement.classList.add('dark')
     } else {
@@ -38,6 +42,8 @@ export const AdminHeader = () => {
   }
 
   const handleGoToSite = () => {
+    // ✅ IMPORTANTE: Remover dark mode al ir al sitio público
+    document.documentElement.classList.remove('dark')
     window.location.href = '/'
   }
 
@@ -90,7 +96,8 @@ export const AdminHeader = () => {
           <button
             onClick={toggleDarkMode}
             className="rounded-lg border border-gray-200 p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-            title={isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
+            title={isDarkMode ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+            aria-label="Toggle dark mode"
           >
             {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>

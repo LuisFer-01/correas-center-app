@@ -10,6 +10,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 // Definición de items del sidebar
@@ -69,6 +70,15 @@ export const AdminLayout = () => {
 
   // Ocultar sidebar en la página de login
   const isLoginPage = location.pathname === '/admin/login'
+
+  // ✅ NUEVO: Limpiar dark mode al salir del admin
+  useEffect(() => {
+    return () => {
+      // Cuando el componente se desmonta (usuario sale del admin)
+      // Remover la clase dark para no afectar al sitio público
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
 
   return (
     <AdminProvider>
