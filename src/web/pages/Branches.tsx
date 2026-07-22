@@ -1,6 +1,6 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
-import { Building2, Clock, ExternalLink, Mail, MapPin, MessageCircle, Phone } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Building2, ChevronDown, Clock, Mail, MapPin, MessageCircle, Phone } from 'lucide-react'
+import { useState } from 'react'
 
 export const Branches = () => {
   const { data: globals, isLoading } = useGlobalData()
@@ -10,20 +10,16 @@ export const Branches = () => {
     mensaje: 'Hola, necesito información sobre sus productos y servicios'
   }
 
-  const [showTooltip, setShowTooltip] = useState<number | null>(null)
-
-  // Auto-ocultar tooltip después de 5 segundos
-  useEffect(() => {
-    if (showTooltip !== null) {
-      const timer = setTimeout(() => setShowTooltip(null), 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [showTooltip])
+  const [expandedLocation, setExpandedLocation] = useState<number | null>(null)
 
   const handleWhatsAppContact = (sucursal: any) => {
     const mensaje = `Hola, necesito información sobre la sucursal *${sucursal.nombre}* ubicada en ${sucursal.direccion}. ¿Podrían brindarme más detalles?`
     const url = `https://wa.me/${whatsapp.numero}?text=${encodeURIComponent(mensaje)}`
     window.open(url, '_blank')
+  }
+
+  const toggleMap = (index: number) => {
+    setExpandedLocation(expandedLocation === index ? null : index)
   }
 
   if (isLoading) {
@@ -64,7 +60,7 @@ export const Branches = () => {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
             Sucursales
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-1xl mx-auto">
             Cobertura estratégica para atenderte mejor en todo Bolivia
           </p>
         </div>
@@ -74,82 +70,90 @@ export const Branches = () => {
       <section className="py-12 md:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {sucursales.map((sucursal) => (
+            {sucursales.map((sucursal, index) => (
               <div
                 key={sucursal.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#EA0A2A]/20"
+                className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden hover:border-[#EA0A2A] transition-all duration-300"
               >
-                {/* Header de la sucursal */}
-                <div className="bg-gradient-to-r from-[#EA0A2A] to-[#c90825] p-6 text-white">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{sucursal.nombre}</h3>
-                    {sucursal.es_principal && (
-                      <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                        Principal
-                      </span>
-                    )}
+                <div className="p-6">
+                  {/* Header de la sucursal */}
+                  <div className="mb-4">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      {sucursal.nombre}
+                      {sucursal.es_principal && (
+                        <span className="ml-2 text-sm font-normal text-[#EA0A2A]">
+                          (Principal)
+                        </span>
+                      )}
+                    </h3>
                   </div>
-                </div>
 
-                {/* Contenido */}
-                <div className="p-6 space-y-4">
-                  {/* Dirección */}
-                  <div className="flex items-start gap-3">
-                    <MapPin size={20} className="text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-gray-900 font-semibold">Dirección</p>
-                      <p className="text-gray-600 text-sm">{sucursal.direccion}</p>
+                  {/* Información de contacto */}
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="text-[#EA0A2A] flex-shrink-0 mt-1" size={20} />
+                      <p className="text-gray-700 text-sm">{sucursal.direccion}</p>
                     </div>
-                  </div>
-
-                  {/* Teléfono */}
-                  <div className="flex items-start gap-3">
-                    <Phone size={20} className="text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-gray-900 font-semibold">Teléfono</p>
+                    <div className="flex items-center gap-3">
+                      <Phone className="text-[#EA0A2A] flex-shrink-0" size={20} />
                       <a
                         href={`tel:${sucursal.telefono.replace(/\s/g, '')}`}
-                        className="text-gray-600 text-sm hover:text-[#EA0A2A] transition-colors"
+                        className="text-gray-700 text-sm hover:text-[#EA0A2A] transition-colors"
                       >
                         {sucursal.telefono}
                       </a>
                     </div>
-                  </div>
-
-                  {/* Email */}
-                  {sucursal.email && (
-                    <div className="flex items-start gap-3">
-                      <Mail size={20} className="text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-gray-900 font-semibold">Email</p>
+                    {sucursal.email && (
+                      <div className="flex items-center gap-3">
+                        <Mail className="text-[#EA0A2A] flex-shrink-0" size={20} />
                         <a
                           href={`mailto:${sucursal.email}`}
-                          className="text-gray-600 text-sm hover:text-[#EA0A2A] transition-colors"
+                          className="text-gray-700 text-sm hover:text-[#EA0A2A] transition-colors"
                         >
                           {sucursal.email}
                         </a>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Horarios */}
-                  {sucursal.horarios && (
-                    <div className="flex items-start gap-3">
-                      <Clock size={20} className="text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-gray-900 font-semibold">Horarios</p>
-                        <p className="text-gray-600 text-sm">{sucursal.horarios}</p>
+                    )}
+                    {sucursal.horarios && (
+                      <div className="flex items-start gap-3">
+                        <Clock className="text-[#EA0A2A] flex-shrink-0 mt-1" size={20} />
+                        <p className="text-gray-700 text-sm">{sucursal.horarios}</p>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Mapa */}
-                  {sucursal.mapa_incrustado && (
-                    <div className="mt-4 rounded-lg overflow-hidden border border-gray-200">
+                  {/* Botones de acción */}
+                  <div className="flex gap-3">
+                    {sucursal.mapa_incrustado && (
+                      <button
+                        onClick={() => toggleMap(index)}
+                        className="flex-1 inline-flex items-center justify-center gap-2 bg-[#EA0A2A] text-white px-4 py-3 rounded-md hover:bg-[#c90825] transition-all font-semibold text-sm"
+                      >
+                        {expandedLocation === index ? 'Ocultar Mapa' : 'Ver Ubicación'}
+                        <ChevronDown
+                          size={16}
+                          className={`transition-transform ${expandedLocation === index ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleWhatsAppContact(sucursal)}
+                      className="flex-1 inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-3 rounded-md hover:bg-[#128C7E] transition-all font-semibold text-sm"
+                    >
+                      Contactar
+                      <MessageCircle size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mapa expandido */}
+                {expandedLocation === index && sucursal.mapa_incrustado && (
+                  <div className="border-t border-gray-200">
+                    <div className="h-64 w-full">
                       <iframe
                         src={sucursal.mapa_incrustado}
                         width="100%"
-                        height="200"
+                        height="100%"
                         style={{ border: 0 }}
                         allowFullScreen
                         loading="lazy"
@@ -157,31 +161,8 @@ export const Branches = () => {
                         title={`Mapa de ${sucursal.nombre}`}
                       ></iframe>
                     </div>
-                  )}
-
-                  {/* Botones de acción */}
-                  <div className="flex gap-3 pt-4 border-t border-gray-100">
-                    {sucursal.mapa_incrustado && (
-                      <a
-                        href={sucursal.mapa_incrustado}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 bg-[#EA0A2A] hover:bg-[#c90825] text-white px-4 py-2 rounded-lg font-semibold transition-all text-center flex items-center justify-center gap-2"
-                      >
-                        <ExternalLink size={16} />
-                        Ver Ubicación
-                      </a>
-                    )}
-                    {/* ✅ NUEVO: Botón Contactar via WhatsApp */}
-                    <button
-                      onClick={() => handleWhatsAppContact(sucursal)}
-                      className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white px-4 py-2 rounded-lg font-semibold transition-all text-center flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle size={16} />
-                      Contactar
-                    </button>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

@@ -350,7 +350,7 @@ export const Contact = () => {
           </div>
         </div>
 
-        {/* ✅ SE ELIMINÓ: Mapa de Sucursales Interactivo (Se moverá a Locations.tsx) */}
+        {/* SE ELIMINÓ: Mapa de Sucursales Interactivo (Se moverá a Locations.tsx) */}
 
         {/* FAQ Accordion */}
         <div className="max-w-4xl mx-auto mt-16">
