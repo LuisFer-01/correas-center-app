@@ -1,6 +1,5 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { getSupabaseImageUrl } from '@/lib/supabase'
-import { AppLayout } from '@/web/layouts/AppLayout'
 import { ArrowRight, Wrench } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -13,9 +12,9 @@ export const ServicesIndex = () => {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <>
         <div className="py-20 text-center text-gray-500">Cargando servicios...</div>
-      </AppLayout>
+      </>
     )
   }
 
@@ -24,17 +23,17 @@ export const ServicesIndex = () => {
       {/* Header de página */}
       <section className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-16 md:py-20 overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
+          {/* <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
             <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
             <span>/</span>
             <span className="text-white">Servicios</span>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="bg-[#EA0A2A] p-4 rounded-xl">
-              <Wrench size={40} className="text-white" />
+          </div> */}
+          <div className="flex items-start gap-5">
+            <div className="bg-[#EA0A2A] p-6 rounded-xl">
+              <Wrench size={50} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              <h1 className="text-2xl md:text-2xl lg:text-5xl font-bold text-white mb-1">
                 Nuestros Servicios
               </h1>
               <p className="text-lg text-gray-300 max-w-3xl">

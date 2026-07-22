@@ -15,7 +15,7 @@ export const Home = () => {
     <>
       <Hero /> {/* ComponenteHero Completo*/}
       <ProductSelector /> {/* Componente ProductSelector A medio implementar */}
-      <Products />
+      <Products /> {/* Componente Productos Completo */}
       <Brands /> {/* Componente Marcas Completo */}
       <Services /> {/* Componente Servicios Completo */}
       <Industries />

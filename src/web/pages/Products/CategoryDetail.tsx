@@ -1,5 +1,4 @@
 import { getSupabaseImageUrl, supabase } from '@/lib/supabase'
-import { AppLayout } from '@/web/layouts/AppLayout'
 import { AlertTriangle, ArrowRight, CheckCircle2, FlaskConical, Layers, Ruler, Wrench } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
@@ -51,9 +50,9 @@ export const CategoryDetail = () => {
 
   if (loading) {
     return (
-      <AppLayout>
+      <>
         <div className="py-20 text-center text-gray-500">Cargando detalles de la categoría...</div>
-      </AppLayout>
+      </>
     )
   }
 
@@ -106,13 +105,13 @@ export const CategoryDetail = () => {
           </div>
         )}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
+          {/* <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
             <Link to="/products" className="hover:text-white transition-colors">Productos</Link>
             <span>/</span>
             <Link to={`/products/${productSlug}`} className="hover:text-white transition-colors capitalize">{productSlug?.replace(/-/g, ' ')}</Link>
             <span>/</span>
             <span className="text-white">{categoria.nombre}</span>
-          </div>
+          </div> */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">{categoria.nombre}</h1>
           {categoria.descripcion_corta && <p className="text-lg text-gray-300 max-w-3xl">{categoria.descripcion_corta}</p>}
         </div>
