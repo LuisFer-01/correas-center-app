@@ -1,9 +1,9 @@
-import { useAuthContext } from '@/providers/AuthProvider'
+import { useAdminContext } from '@/providers/AdminProvider'
 import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 export const ProtectedRoute = () => {
-  const { user, loading } = useAuthContext()
+  const { user, loading } = useAdminContext()
   const location = useLocation()
 
   // Guardar la ruta destino antes de redirigir al login
@@ -16,10 +16,12 @@ export const ProtectedRoute = () => {
   // Mostrar skeleton mientras verifica autenticación
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#EA0A2A] border-r-transparent"></div>
-          <p className="mt-4 text-sm text-gray-600">Verificando sesión...</p>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Verificando sesión...
+          </p>
         </div>
       </div>
     )
