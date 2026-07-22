@@ -52,6 +52,7 @@
     "globals": "^17.7.0",
     "postcss": "^8.5.19",
     "prettier": "^3.9.5",
+    "supabase": "^2.109.1",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.62.0",

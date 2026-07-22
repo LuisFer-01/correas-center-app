@@ -50,45 +50,43 @@ export const Contact = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
+  e.preventDefault()
+  setIsSubmitting(true)
+  setErrors({})
 
-    setIsSubmitting(true)
-    setSubmitMessage(null)
+  try {
+    // 1. (Opcional pero recomendado) Guardar en la BD primero
+    const { error: dbError } = await supabase.from('contactos').insert({
+      empresa_id: globals?.empresa?.id || 1,
+      nombre: formData.nombre,
+      empresa: formData.empresa || null,
+      telefono: formData.telefono,
+      email: formData.email,
+      mensaje: formData.mensaje,
+      estado: 'nuevo',
+    })
 
-    try {
-      // 1. Guardar en la base de datos de Supabase
-      const { error } = await supabase.from('contactos').insert({
-        empresa_id: globals?.empresa?.id || 1,
-        nombre: formData.nombre,
-        empresa: formData.empresa || null,
-        telefono: formData.telefono,
-        email: formData.email,
-        mensaje: formData.mensaje,
-        estado: 'nuevo',
-      })
+    if (dbError) throw new Error('Error al guardar en la base de datos')
 
-      if (error) throw error
+    // 2. Llamar a la Edge Function para enviar el correo
+    const { data, error: fnError } = await supabase.functions.invoke('send-contact-email', {
+      body: formData,
+    })
 
-      // 2. Éxito
-      setSubmitMessage({ 
-        type: 'success', 
-        text: '¡Mensaje enviado correctamente! Nos pondremos en contacto contigo pronto.' 
-      })
-      setFormData({ nombre: '', empresa: '', telefono: '', email: '', mensaje: '' })
+    if (fnError) throw fnError
 
-      // TODO: Aquí es donde llamarías a tu Supabase Edge Function para enviar el email real.
-      // await supabase.functions.invoke('send-contact-email', { body: formData })
-
-    } catch (err) {
-      console.error('Error al enviar contacto:', err)
-      setSubmitMessage({ 
-        type: 'error', 
-        text: 'Hubo un error al enviar el mensaje. Por favor intenta nuevamente.' 
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    // 3. Éxito
+    setMessage({ type: 'success', text: '¡Mensaje enviado correctamente! Nos pondremos en contacto contigo pronto.' })
+    setFormData({ nombre: '', empresa: '', telefono: '', email: '', mensaje: '' })
+    
+  } catch (err: any) {
+    console.error('Error en contacto:', err)
+    setMessage({ 
+      type: 'error', 
+      text: err.message || 'Hubo un error al enviar el mensaje. Por favor intenta nuevamente.' 
+    })
+  } finally {
+    setIsSubmitting(false)
   }
 
   return (
