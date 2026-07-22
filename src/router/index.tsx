@@ -4,6 +4,8 @@ import { PublicLayout } from '@/web/layouts/PublicLayout'
 import { Home } from '@/web/pages/Home'
 import { createBrowserRouter } from 'react-router-dom'
 import { About } from '../web/pages/About'
+import { ApplicationsIndex } from '../web/pages/Applications/Index'
+import { ApplicationsShow } from '../web/pages/Applications/Show'
 import { Branches } from '../web/pages/Branches'
 import { Privacy } from '../web/pages/Privacy'
 import { CategoryDetail } from '../web/pages/Products/CategoryDetail'
@@ -29,6 +31,8 @@ export const router = createBrowserRouter([
       { path: 'products', element: <ProductsIndex /> },
       { path: 'products/:slug', element: <ProductShow /> },
       { path: 'products/:productSlug/:categorySlug', element: <CategoryDetail /> },
+      { path: 'applications', element: <ApplicationsIndex /> },
+      { path: 'applications/:slug', element: <ApplicationsShow /> },
       { path: 'services', element: <ServicesIndex /> },
       { path: 'services/:slug', element: <ServicesShow /> },
       { path: 'about', element: <About /> },

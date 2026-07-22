@@ -20,6 +20,14 @@ export interface Sucursal {
   es_principal: boolean
 }
 
+export interface Marca {
+  id: number
+  nombre: string
+  slug: string
+  logo: string | null
+  orden: number
+}
+
 export interface Producto {
   id: number
   nombre: string
@@ -36,28 +44,11 @@ export interface Producto {
   marcas: Marca[]
 }
 
-export interface InfraestructuraCaracteristica {
+export interface IndustriaAsignacion {
   id: number
-  titulo: string
-  descripcion: string
-  icono: string | null
-  stats: string | null
-  orden: number
-}
-
-export interface InfraestructuraCapacidad {
-  id: number
-  nombre: string
-  icono: string | null
-  orden: number
-}
-
-export interface Differential {
-  id: number
-  titulo: string
-  subtitulo: string
-  descripcion: string
-  icono: string | null
+  industria_id: number
+  tipo_registro: string
+  registro_id: number
   orden: number
 }
 
@@ -66,6 +57,24 @@ export interface Industria {
   nombre: string
   slug: string
   imagen: string | null
+  orden: number
+  categorias?: Array<{
+    id: number
+    nombre: string
+    slug: string
+    descripcion_corta: string | null
+    producto?: {
+      id: number
+      nombre: string
+      slug: string
+    }
+  }>
+  servicios?: Array<{
+    id: number
+    nombre: string
+    descripcion: string | null
+    imagen: string | null
+  }>
 }
 
 export interface Servicio {
@@ -73,14 +82,6 @@ export interface Servicio {
   nombre: string
   descripcion: string | null
   imagen: string | null
-  orden: number
-}
-
-export interface Marca {
-  id: number
-  nombre: string
-  slug: string
-  logo: string | null
   orden: number
 }
 
@@ -161,6 +162,31 @@ export interface RegistroContenido {
   orden: number
 }
 
+export interface InfraestructuraCaracteristica {
+  id: number
+  titulo: string
+  descripcion: string
+  icono: string | null
+  stats: string | null
+  orden: number
+}
+
+export interface InfraestructuraCapacidad {
+  id: number
+  nombre: string
+  icono: string | null
+  orden: number
+}
+
+export interface Differential {
+  id: number
+  titulo: string
+  subtitulo: string
+  descripcion: string
+  icono: string | null
+  orden: number
+}
+
 export interface GlobalData {
   empresa: Empresa | null
   sucursales: Sucursal[]
@@ -211,6 +237,7 @@ export const globalsService = {
       { data: sucursalesData, error: errorSucursales },
       { data: productosData, error: errorProductos },
       { data: industriasData, error: errorIndustrias },
+      { data: industriaAsignacionesData, error: errorAsignaciones },
       { data: serviciosData, error: errorServicios },
       { data: marcasData, error: errorMarcas },
       { data: infraCaracteristicasData, error: errorInfraCaracteristicas },
@@ -223,8 +250,10 @@ export const globalsService = {
       { data: registrosData, error: errorRegistros }
     ] = await Promise.all([
       supabase.from('sucursales').select('id, nombre, direccion, telefono, email, horarios, mapa_incrustado, latitud, longitud, es_principal, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias!inner(id, nombre, slug, descripcion_corta, uso),producto_marca!inner(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select(`id, nombre, slug, imagen, orden, categorias!inner(id, nombre, slug, descripcion_corta, uso), producto_marca!inner(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      // ✅ NUEVO: Obtener asignaciones de industrias
+      supabase.from('industria_asignacion').select('id, industria_id, tipo_registro, registro_id, orden').eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('marcas').select('id, nombre, slug, logo, orden').eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, icono, metadata, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 5).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
@@ -234,18 +263,17 @@ export const globalsService = {
       supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, imagen, metadata, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 1).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
-      // ✅ CORREGIDO: Filtro explícito en la relación anidada para respetar RLS
       supabase.from('registros').select('id, identificador, nombre, descripcion, registro_contenido(id, titulo, subtitulo, descripcion, icono, stats, orden)').eq('registro_contenido.empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true })
     ])
 
-    // Log de errores para depuración (puedes eliminarlo en producción)
-    if (errorSucursales || errorProductos || errorIndustrias || errorServicios || errorMarcas || errorInfraCaracteristicas || errorInfraCapacidades || errorDiferenciales || errorWizard || errorMenus || errorFooters || errorHeroes || errorRegistros) {
+    // Log de errores para depuración
+    if (errorSucursales || errorProductos || errorIndustrias || errorAsignaciones || errorServicios || errorMarcas || errorInfraCaracteristicas || errorInfraCapacidades || errorDiferenciales || errorWizard || errorMenus || errorFooters || errorHeroes || errorRegistros) {
       console.warn('Algunas consultas de globalsService tuvieron errores:', {
-        errorSucursales, errorProductos, errorIndustrias, errorServicios, errorMarcas, errorInfraCaracteristicas, errorInfraCapacidades, errorDiferenciales, errorWizard, errorMenus, errorFooters, errorHeroes, errorRegistros
+        errorSucursales, errorProductos, errorIndustrias, errorAsignaciones, errorServicios, errorMarcas, errorInfraCaracteristicas, errorInfraCapacidades, errorDiferenciales, errorWizard, errorMenus, errorFooters, errorHeroes, errorRegistros
       })
     }
 
-    // 3. Agrupar menús por grupo (Producto, Aplicacion, Servicio)
+    // 3. Agrupar menús por grupo
     const menusAgrupados: GlobalData['menus'] = {}
     menusData?.forEach((menu: Menu) => {
       const grupoKey = menu.grupo as keyof GlobalData['menus']
@@ -261,9 +289,7 @@ export const globalsService = {
     const footer_servicios = footersData?.filter(f => f.tipo === 'servicio') || []
     const footer_redes_sociales = footersData?.filter(f => f.tipo === 'red_social') || []
 
-    // 5. Productos populares (los primeros 6)
-    const productos_populares = productosData?.slice(0, 6) || []
-
+    // 5. Procesar productos
     const productosProcesados = (productosData || []).map((p: any) => ({
       id: p.id,
       nombre: p.nombre,
@@ -271,11 +297,51 @@ export const globalsService = {
       imagen: p.imagen,
       orden: p.orden,
       categorias: p.categorias || [],
-      // Extraemos solo el objeto 'marca' de la relación 'producto_marca' y eliminamos duplicados
       marcas: Array.from(new Map(p.producto_marca?.map((pm: any) => [pm.marca.id, pm.marca])).values())
     }))
 
-    // 6. Mapear datos del Hero desde el campo metadata (JSONB)
+    // 6. ✅ NUEVO: Procesar industrias con sus asignaciones
+    const industriasProcesadas = (industriasData || []).map((industria: any) => {
+      // Filtrar asignaciones para esta industria
+      const asignaciones = industriaAsignacionesData?.filter((a: any) => a.industria_id === industria.id) || []
+      
+      // Separar por tipo_registro
+      const categoriasAsignadas = asignaciones
+        .filter((a: any) => a.tipo_registro === 'categoria')
+        .map((a: any) => {
+          // Buscar la categoría en productosProcesados
+          for (const producto of productosProcesados) {
+            const categoria = producto.categorias?.find((c: any) => c.id === a.registro_id)
+            if (categoria) {
+              return {
+                ...categoria,
+                producto: {
+                  id: producto.id,
+                  nombre: producto.nombre,
+                  slug: producto.slug
+                }
+              }
+            }
+          }
+          return null
+        })
+        .filter(Boolean)
+
+      const serviciosAsignados = asignaciones
+        .filter((a: any) => a.tipo_registro === 'servicio')
+        .map((a: any) => {
+          return serviciosData?.find((s: any) => s.id === a.registro_id) || null
+        })
+        .filter(Boolean)
+
+      return {
+        ...industria,
+        categorias: categoriasAsignadas,
+        servicios: serviciosAsignados
+      }
+    })
+
+    // 7. Mapear datos del Hero
     const heroes = heroesData?.map((item: any) => {
       const meta = item.metadata || {}
       return {
@@ -293,7 +359,7 @@ export const globalsService = {
       }
     }) || []
 
-    // 7. Mapear registros about
+    // 8. Mapear registros about
     const registros_about: RegistroAbout[] = registrosData?.map((registro: any) => ({
       id: registro.id,
       identificador: registro.identificador,
@@ -302,19 +368,19 @@ export const globalsService = {
       detalles: (registro.registro_contenido || []).sort((a: any, b: any) => a.orden - b.orden)
     })) || []
 
-    // 8. WhatsApp (Hardcodeado por ahora o desde tabla de configuración si existe)
+    // 9. WhatsApp
     const whatsapp = {
       numero: '59177306576',
       mensaje: 'Hola, necesito información sobre sus productos y servicios'
     }
 
-    // 9. Mapear Infraestructura y Diferenciales
+    // 10. Mapear Infraestructura y Diferenciales
     const infraestructura_caracteristicas = infraCaracteristicasData?.map((item: any) => ({
       id: item.id,
       titulo: item.titulo,
       descripcion: item.descripcion,
       icono: item.icono,
-      stats: item.metadata?.stats || item.subtitulo, // Fallback a subtitulo si no hay metadata
+      stats: item.metadata?.stats || item.subtitulo,
       orden: item.orden
     })) || []
 
@@ -338,8 +404,8 @@ export const globalsService = {
       empresa: empresaData || null,
       sucursales: sucursalesData || [],
       productos: productosProcesados || [],
-      productos_populares,
-      industrias: industriasData || [],
+      productos_populares: productosProcesados?.slice(0, 6) || [],
+      industrias: industriasProcesadas || [],
       servicios: serviciosData || [],
       marcas: marcasData || [],
       infraestructura_caracteristicas,

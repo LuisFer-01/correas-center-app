@@ -18,7 +18,7 @@ export const Home = () => {
       <Products /> {/* Componente Productos Completo */}
       <Brands /> {/* Componente Marcas Completo */}
       <Services /> {/* Componente Servicios Completo */}
-      <Industries />
+      <Industries /> { /* Componente de Industrias Completo */ }
       <Infrastructure /> {/* Componente Infraestructura Completo */}
       <Differentials /> {/* Componente Diferenciales Completo */}
       <Locations />
