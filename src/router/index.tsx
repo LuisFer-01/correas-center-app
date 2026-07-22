@@ -7,6 +7,7 @@ import { About } from '../web/pages/About'
 import { ApplicationsIndex } from '../web/pages/Applications/Index'
 import { ApplicationsShow } from '../web/pages/Applications/Show'
 import { Branches } from '../web/pages/Branches'
+import { Contact } from '../web/pages/Contact'
 import { Privacy } from '../web/pages/Privacy'
 import { CategoryDetail } from '../web/pages/Products/CategoryDetail'
 import { ProductsIndex } from '../web/pages/Products/Index'
@@ -38,8 +39,8 @@ export const router = createBrowserRouter([
       { path: 'about', element: <About /> },
       { path: 'privacy', element: <Privacy /> },
       { path: 'terms', element: <Terms /> },
-      { path: 'branches', element: <Branches /> }
-      // Fase 2: Aquí irán las rutas públicas (/productos, /industrias, etc.)
+      { path: 'branches', element: <Branches /> },
+      { path: 'contact', element: <Contact /> }, 
     ],
   },
   {
