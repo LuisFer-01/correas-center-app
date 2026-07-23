@@ -21,11 +21,11 @@ interface SidebarItem {
 
 const sidebarItems: SidebarItem[] = [
   { to: '/admin', label: 'Dashboard', icon: Home, end: true },
+  { to: '/admin/empresas', label: 'Empresas', icon: Building2, end: true },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users, disabled: true },
   { to: '/admin/productos', label: 'Productos', icon: Package, disabled: true },
   { to: '/admin/servicios', label: 'Servicios', icon: Wrench, disabled: true },
   { to: '/admin/contactos', label: 'Contactos', icon: Mail, disabled: true },
-  { to: '/admin/empresas', label: 'Empresas', icon: Building2, disabled: true },
   { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, disabled: true },
   { to: '/admin/configuracion', label: 'Configuración', icon: Settings, disabled: true },
 ]

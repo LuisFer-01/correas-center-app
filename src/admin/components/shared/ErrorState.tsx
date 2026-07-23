@@ -46,7 +46,7 @@ export function ErrorState({
   return (
     <div className={`flex flex-col items-center justify-center py-16 px-4 text-center ${className}`}>
       {/* Icono */}
-      <div className="mb-6 rounded-full bg-red-50 p-6 dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333]">
+      <div className="mb-6 rounded-full bg-red-50 p-6 bg-gray-800">
         <div className="text-red-500 dark:text-red-400">
           {displayIcon}
         </div>

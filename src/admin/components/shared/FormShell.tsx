@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button'
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Loader2 } from 'lucide-react'
 
@@ -45,7 +45,7 @@ export function FormShell({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className={`sm:max-w-[600px] dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] dark:border-gray-600 ${className || ''}`}
+        className={`sm:max-w-[600px] bg-gray-800 dark:border-gray-600 ${className || ''}`}
       >
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">

@@ -1,12 +1,12 @@
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react'
@@ -44,7 +44,7 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] dark:border-gray-600">
+      <AlertDialogContent className="bg-gray-800 dark:border-gray-600">
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className={`flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0 ${

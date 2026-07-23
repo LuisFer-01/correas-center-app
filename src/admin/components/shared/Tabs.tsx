@@ -1,8 +1,8 @@
 import {
-    Tabs as ShadcnTabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
+  Tabs as ShadcnTabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
@@ -33,7 +33,7 @@ export function Tabs({
     <ShadcnTabs defaultValue={defaultValue} className={className}>
       <TabsList
         className={cn(
-          'w-full bg-white dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] border border-gray-200 dark:border-gray-600',
+          'w-full bg-white bg-gray-800 border border-gray-200 dark:border-gray-600',
           variant === 'default' && 'h-auto p-1 gap-1',
           variant === 'underline' && 'h-auto bg-transparent border-b rounded-none p-0 gap-0',
           variant === 'pills' && 'h-auto p-1 gap-2'

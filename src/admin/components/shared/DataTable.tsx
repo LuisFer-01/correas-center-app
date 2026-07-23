@@ -1,32 +1,32 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table'
 import type {
-    ColumnDef,
-    ColumnFiltersState,
-    SortingState,
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
 } from '@tanstack/react-table'
 import {
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from '@tanstack/react-table'
 import {
-    ChevronLeft,
-    ChevronRight,
-    ChevronsLeft,
-    ChevronsRight,
-    Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Loader2,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -79,7 +79,7 @@ export function DataTable<TData, TValue>({
   // Estado de carga
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] p-8">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-800 p-8">
         <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-300">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span>Cargando datos...</span>
@@ -106,7 +106,7 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Tabla */}
-      <div className="rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333]">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden bg-gray-800">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

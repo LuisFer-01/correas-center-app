@@ -45,7 +45,7 @@ export function showToast(type: ToastType, options: ToastOptions) {
           onClick: options.action.onClick,
         }
       : undefined,
-    className: 'dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] dark:border-gray-600 dark:text-white',
+    className: 'bg-gray-800 dark:border-gray-600 dark:text-white',
   })
 }
 
@@ -75,7 +75,7 @@ export const toast = {
       loading: messages.loading,
       success: messages.success,
       error: messages.error,
-      className: 'dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] dark:border-gray-600 dark:text-white',
+      className: 'bg-gray-800 dark:border-gray-600 dark:text-white',
     })
     return promise
   },

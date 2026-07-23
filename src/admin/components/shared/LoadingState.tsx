@@ -32,7 +32,7 @@ export function LoadingState({
   // Loading de tabla
   if (variant === 'table') {
     return (
-      <div className={`rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] ${className}`}>
+      <div className={`rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden bg-gray-800 ${className}`}>
         {/* Header de la tabla */}
         <div className="border-b border-gray-200 dark:border-gray-600 p-4">
           <div className="flex gap-4">
@@ -62,7 +62,7 @@ export function LoadingState({
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="rounded-lg border border-gray-200 dark:border-gray-600 p-6 dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333]"
+            className="rounded-lg border border-gray-200 dark:border-gray-600 p-6 bg-gray-800"
           >
             <Skeleton className="h-4 w-1/2 mb-4 dark:bg-gray-600" />
             <Skeleton className="h-8 w-1/3 mb-2 dark:bg-gray-600" />
@@ -95,7 +95,7 @@ export function LoadingState({
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className="rounded-lg border border-gray-200 dark:border-gray-600 p-6 dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333]"
+            className="rounded-lg border border-gray-200 dark:border-gray-600 p-6 bg-gray-800"
           >
             <div className="flex items-center justify-between mb-4">
               <Skeleton className="h-4 w-1/2 dark:bg-gray-600" />

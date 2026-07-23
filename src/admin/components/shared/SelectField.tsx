@@ -1,10 +1,10 @@
 import { Label } from '@/components/ui/label'
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 import { AlertCircle, Info } from 'lucide-react'
 
@@ -83,7 +83,7 @@ export function SelectField({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent
-          className="bg-white dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] border-gray-200 dark:border-gray-600"
+          className="bg-white bg-gray-800 border-gray-200 dark:border-gray-600"
           position="popper"
         >
           {options.length > 0 ? (
