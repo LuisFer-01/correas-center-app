@@ -11,18 +11,21 @@ export const AdminLayout = () => {
 
   return (
     <AdminProvider>
-      <div className="!min-h-screen bg-gray-50 dark:bg-gradient-to-r from-[#727272] to-[#333333]">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
         {isLoginPage ? (
           // En login, solo renderizar el outlet sin layout
           <Outlet />
         ) : (
-          <div className="!flex min-h-screen">
-            {/* Sidebar como componente independiente */}
-            <AdminSidebar />
+          <div className="flex flex-col min-h-screen">
+            {/* ✅ NUEVO: Header arriba full-width */}
+            <AdminHeader />
 
-            {/* Contenido principal */}
-            <div className="flex flex-1 flex-col min-w-0">
-              <AdminHeader />
+            {/* ✅ NUEVO: Contenedor flex con sidebar + contenido debajo del header */}
+            <div className="flex flex-1">
+              {/* Sidebar a la izquierda */}
+              <AdminSidebar />
+
+              {/* Contenido principal a la derecha */}
               <main className="flex-1 p-6 md:p-8 overflow-auto">
                 <Outlet />
               </main>

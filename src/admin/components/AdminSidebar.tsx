@@ -1,12 +1,12 @@
 import {
-    Building2,
-    FileText,
-    Home,
-    Mail,
-    Package,
-    Settings,
-    Users,
-    Wrench,
+  Building2,
+  FileText,
+  Home,
+  Mail,
+  Package,
+  Settings,
+  Users,
+  Wrench,
 } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
@@ -38,28 +38,10 @@ export const AdminSidebar = () => {
     <aside
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
-      className={`hidden lg:flex flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gradient-to-r from-[#727272] to-[#333333] transition-all duration-300 ease-in-out ${
+      className={`hidden lg:flex flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 transition-all duration-300 ease-in-out ${
         isExpanded ? 'w-64' : 'w-20'
       }`}
     >
-      {/* Logo / Brand */}
-      <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-4 dark:border-gray-700">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#EA0A2A] text-white">
-          <Building2 className="h-5 w-5" />
-        </div>
-        <div
-          className={`overflow-hidden transition-all duration-300 ${
-            isExpanded ? '!max-w-[200px] !opacity-100' : '!max-w-0 opacity-0'
-          }`}
-        >
-          <h1 className="!text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">
-            Correas Center
-          </h1>
-          <p className="text-xs text-gray-100 dark:text-gray-200 whitespace-nowrap">
-            Panel Admin
-          </p>
-        </div>
-      </div>
 
       {/* Navegación */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3">

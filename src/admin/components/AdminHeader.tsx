@@ -75,13 +75,13 @@ export const AdminHeader = () => {
   const showImage = avatarUrl && !avatarError
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gradient-to-r from-[#727272] to-[#333333]">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center justify-between">
         {/* Lado izquierdo: Logo empresa */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             {empresa?.logo ? (
-              <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-gray-200 bg-white p-1 dark:border-[#727272] dark:bg-[#727272]">
+              <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-800">
                 <img
                   src={empresa.logo}
                   alt={empresa.nombre}
@@ -97,7 +97,7 @@ export const AdminHeader = () => {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 {empresa?.nombre || 'Correas Center'}
               </h1>
-              <p className="text-xs text-gray-300 dark:text-gray-200">
+              <p className="text-xs !text-gray-300 dark:text-gray-200">
                 Panel de Administración
               </p>
             </div>
@@ -120,7 +120,7 @@ export const AdminHeader = () => {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 p-1.5 transition-colors hover:bg-gray-100 dark:bg-gradient-to-r from-[#727272] to-[#333333] dark:hover:bg-gray-700"
+              className="flex items-center gap-2 rounded-lg border border-gray-200 p-1.5 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
               {/* ✅ MEJORADO: Avatar con imagen o iniciales */}
               <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden bg-[#EA0A2A] text-sm font-semibold text-white">
@@ -155,7 +155,7 @@ export const AdminHeader = () => {
                   className="fixed inset-0 z-10"
                   onClick={() => setShowUserMenu(false)}
                 />
-                <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gradient-to-r from-[#727272] to-[#333333]">
+                <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
                   {/* Header del menú con avatar grande */}
                   <div className="border-b border-gray-200 p-4 dark:border-gray-700">
                     <div className="flex items-center gap-3">
