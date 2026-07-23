@@ -11,7 +11,7 @@ export const AdminLayout = () => {
 
   return (
     <AdminProvider>
-      <div className="!min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="!min-h-screen bg-gray-50 dark:bg-gradient-to-r from-[#727272] to-[#333333]">
         {isLoginPage ? (
           // En login, solo renderizar el outlet sin layout
           <Outlet />

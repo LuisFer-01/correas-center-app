@@ -75,13 +75,13 @@ export const AdminHeader = () => {
   const showImage = avatarUrl && !avatarError
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gradient-to-r from-[#727272] to-[#333333]">
       <div className="flex items-center justify-between">
         {/* Lado izquierdo: Logo empresa */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             {empresa?.logo ? (
-              <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-600 dark:bg-gray-700">
+              <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-gray-200 bg-white p-1 dark:border-[#727272] dark:bg-[#727272]">
                 <img
                   src={empresa.logo}
                   alt={empresa.nombre}
@@ -97,7 +97,7 @@ export const AdminHeader = () => {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 {empresa?.nombre || 'Correas Center'}
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-300 dark:text-gray-200">
                 Panel de Administración
               </p>
             </div>

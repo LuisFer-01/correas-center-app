@@ -38,7 +38,7 @@ export const AdminSidebar = () => {
     <aside
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
-      className={`hidden lg:flex flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 transition-all duration-300 ease-in-out ${
+      className={`hidden lg:flex flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gradient-to-r from-[#727272] to-[#333333] transition-all duration-300 ease-in-out ${
         isExpanded ? 'w-64' : 'w-20'
       }`}
     >
@@ -55,7 +55,7 @@ export const AdminSidebar = () => {
           <h1 className="!text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">
             Correas Center
           </h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+          <p className="text-xs text-gray-100 dark:text-gray-200 whitespace-nowrap">
             Panel Admin
           </p>
         </div>
@@ -73,7 +73,7 @@ export const AdminSidebar = () => {
             if (item.disabled) {
               return (
                 <li key={item.to} className="relative group">
-                  <div className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 dark:text-gray-500">
+                  <div className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-300 dark:text-gray-400">
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     <span
                       className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
