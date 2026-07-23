@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { RouterProvider } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import { router } from './router'
 
 function App() {
@@ -23,6 +24,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster
+        position='top-right'
+        richColors
+        closeButton
+        theme='dark'
+      />
       {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
     </QueryClientProvider>
   )

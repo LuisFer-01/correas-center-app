@@ -37,7 +37,7 @@ const routeLabels: Record<string, string> = {
 
 export const AdminBreadcrumbs = () => {
   const location = useLocation()
-  
+
   // No mostrar en el Dashboard
   if (location.pathname === '/admin' || location.pathname === '/admin/') {
     return null
@@ -65,14 +65,14 @@ export const AdminBreadcrumbs = () => {
   })
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-6">
+    <nav aria-label="Breadcrumb" className="mb-4">
       <ol className="flex items-center gap-2 text-sm">
         {breadcrumbs.map((item, index) => {
           const isLast = index === breadcrumbs.length - 1
           return (
             <li key={index} className="flex items-center gap-2">
               {index === 0 && (
-                <Home size={14} className="text-gray-500" />
+                <Home size={14} className="text-gray-500 dark:text-gray-400" />
               )}
               {isLast ? (
                 <span className="text-gray-900 font-medium dark:text-white">
@@ -87,7 +87,7 @@ export const AdminBreadcrumbs = () => {
                 </Link>
               )}
               {!isLast && (
-                <ChevronRight size={14} className="text-gray-400" />
+                <ChevronRight size={14} className="text-gray-400 dark:text-gray-500" />
               )}
             </li>
           )
