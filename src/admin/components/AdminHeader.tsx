@@ -1,5 +1,6 @@
+import { getSupabaseImageUrl } from '@/lib/supabase'
 import { useAdminContext } from '@/providers/AdminProvider'
-import { Building2, LogOut, Moon, Sun } from 'lucide-react'
+import { Building2, LogOut, Moon, Sun, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -8,14 +9,14 @@ export const AdminHeader = () => {
   const navigate = useNavigate()
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [avatarError, setAvatarError] = useState(false)
 
   // Cargar preferencia de dark mode al montar
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('adminDarkMode')
     const isDark = savedDarkMode === 'true'
     setIsDarkMode(isDark)
-    
-    // Aplicar clase al html
+
     if (isDark) {
       document.documentElement.classList.add('dark')
     } else {
@@ -27,7 +28,7 @@ export const AdminHeader = () => {
     const newDarkMode = !isDarkMode
     setIsDarkMode(newDarkMode)
     localStorage.setItem('adminDarkMode', String(newDarkMode))
-    
+
     if (newDarkMode) {
       document.documentElement.classList.add('dark')
     } else {
@@ -42,7 +43,6 @@ export const AdminHeader = () => {
   }
 
   const handleGoToSite = () => {
-    // ✅ IMPORTANTE: Remover dark mode al ir al sitio público
     document.documentElement.classList.remove('dark')
     window.location.href = '/'
   }
@@ -60,14 +60,28 @@ export const AdminHeader = () => {
     return perfil?.email?.[0]?.toUpperCase() || 'U'
   }
 
+  // ✅ NUEVO: Obtener URL del avatar
+  const getAvatarUrl = () => {
+    if (!perfil?.avatar_url) return null
+    // Si ya es una URL completa (http/https), usarla directamente
+    if (perfil.avatar_url.startsWith('http')) {
+      return perfil.avatar_url
+    }
+    // Si es un path relativo, usar el helper de Supabase
+    return getSupabaseImageUrl(perfil.avatar_url, 'avatars-usuarios')
+  }
+
+  const avatarUrl = getAvatarUrl()
+  const showImage = avatarUrl && !avatarError
+
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center justify-between">
         {/* Lado izquierdo: Logo empresa */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             {empresa?.logo ? (
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-600 dark:bg-gray-700">
+              <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-600 dark:bg-gray-700">
                 <img
                   src={empresa.logo}
                   alt={empresa.nombre}
@@ -108,8 +122,20 @@ export const AdminHeader = () => {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center gap-2 rounded-lg border border-gray-200 p-1.5 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EA0A2A] text-sm font-semibold text-white">
-                {getUserInitials()}
+              {/* ✅ MEJORADO: Avatar con imagen o iniciales */}
+              <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden bg-[#EA0A2A] text-sm font-semibold text-white">
+                {showImage ? (
+                  <img
+                    src={avatarUrl}
+                    alt={perfil?.nombre_completo || 'Avatar'}
+                    className="h-full w-full object-cover"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <span className="text-xs font-semibold">
+                    {getUserInitials()}
+                  </span>
+                )}
               </div>
               <div className="hidden text-left sm:block">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -130,13 +156,30 @@ export const AdminHeader = () => {
                   onClick={() => setShowUserMenu(false)}
                 />
                 <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                  {/* Header del menú con avatar grande */}
                   <div className="border-b border-gray-200 p-4 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {perfil?.nombre_completo || 'Usuario'}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {perfil?.email || 'Sin email'}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden bg-[#EA0A2A] text-white">
+                        {showImage ? (
+                          <img
+                            src={avatarUrl}
+                            alt={perfil?.nombre_completo || 'Avatar'}
+                            className="h-full w-full object-cover"
+                            onError={() => setAvatarError(true)}
+                          />
+                        ) : (
+                          <User className="h-6 w-6" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {perfil?.nombre_completo || 'Usuario'}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {perfil?.email || 'Sin email'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="p-2">
                     <button

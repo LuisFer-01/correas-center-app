@@ -145,7 +145,7 @@ export const Dashboard = () => {
         <h2 className="text-3xl font-bold tracking-tight text-gray-900">
           ¡Bienvenido al Panel de Administración!
         </h2>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-400 mt-2">
           Resumen general del sistema Correas Center
         </p>
       </div>
@@ -158,18 +158,18 @@ export const Dashboard = () => {
             <Link
               key={stat.title}
               to={stat.link}
-              className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow hover:border-[#EA0A2A]/30"
+              className="bg-gradient-to-r from-[#969696] to-[#4b4b4b] rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow hover:border-[#EA0A2A]/30"
             >
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="text-sm font-medium text-gray-700">
+                <h3 className="text-sm font-medium text-gray-200">
                   {stat.title}
                 </h3>
                 <div className={`${stat.bgColor} p-2 rounded-lg`}>
                   <Icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </div>
-              <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-              <p className="text-xs text-gray-500 mt-1">
+              <div className="text-2xl font-bold text-gray-200">{stat.value}</div>
+              <p className="text-xs text-gray-300 mt-1">
                 {stat.description}
               </p>
             </Link>
@@ -178,7 +178,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Accesos rápidos */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-gradient-to-r from-[#cacaca] to-[#787879] rounded-xl border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-2">Accesos Rápidos</h3>
         <p className="text-sm text-gray-600 mb-4">
           Módulos más utilizados del sistema
@@ -190,10 +190,13 @@ export const Dashboard = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className="flex flex-col items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-[#EA0A2A]/30 transition-colors"
+                className="bg-gradient-to-r from-[#969696] to-[#4b4b4b] flex flex-col items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-[#EA0A2A]/30 transition-colors"
               >
-                <Icon className="h-5 w-5 text-gray-500" />
-                <span className="font-medium text-gray-900">{item.title}</span>
+                <div className="bg-white p-2 rounded-lg">
+                  <Icon className="h-5 w-5 text-gray-700" />
+                </div>
+                
+                <span className="font-medium text-gray-300">{item.title}</span>
               </Link>
             )
           })}

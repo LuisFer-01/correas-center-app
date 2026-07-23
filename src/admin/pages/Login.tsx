@@ -62,13 +62,13 @@ export const Login = () => {
 
       <div className="relative w-full max-w-md">
         {/* Card de Login */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
           {/* Header con branding */}
-          <div className="bg-gradient-to-r from-[#EA0A2A] to-[#c90825] p-8 text-center">
+          <div className="bg-gradient-to-r from-[#fd2142] to-[#8a0015] p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
-              <Shield size={32} className="text-white" />
+              <Shield size={24} className="text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">
+            <h1 className="text-2xl font-bold !text-white/90 mb-2">
               Correas Center Admin
             </h1>
             <p className="text-white/90 text-sm">
@@ -89,7 +89,7 @@ export const Login = () => {
 
               {/* Email */}
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-400">
                   Correo electrónico
                 </label>
                 <div className="relative">
@@ -103,14 +103,14 @@ export const Login = () => {
                     required
                     disabled={isLoading}
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-[#EA0A2A] focus:ring-2 focus:ring-[#EA0A2A]/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-[#EA0A2A] focus:ring-2 focus:ring-[#EA0A2A]/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-400"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-400">
                   Contraseña
                 </label>
                 <div className="relative">
@@ -124,7 +124,7 @@ export const Login = () => {
                     required
                     disabled={isLoading}
                     autoComplete="current-password"
-                    className="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-300 focus:border-[#EA0A2A] focus:ring-2 focus:ring-[#EA0A2A]/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-300 focus:border-[#EA0A2A] focus:ring-2 focus:ring-[#EA0A2A]/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-400"
                   />
                   <button
                     type="button"
