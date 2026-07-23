@@ -120,7 +120,7 @@ export const AdminHeader = () => {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 p-1.5 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="flex items-center gap-2 rounded-lg border border-gray-200 p-1.5 transition-colors hover:bg-gray-100 dark:bg-gradient-to-r from-[#727272] to-[#333333] dark:hover:bg-gray-700"
             >
               {/* ✅ MEJORADO: Avatar con imagen o iniciales */}
               <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden bg-[#EA0A2A] text-sm font-semibold text-white">
@@ -155,7 +155,7 @@ export const AdminHeader = () => {
                   className="fixed inset-0 z-10"
                   onClick={() => setShowUserMenu(false)}
                 />
-                <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gradient-to-r from-[#727272] to-[#333333]">
                   {/* Header del menú con avatar grande */}
                   <div className="border-b border-gray-200 p-4 dark:border-gray-700">
                     <div className="flex items-center gap-3">
