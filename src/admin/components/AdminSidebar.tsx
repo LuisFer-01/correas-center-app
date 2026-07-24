@@ -1,5 +1,6 @@
 import {
   Building2,
+  Factory,
   FileText,
   FolderBookmark,
   Home,
@@ -30,6 +31,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/productos', label: 'Productos', icon: Package, end: true },
   { to: '/admin/categorias', label: 'Categorias', icon: Tag, end: true },
   { to: '/admin/servicios', label: 'Servicios', icon: Wrench, end: true },
+  { to: '/admin/industrias', label: 'Industrias', icon: Factory, end: true },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users, disabled: true },
   { to: '/admin/contactos', label: 'Contactos', icon: Mail, disabled: true },
   { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, disabled: true },
