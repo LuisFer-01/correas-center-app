@@ -6,6 +6,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { Dashboard } from '../admin/pages/Dashboard'
 import { EmpresasIndex } from '../admin/pages/Empresas/Index'
 import { Login } from '../admin/pages/Login'
+import { SucursalesIndex } from '../admin/pages/Sucursales/Index'
 import { About } from '../web/pages/About'
 import { ApplicationsIndex } from '../web/pages/Applications/Index'
 import { ApplicationsShow } from '../web/pages/Applications/Show'
@@ -56,7 +57,8 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { index: true, element: <Dashboard /> },
-          { path: 'empresas', element: <EmpresasIndex /> }, 
+          { path: 'empresas', element: <EmpresasIndex /> },
+          { path: 'sucursales', element: <SucursalesIndex /> },
           // Fase 4: Aquí irán los CRUDs (/admin/empresas, /admin/productos, etc.)
         ],
       },

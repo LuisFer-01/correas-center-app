@@ -5,6 +5,7 @@ import {
   Mail,
   Package,
   Settings,
+  Store,
   Users,
   Wrench,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ interface SidebarItem {
 const sidebarItems: SidebarItem[] = [
   { to: '/admin', label: 'Dashboard', icon: Home, end: true },
   { to: '/admin/empresas', label: 'Empresas', icon: Building2, end: true },
+  { to: '/admin/sucursales', label: 'Sucursales', icon: Store, end: true },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users, disabled: true },
   { to: '/admin/productos', label: 'Productos', icon: Package, disabled: true },
   { to: '/admin/servicios', label: 'Servicios', icon: Wrench, disabled: true },
