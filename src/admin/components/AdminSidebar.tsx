@@ -7,8 +7,9 @@ import {
   Package,
   Settings,
   Store,
+  Tag,
   Users,
-  Wrench,
+  Wrench
 } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
@@ -27,6 +28,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/sucursales', label: 'Sucursales', icon: Store, end: true },
   { to: '/admin/marcas', label: 'Marcas', icon: FolderBookmark, end: true },
   { to: '/admin/productos', label: 'Productos', icon: Package, end: true },
+  { to: '/admin/categorias', label: 'Categorias', icon: Tag, end: true },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users, disabled: true },
   { to: '/admin/servicios', label: 'Servicios', icon: Wrench, disabled: true },
   { to: '/admin/contactos', label: 'Contactos', icon: Mail, disabled: true },
