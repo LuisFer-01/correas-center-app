@@ -250,9 +250,8 @@ export const globalsService = {
       { data: registrosData, error: errorRegistros }
     ] = await Promise.all([
       supabase.from('sucursales').select('id, nombre, direccion, telefono, email, horarios, mapa_incrustado, latitud, longitud, es_principal, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select(`id, nombre, slug, imagen, orden, categorias!inner(id, nombre, slug, descripcion_corta, uso), producto_marca!inner(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias(id, nombre, slug, descripcion_corta, uso),producto_marca(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      // ✅ NUEVO: Obtener asignaciones de industrias
       supabase.from('industria_asignacion').select('id, industria_id, tipo_registro, registro_id, orden').eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('marcas').select('id, nombre, slug, logo, orden').eq('estado', 'activo').order('orden', { ascending: true }),
