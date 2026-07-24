@@ -5,8 +5,14 @@ import { SelectField } from '@/admin/components/shared/SelectField'
 import { toast } from '@/admin/components/shared/Toast'
 import { actualizarMenu, crearMenu, getEmpresasActivas, getNextOrdenMenu, getNextRegistroId } from '@/admin/services/menu.service'
 import type { Menu } from '@/admin/types/menu'
-import Icon from '@/components/Icon'
 import { useEffect, useState } from 'react'
+
+// ✅ NUEVO: Mapeo de tipo_registro a su prefijo de ruta
+const tipoRegistroPrefijos: Record<string, string> = {
+  producto: '/products/',
+  industria: '/applications/',
+  servicio: '/services/',
+}
 
 interface MenuFormProps {
   open: boolean
@@ -29,7 +35,7 @@ export function MenuForm({
   const [grupo, setGrupo] = useState('')
   const [tipoRegistro, setTipoRegistro] = useState<'producto' | 'industria' | 'servicio'>('producto')
   const [registroId, setRegistroId] = useState<number>(0)
-  const [ruta, setRuta] = useState('')
+  const [suffix, setSuffix] = useState('') // ✅ NUEVO: Solo la parte final de la ruta
   const [icono, setIcono] = useState('')
   const [mostrar, setMostrar] = useState(true)
   const [orden, setOrden] = useState(0)
@@ -48,7 +54,7 @@ export function MenuForm({
     }
   }, [open, empresasLoaded])
 
-  // NUEVO: Actualizar registro_id automáticamente al cambiar tipo_registro (solo en creación)
+  // ✅ NUEVO: Actualizar registro_id automáticamente al cambiar tipo_registro (solo en creación)
   useEffect(() => {
     if (!isEditing && tipoRegistro) {
       getNextRegistroId(tipoRegistro).then((nextId) => {
@@ -64,7 +70,7 @@ export function MenuForm({
       setGrupo('')
       setTipoRegistro('producto')
       setRegistroId(0)
-      setRuta('')
+      setSuffix('')
       setIcono('')
       setMostrar(true)
       setOrden(0)
@@ -78,11 +84,19 @@ export function MenuForm({
       setGrupo(menuEditar.grupo)
       setTipoRegistro(menuEditar.tipo_registro)
       setRegistroId(menuEditar.registro_id)
-      setRuta(menuEditar.ruta)
       setIcono(menuEditar.icono || '')
       setMostrar(menuEditar.mostrar)
       setOrden(menuEditar.orden)
       setEstado(menuEditar.estado === 'eliminado' ? 'activo' : menuEditar.estado)
+      
+      // ✅ NUEVO: Extraer el suffix de la ruta existente
+      const prefijo = tipoRegistroPrefijos[menuEditar.tipo_registro] || ''
+      const rutaCompleta = menuEditar.ruta || ''
+      if (rutaCompleta.startsWith(prefijo)) {
+        setSuffix(rutaCompleta.substring(prefijo.length).replace(/\/$/, ''))
+      } else {
+        setSuffix(rutaCompleta)
+      }
     } else if (open && empresas.length > 0 && !menuEditar) {
       getNextOrdenMenu().then((nextOrden) => {
         setOrden(nextOrden)
@@ -90,8 +104,8 @@ export function MenuForm({
       setEmpresaId(empresas[0]?.id || 0)
       setGrupo('')
       setTipoRegistro('producto')
-      setRegistroId(0) // Se actualizará por el useEffect de tipoRegistro
-      setRuta('')
+      setRegistroId(0)
+      setSuffix('')
       setIcono('')
       setMostrar(true)
       setEstado('activo')
@@ -103,7 +117,7 @@ export function MenuForm({
     if (!empresaId) newErrors.empresa_id = 'Selecciona una empresa'
     if (!grupo.trim()) newErrors.grupo = 'El nombre del grupo es obligatorio'
     if (!registroId) newErrors.registro_id = 'El ID del registro es obligatorio'
-    if (!ruta.trim()) newErrors.ruta = 'La ruta es obligatoria'
+    if (!suffix.trim()) newErrors.suffix = 'La ruta es obligatoria'
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -114,6 +128,11 @@ export function MenuForm({
 
     setIsLoading(true)
     try {
+      // ✅ NUEVO: Construir la ruta final concatenada
+      const prefijo = tipoRegistroPrefijos[tipoRegistro] || ''
+      const cleanSuffix = suffix.replace(/^\//, '').replace(/\/$/, '').trim()
+      const rutaFinal = `${prefijo}${cleanSuffix}/`
+
       if (isEditing && menuEditar) {
         await actualizarMenu({
           id: menuEditar.id,
@@ -121,7 +140,7 @@ export function MenuForm({
           grupo: grupo.trim(),
           tipo_registro: tipoRegistro,
           registro_id: registroId,
-          ruta: ruta.trim(),
+          ruta: rutaFinal,
           icono: icono.trim() || undefined,
           mostrar,
           orden,
@@ -134,7 +153,7 @@ export function MenuForm({
           grupo: grupo.trim(),
           tipo_registro: tipoRegistro,
           registro_id: registroId,
-          ruta: ruta.trim(),
+          ruta: rutaFinal,
           icono: icono.trim() || undefined,
           mostrar,
           orden,
@@ -157,7 +176,7 @@ export function MenuForm({
     setGrupo('')
     setTipoRegistro('producto')
     setRegistroId(0)
-    setRuta('')
+    setSuffix('')
     setIcono('')
     setMostrar(true)
     setOrden(0)
@@ -176,6 +195,8 @@ export function MenuForm({
     { value: 'activo', label: 'Activo' },
     { value: 'inactivo', label: 'Inactivo' },
   ]
+
+  const prefijoActual = tipoRegistroPrefijos[tipoRegistro] || ''
 
   return (
     <FormShell
@@ -225,35 +246,54 @@ export function MenuForm({
           />
         </div>
 
-        {/* Registro ID y Ruta */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            label="ID del Registro"
-            name="registro_id"
-            type="number"
-            value={registroId.toString()}
-            onChange={(e) => {
-              setRegistroId(Number(e.target.value))
-              if (errors.registro_id) setErrors({ ...errors, registro_id: '' })
-            }}
-            placeholder="Ej: 1"
-            error={errors.registro_id}
-            required
-            helpText="Se autocompleta según el tipo de registro seleccionado"
-          />
-          <FormField
-            label="Ruta"
-            name="ruta"
-            value={ruta}
-            onChange={(e) => {
-              setRuta(e.target.value)
-              if (errors.ruta) setErrors({ ...errors, ruta: '' })
-            }}
-            placeholder="Ej: /products/correas"
-            error={errors.ruta}
-            required
-            helpText="La URL a la que redirigirá este menú"
-          />
+        {/* Registro ID */}
+        <FormField
+          label="ID del Registro"
+          name="registro_id"
+          type="number"
+          value={registroId.toString()}
+          onChange={(e) => {
+            setRegistroId(Number(e.target.value))
+            if (errors.registro_id) setErrors({ ...errors, registro_id: '' })
+          }}
+          placeholder="Ej: 1"
+          error={errors.registro_id}
+          required
+          helpText="Se autocompleta según el tipo de registro seleccionado"
+        />
+
+        {/* ✅ NUEVO: Ruta con Prefijo */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            Ruta *
+          </label>
+          <div className="flex items-center gap-2">
+            {/* Prefijo fijo (no editable) */}
+            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap font-mono bg-gray-100 dark:bg-gray-800 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600">
+              {prefijoActual}
+            </span>
+            {/* Input editable para el suffix */}
+            <input
+              type="text"
+              value={suffix}
+              onChange={(e) => {
+                setSuffix(e.target.value)
+                if (errors.suffix) setErrors({ ...errors, suffix: '' })
+              }}
+              placeholder="correas"
+              className="flex-1 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-mono text-sm focus:border-[#EA0A2A] focus:ring-2 focus:ring-[#EA0A2A]/20 outline-none"
+            />
+          </div>
+          {errors.suffix && (
+            <p className="text-xs text-red-600 dark:text-red-400">{errors.suffix}</p>
+          )}
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Escribe solo la parte final de la ruta. Se concatenará automáticamente con el prefijo del tipo de registro.
+            <br />
+            <span className="font-mono text-[#EA0A2A]">
+              Ejemplo final: {prefijoActual}{suffix || 'correas'}/
+            </span>
+          </p>
         </div>
 
         {/* Icono con Preview */}
@@ -270,13 +310,10 @@ export function MenuForm({
             <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Vista previa</span>
             <div className="flex items-center gap-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
               {icono ? (
-                <Icon name={icono} size="2x" className="text-[#EA0A2A]" />
+                <span className="text-[#EA0A2A] font-mono text-sm">{icono}</span>
               ) : (
-                <Icon name="fa-circle" size="2x" className="text-gray-400" />
+                <span className="text-gray-400 text-sm">Sin icono seleccionado</span>
               )}
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {icono || 'Sin icono seleccionado'}
-              </span>
             </div>
           </div>
         </div>

@@ -5,20 +5,18 @@ import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarMenu,
-    eliminarMenuItem,
-    getMenus,
-    restaurarMenu,
+  eliminarMenu,
+  getMenus,
+  restaurarMenu,
 } from '@/admin/services/menu.service'
 import type { Menu } from '@/admin/types/menu'
-import Icon from '@/components/Icon'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, RotateCcw, Settings2, Trash2 } from 'lucide-react'; // ✅ Settings2 agregado
 import { useEffect, useState } from 'react'
 import { MenuForm } from './components/MenuForm'
-import { MenuItemForm } from './components/MenuItemForm'
+import { SubcategoriesManager } from './components/SubcategoriesManager'; // ✅ NUEVO
 
 export const MenusIndex = () => {
   const [menus, setMenus] = useState<Menu[]>([])
@@ -28,10 +26,9 @@ export const MenusIndex = () => {
   const [isMenuFormOpen, setIsMenuFormOpen] = useState(false)
   const [menuEditar, setMenuEditar] = useState<Menu | null>(null)
   
-  // Estados para Subcategoría (MenuItem)
-  const [isMenuItemFormOpen, setIsMenuItemFormOpen] = useState(false)
-  const [menuItemSelected, setMenuItemSelected] = useState<number | null>(null)
-  const [menuItemEditar, setMenuItemEditar] = useState<any>(null)
+  // ✅ NUEVOS Estados para el Modal de Subcategorías
+  const [isSubcategoriesOpen, setIsSubcategoriesOpen] = useState(false)
+  const [selectedMenuForSubcategories, setSelectedMenuForSubcategories] = useState<Menu | null>(null)
   
   // Estados para Eliminación
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -67,16 +64,10 @@ export const MenusIndex = () => {
     setIsMenuFormOpen(true)
   }
 
-  const handleAgregarItem = (menuId: number) => {
-    setMenuItemSelected(menuId)
-    setMenuItemEditar(null)
-    setIsMenuItemFormOpen(true)
-  }
-
-  const handleEditarItem = (menuId: number, item: any) => {
-    setMenuItemSelected(menuId)
-    setMenuItemEditar(item)
-    setIsMenuItemFormOpen(true)
+  // ✅ NUEVA FUNCIÓN: Abrir modal de subcategorías
+  const handleManageSubcategories = (menu: Menu) => {
+    setSelectedMenuForSubcategories(menu)
+    setIsSubcategoriesOpen(true)
   }
 
   const handleEliminarClick = (menu: Menu) => {
@@ -100,17 +91,6 @@ export const MenusIndex = () => {
     }
   }
 
-  const handleEliminarItem = async (menuId: number, itemId: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta subcategoría?')) return
-    try {
-      await eliminarMenuItem(itemId)
-      toast.success('Subcategoría eliminada', 'La subcategoría se marcó como eliminada')
-      await loadMenus()
-    } catch (error: any) {
-      toast.error('Error al eliminar', error.message || 'Ocurrió un error')
-    }
-  }
-
   const handleRestaurar = async (menu: Menu) => {
     try {
       await restaurarMenu(menu.id)
@@ -123,10 +103,7 @@ export const MenusIndex = () => {
 
   const handleSuccess = () => {
     setIsMenuFormOpen(false)
-    setIsMenuItemFormOpen(false)
     setMenuEditar(null)
-    setMenuItemEditar(null)
-    setMenuItemSelected(null)
     loadMenus()
   }
 
@@ -146,7 +123,10 @@ export const MenusIndex = () => {
         <div>
           <div className="font-medium flex items-center gap-2 text-gray-900 dark:text-white">
             {row.original.icono && (
-              <Icon name={row.original.icono} size="sm" className="text-[#EA0A2A]" />
+              <span className="text-[#EA0A2A]">
+                {/* Aquí podrías renderizar tu componente Icon si lo tienes importado, o dejar el texto */}
+                {row.original.icono}
+              </span>
             )}
             {row.getValue('grupo')}
           </div>
@@ -168,48 +148,26 @@ export const MenusIndex = () => {
     {
       id: 'menu_items',
       header: 'Subcategorías',
-      cell: ({ row }) => (
-        <div className="space-y-2">
-          {row.original.menu_items && row.original.menu_items.length > 0 ? (
-            row.original.menu_items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-2 text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
-                <span className="text-gray-700 dark:text-gray-300 truncate flex-1 font-mono">{item.ruta}</span>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => handleEditarItem(row.original.id, item)}
-                    title="Editar"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                    onClick={() => handleEliminarItem(row.original.id, item.id)}
-                    title="Eliminar"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <span className="text-sm text-gray-500 dark:text-gray-400 italic">Sin subcategorías</span>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs mt-1 text-[#EA0A2A] hover:text-[#c90825] hover:bg-[#EA0A2A]/10"
-            onClick={() => handleAgregarItem(row.original.id)}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Agregar Subcategoría
-          </Button>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const menu = row.original
+        const count = menu.menu_items?.length || 0
+        return (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-mono dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
+              {count}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-600 hover:text-[#EA0A2A] dark:text-gray-300 dark:hover:bg-gray-700"
+              onClick={() => handleManageSubcategories(menu)}
+              title="Gestionar subcategorías"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'orden',
@@ -321,15 +279,13 @@ export const MenusIndex = () => {
         onSuccess={handleSuccess}
       />
 
-      {menuItemSelected && (
-        <MenuItemForm
-          open={isMenuItemFormOpen}
-          onOpenChange={setIsMenuItemFormOpen}
-          menuId={menuItemSelected}
-          menuItemEditar={menuItemEditar}
-          onSuccess={handleSuccess}
-        />
-      )}
+      {/* ✅ NUEVO: Modal de Gestión de Subcategorías */}
+      <SubcategoriesManager
+        open={isSubcategoriesOpen}
+        onOpenChange={setIsSubcategoriesOpen}
+        menu={selectedMenuForSubcategories}
+        onSuccess={loadMenus}
+      />
 
       <ConfirmDialog
         open={isDeleteOpen}
