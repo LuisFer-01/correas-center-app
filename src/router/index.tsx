@@ -12,6 +12,7 @@ import { Login } from '../admin/pages/Login'
 import { MarcasIndex } from '../admin/pages/Marcas/Index'
 import { MenusIndex } from '../admin/pages/Menus/Index'
 import { ProductosIndex } from '../admin/pages/Productos/Index'
+import { SeccionesIndex } from '../admin/pages/Secciones/Index'
 import { ServiciosIndex } from '../admin/pages/Servicios/Index'
 import { SucursalesIndex } from '../admin/pages/Sucursales/Index'
 import { About } from '../web/pages/About'
@@ -73,6 +74,7 @@ export const router = createBrowserRouter([
           { path: 'industrias', element: <IndustriasIndex /> },
           { path: 'menus', element: <MenusIndex /> },
           { path: 'footers', element: <FootersIndex /> },
+          { path: 'secciones', element: <SeccionesIndex /> },
           // Fase 4: Aquí irán los CRUDs (/admin/empresas, /admin/productos, etc.)
         ],
       },
