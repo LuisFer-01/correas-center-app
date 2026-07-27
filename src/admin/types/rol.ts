@@ -18,6 +18,10 @@ export interface Rol {
   permisos: Permiso[]
 }
 
+export interface PermisosAgrupados {
+  [grupo: string]: Permiso[]
+}
+
 export interface CreateRolDTO {
   nombre: string
   slug: string
@@ -31,8 +35,4 @@ export interface UpdateRolDTO {
   slug: string
   descripcion?: string
   permiso_ids: number[]
-}
-
-export interface PermisosAgrupados {
-  [grupo: string]: Permiso[]
 }

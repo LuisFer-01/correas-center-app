@@ -5,17 +5,19 @@ import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarRol,
-    getPermisosAgrupados,
-    getRoles,
+  eliminarRol,
+  getPermisosAgrupados,
+  getRoles,
+  restaurarRol,
 } from '@/admin/services/rol.service'
 import type { PermisosAgrupados, Rol } from '@/admin/types/rol'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Pencil, Plus, RotateCcw, Shield, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, RotateCcw, Shield, Trash2, UserRoundKey } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { RolForm } from './components/RolForm'
+import { RolPermisosModal } from './components/RolPermisosModal'
 
 export const RolesIndex = () => {
   const [roles, setRoles] = useState<Rol[]>([])
@@ -27,6 +29,11 @@ export const RolesIndex = () => {
   const [rolEliminar, setRolEliminar] = useState<Rol | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleted, setShowDeleted] = useState(false)
+  
+  // ✅ NUEVOS: Estados para el modal de permisos
+  const [isPermisosOpen, setIsPermisosOpen] = useState(false)
+  const [rolPermisos, setRolPermisos] = useState<Rol | null>(null)
+  const [isRestoring, setIsRestoring] = useState(false)
 
   const loadData = async () => {
     setIsLoading(true)
@@ -59,6 +66,12 @@ export const RolesIndex = () => {
     setIsFormOpen(true)
   }
 
+  // ✅ NUEVO: Abrir modal de permisos
+  const handleGestionarPermisos = (rol: Rol) => {
+    setRolPermisos(rol)
+    setIsPermisosOpen(true)
+  }
+
   const handleEliminarClick = (rol: Rol) => {
     setRolEliminar(rol)
     setIsDeleteOpen(true)
@@ -66,6 +79,12 @@ export const RolesIndex = () => {
 
   const handleEliminarConfirm = async () => {
     if (!rolEliminar) return
+    if (rolEliminar.es_sistema) {
+      toast.error('Error', 'No se pueden eliminar roles del sistema')
+      setIsDeleteOpen(false)
+      return
+    }
+    
     setIsDeleting(true)
     try {
       await eliminarRol(rolEliminar.id)
@@ -80,26 +99,29 @@ export const RolesIndex = () => {
     }
   }
 
+  // ✅ IMPLEMENTADO: Función de restaurar
   const handleRestaurar = async (rol: Rol) => {
+    setIsRestoring(true)
     try {
-      const now = new Date().toISOString()
-      const { error } = await supabase
-        .from('roles')
-        .update({ estado: 'activo', eliminado_en: null })
-        .eq('id', rol.id)
-      
-      if (error) throw new Error(error.message)
-      
-      toast.success('Rol restaurado', 'El rol volvió a estado activo')
+      await restaurarRol(rol.id)
+      toast.success('Rol restaurado', `El rol "${rol.nombre}" volvió a estado activo`)
       await loadData()
     } catch (error: any) {
       toast.error('Error al restaurar', error.message || 'Ocurrió un error')
+    } finally {
+      setIsRestoring(false)
     }
   }
 
   const handleSuccess = () => {
     setIsFormOpen(false)
     setRolEditar(null)
+    loadData()
+  }
+
+  const handlePermisosSuccess = () => {
+    setIsPermisosOpen(false)
+    setRolPermisos(null)
     loadData()
   }
 
@@ -118,9 +140,7 @@ export const RolesIndex = () => {
         <div>
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-            <div className="font-medium text-gray-900 dark:text-white">
-              {row.getValue('nombre')}
-            </div>
+            <div className="font-medium text-gray-900 dark:text-white">{row.getValue('nombre')}</div>
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
             {row.original.slug}
@@ -140,14 +160,26 @@ export const RolesIndex = () => {
     {
       accessorKey: 'permisos',
       header: 'Permisos',
-      cell: ({ row }) => (
-        <div className="text-sm">
-          <span className="font-medium text-gray-900 dark:text-white">
-            {row.original.permisos.length}
-          </span>
-          <span className="text-gray-500 dark:text-gray-400"> permisos asignados</span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const rol = row.original
+        const cantidad = rol.permisos.length
+        return (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-mono dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
+              {cantidad}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-600 hover:text-[#EA0A2A] dark:text-gray-300 dark:hover:bg-gray-700"
+              onClick={() => handleGestionarPermisos(rol)}
+              title="Gestionar permisos"
+            >
+              <UserRoundKey className="h-4 w-4" />
+            </Button>
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'es_sistema',
@@ -155,13 +187,13 @@ export const RolesIndex = () => {
       cell: ({ row }) => (
         <div>
           {row.original.es_sistema ? (
-            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
               Sistema
-            </Badge>
+            </span>
           ) : (
-            <Badge variant="outline" className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300">
               Personalizado
-            </Badge>
+            </span>
           )}
         </div>
       ),
@@ -183,6 +215,7 @@ export const RolesIndex = () => {
               variant="outline"
               size="sm"
               onClick={() => handleRestaurar(rol)}
+              disabled={isRestoring}
               className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
@@ -193,7 +226,7 @@ export const RolesIndex = () => {
 
         return (
           <div className="flex items-center gap-2">
-            <RequirePermission permission="roles.update">
+            <RequirePermission permission="roles.manage">
               <Button
                 variant="ghost"
                 size="icon"
@@ -204,12 +237,14 @@ export const RolesIndex = () => {
                 <Pencil className="h-4 w-4" />
               </Button>
             </RequirePermission>
-            <RequirePermission permission="roles.delete">
+            <RequirePermission permission="roles.manage">
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                onClick={() => handleEliminarClick(rol)}
+                className={`text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20 ${
+                  rol.es_sistema ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={() => !rol.es_sistema && handleEliminarClick(rol)}
                 title={rol.es_sistema ? 'No se puede eliminar roles de sistema' : 'Eliminar'}
                 disabled={rol.es_sistema}
               >
@@ -240,7 +275,7 @@ export const RolesIndex = () => {
                 {showDeleted ? 'Ocultar Eliminados' : 'Ver Eliminados'}
               </Button>
             </RequirePermission>
-            <RequirePermission permission="roles.create">
+            <RequirePermission permission="roles.manage">
               <Button
                 onClick={handleNuevoRol}
                 className="bg-[#EA0A2A] hover:bg-[#c90825] dark:bg-[#EA0A2A] dark:hover:bg-[#c90825]"
@@ -264,9 +299,17 @@ export const RolesIndex = () => {
       <RolForm
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        permisosAgrupados={permisosAgrupados}
         rolEditar={rolEditar}
         onSuccess={handleSuccess}
+      />
+
+      {/* ✅ NUEVO: Modal de gestión de permisos */}
+      <RolPermisosModal
+        open={isPermisosOpen}
+        onOpenChange={setIsPermisosOpen}
+        rol={rolPermisos}
+        permisosAgrupados={permisosAgrupados}
+        onSuccess={handlePermisosSuccess}
       />
 
       <ConfirmDialog
