@@ -43,7 +43,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/registros', label: 'Registros', icon: Type, end: true },
   { to: '/admin/roles', label: 'Roles', icon: Shield, end: true },
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users, end: true },
-  { to: '/admin/contactos', label: 'Contactos', icon: Mail, disabled: true },
+  { to: '/admin/contactos', label: 'Contactos', icon: Mail, end: true },
   { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, disabled: true },
   { to: '/admin/configuracion', label: 'Configuración', icon: Settings, disabled: true },
 ]
