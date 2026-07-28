@@ -1,4 +1,5 @@
 import {
+  BookType,
   Building2,
   Factory,
   FileText,
@@ -53,6 +54,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/pasos-wizard', label: 'Pasos Wizard', icon: Wand2, end: true },
   { to: '/admin/tipos-atributo', label: 'Tipos Atributo', icon: TagIcon, end: true },
   { to: '/admin/atributos', label: 'Atributos', icon: Tags, end: true },
+  { to: '/admin/tipos-seccion', label: 'Tipos Sección', icon: BookType, end: true },
   { to: '/admin/configuracion', label: 'Configuración', icon: Settings, disabled: true },
 ]
 
