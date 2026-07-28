@@ -16,6 +16,7 @@ import {
   Tag,
   Type,
   Users,
+  Wand2,
   Wrench
 } from 'lucide-react'
 import { useState } from 'react'
@@ -47,6 +48,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/contactos', label: 'Contactos', icon: Mail, end: true },
   { to: '/admin/suscriptores', label: 'Suscriptores', icon: Inbox, end: true },
   { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, end: true },
+  { to: '/admin/pasos-wizard', label: 'Pasos Wizard', icon: Wand2, end: true },
   { to: '/admin/configuracion', label: 'Configuración', icon: Settings, disabled: true },
 ]
 
