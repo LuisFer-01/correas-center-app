@@ -14,6 +14,7 @@ import {
   Shield,
   Store,
   Tag,
+  TagIcon,
   Type,
   Users,
   Wand2,
@@ -49,6 +50,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/suscriptores', label: 'Suscriptores', icon: Inbox, end: true },
   { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, end: true },
   { to: '/admin/pasos-wizard', label: 'Pasos Wizard', icon: Wand2, end: true },
+  { to: '/admin/tipos-atributo', label: 'Tipos Atributo', icon: TagIcon, end: true },
   { to: '/admin/configuracion', label: 'Configuración', icon: Settings, disabled: true },
 ]
 

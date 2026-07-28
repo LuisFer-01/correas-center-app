@@ -21,6 +21,7 @@ import { SeccionesIndex } from '../admin/pages/Secciones/Index'
 import { ServiciosIndex } from '../admin/pages/Servicios/Index'
 import { SucursalesIndex } from '../admin/pages/Sucursales/Index'
 import { SuscriptoresIndex } from '../admin/pages/Suscriptores/Index'
+import { TiposAtributoIndex } from '../admin/pages/TiposAtributo/Index'
 import { UsuariosIndex } from '../admin/pages/Usuarios/Index'
 import { About } from '../web/pages/About'
 import { ApplicationsIndex } from '../web/pages/Applications/Index'
@@ -89,6 +90,7 @@ export const router = createBrowserRouter([
           { path: 'suscriptores', element: <SuscriptoresIndex /> },
           { path: 'auditoria', element: <AuditoriaIndex /> },
           { path: 'pasos-wizard', element: <PasosWizardIndex /> },
+          { path: 'tipos-atributo', element: <TiposAtributoIndex /> },
           // Fase 4: Aquí irán los CRUDs (/admin/empresas, /admin/productos, etc.)
         ],
       },
