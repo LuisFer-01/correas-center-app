@@ -6,6 +6,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AtributosIndex } from '../admin/pages/Atributos/Index'
 import { AuditoriaIndex } from '../admin/pages/Auditoria/Index'
 import { CategoriasIndex } from '../admin/pages/Categorias/Index'
+import { ConfiguracionIndex } from '../admin/pages/Configuracion/Index'
 import { ContactosIndex } from '../admin/pages/Contactos/Index'
 import { Dashboard } from '../admin/pages/Dashboard'
 import { EmpresasIndex } from '../admin/pages/Empresas/Index'
@@ -95,6 +96,7 @@ export const router = createBrowserRouter([
           { path: 'tipos-atributo', element: <TiposAtributoIndex /> },
           { path: 'atributos', element: <AtributosIndex /> },
           { path: 'tipos-seccion', element: <TiposSeccionIndex /> },
+          { path: 'configuracion', element: <ConfiguracionIndex /> }
         ],
       },
     ],

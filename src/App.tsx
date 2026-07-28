@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { GoogleAnalytics } from './admin/components/analytics/GoogleAnalytics'
+import { TawkTo } from './admin/components/chat/TawkTo'
 import { router } from './router'
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <GoogleAnalytics />
+      <TawkTo />
       <RouterProvider router={router} />
       <Toaster
         position='top-right'
