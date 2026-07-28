@@ -1,4 +1,4 @@
-import type { Contacto, ContactoStats, EstadoContacto } from '@/admin/types/contacto'
+import type { Contacto, EstadoContacto } from '@/admin/types/contacto'
 import { supabase } from '@/lib/supabase'
 
 export async function getContactos(
@@ -79,6 +79,19 @@ export async function archivarContacto(id: number) {
   if (error) throw new Error(error.message)
 }
 
+// ✅ NUEVA: Desarchivar contacto (volver a estado 'nuevo')
+export async function desarchivarContacto(id: number) {
+  const { error } = await supabase
+    .from('contactos')
+    .update({
+      estado: 'nuevo',
+      actualizado_en: new Date().toISOString()
+    })
+    .eq('id', id)
+  
+  if (error) throw new Error(error.message)
+}
+
 export async function eliminarContacto(id: number) {
   const now = new Date().toISOString()
   const { error } = await supabase
@@ -104,7 +117,13 @@ export async function restaurarContacto(id: number) {
   if (error) throw new Error(error.message)
 }
 
-export async function getContactosStats(): Promise<ContactoStats> {
+export async function getContactosStats(): Promise<{
+  nuevos: number
+  leidos: number
+  respondidos: number
+  archivados: number
+  total: number
+}> {
   const { data, error } = await supabase
     .from('contactos')
     .select('estado', { count: 'exact' })
@@ -112,7 +131,7 @@ export async function getContactosStats(): Promise<ContactoStats> {
   
   if (error) throw error
   
-  const stats: ContactoStats = {
+  const stats = {
     nuevos: 0,
     leidos: 0,
     respondidos: 0,

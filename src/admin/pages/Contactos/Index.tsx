@@ -1,41 +1,39 @@
-import { ConfirmDialog } from '@/admin/components/shared/ConfirmDialog'
 import { DataTable } from '@/admin/components/shared/DataTable'
 import { PageHeader } from '@/admin/components/shared/PageHeader'
-import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    getContactos,
-    getContactosStats,
-    restaurarContacto
+  archivarContacto,
+  desarchivarContacto, // ✅ NUEVO
+  getContactos,
+  getContactosStats,
+  marcarComoLeido,
+  marcarComoRespondido,
 } from '@/admin/services/contacto.service'
-import type { Contacto, ContactoStats, EstadoContacto } from '@/admin/types/contacto'
+import type { Contacto, EstadoContacto } from '@/admin/types/contacto'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 import type { ColumnDef } from '@tanstack/react-table'
 import {
-    Archive,
-    CheckCircle2,
-    Eye,
-    Mail,
-    MessageSquare,
-    Phone,
-    RotateCcw,
-    Trash2,
-    User,
+  Archive,
+  Eye,
+  Mail,
+  MessageSquare,
+  Phone,
+  User,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { ContactoDetalleModal } from './components/ContactoDetalleModal'
+import { ContactoDetailModal } from './components/ContactoDetalleModal'
 
 export const ContactosIndex = () => {
   const [contactos, setContactos] = useState<Contacto[]>([])
-  const [stats, setStats] = useState<ContactoStats>({
+  const [stats, setStats] = useState({
     nuevos: 0,
     leidos: 0,
     respondidos: 0,
@@ -44,22 +42,16 @@ export const ContactosIndex = () => {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [filtroEstado, setFiltroEstado] = useState<string>('todos')
-  const [showArchived, setShowArchived] = useState(false)
+  const [showDeleted, setShowDeleted] = useState(false)
   
-  // Estados para el modal de detalle
-  const [isDetalleOpen, setIsDetalleOpen] = useState(false)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [contactoSeleccionado, setContactoSeleccionado] = useState<Contacto | null>(null)
-  
-  // Estados para confirmación de eliminación permanente
-  const [contactoEliminar, setContactoEliminar] = useState<Contacto | null>(null)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   const loadData = async () => {
     setIsLoading(true)
     try {
       const [contactosData, statsData] = await Promise.all([
-        getContactos(true),
+        getContactos(false),
         getContactosStats(),
       ])
       setContactos(contactosData)
@@ -76,51 +68,54 @@ export const ContactosIndex = () => {
     loadData()
   }, [])
 
-  // ✅ Abrir modal de detalle
+  const handleMarcarLeido = async (id: number) => {
+    try {
+      await marcarComoLeido(id)
+      toast.success('Contacto marcado', 'Se marcó como leído correctamente')
+      await loadData()
+      setIsDetailOpen(false)
+    } catch (error: any) {
+      toast.error('Error', error.message || 'No se pudo marcar como leído')
+    }
+  }
+
+  const handleMarcarRespondido = async (id: number) => {
+    try {
+      await marcarComoRespondido(id)
+      toast.success('Contacto marcado', 'Se marcó como respondido correctamente')
+      await loadData()
+      setIsDetailOpen(false)
+    } catch (error: any) {
+      toast.error('Error', error.message || 'No se pudo marcar como respondido')
+    }
+  }
+
+  const handleArchivar = async (id: number) => {
+    try {
+      await archivarContacto(id)
+      toast.success('Contacto archivado', 'El contacto se archivó correctamente')
+      await loadData()
+      setIsDetailOpen(false)
+    } catch (error: any) {
+      toast.error('Error', error.message || 'No se pudo archivar el contacto')
+    }
+  }
+
+  // ✅ NUEVO: Handler para desarchivar
+  const handleDesarchivar = async (id: number) => {
+    try {
+      await desarchivarContacto(id)
+      toast.success('Contacto desarchivado', 'El contacto volvió a estado nuevo')
+      await loadData()
+      setIsDetailOpen(false)
+    } catch (error: any) {
+      toast.error('Error', error.message || 'No se pudo desarchivar el contacto')
+    }
+  }
+
   const handleVerDetalle = (contacto: Contacto) => {
     setContactoSeleccionado(contacto)
-    setIsDetalleOpen(true)
-  }
-
-  // ✅ Eliminar permanentemente (solo para archivados)
-  const handleEliminarClick = (contacto: Contacto) => {
-    setContactoEliminar(contacto)
-    setIsDeleteOpen(true)
-  }
-
-  const handleEliminarConfirm = async () => {
-    if (!contactoEliminar) return
-    setIsDeleting(true)
-    try {
-      // Aquí podrías agregar una función de eliminación permanente si existe
-      // Por ahora, solo mostramos un mensaje
-      toast.success('Contacto eliminado', 'El contacto se eliminó permanentemente')
-      setIsDeleteOpen(false)
-      setContactoEliminar(null)
-      await loadData()
-    } catch (error: any) {
-      toast.error('Error al eliminar', error.message || 'Ocurrió un error')
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
-  // ✅ Restaurar contacto archivado
-  const handleRestaurar = async (id: number) => {
-    try {
-      await restaurarContacto(id)
-      toast.success('Contacto restaurado', 'El contacto volvió a estado activo')
-      await loadData()
-    } catch (error: any) {
-      toast.error('Error al restaurar', error.message || 'Ocurrió un error')
-    }
-  }
-
-  // ✅ Callback cuando se cambia el estado desde el modal
-  const handleDetalleSuccess = () => {
-    setIsDetalleOpen(false)
-    setContactoSeleccionado(null)
-    loadData()
+    setIsDetailOpen(true)
   }
 
   const getEstadoColor = (estado: EstadoContacto) => {
@@ -143,18 +138,13 @@ export const ContactosIndex = () => {
     return labels[estado] || estado
   }
 
-  // Filtrar contactos: archivados solo si showArchived es true
   const filteredContactos = contactos.filter((c) => {
-    if (c.estado === 'archivado') {
-      return showArchived
-    }
     if (filtroEstado !== 'todos' && c.estado !== filtroEstado) {
       return false
     }
     return true
   })
 
-  // ✅ Columnas simplificadas
   const columns: ColumnDef<Contacto>[] = [
     {
       accessorKey: 'nombre',
@@ -208,59 +198,17 @@ export const ContactosIndex = () => {
     {
       id: 'actions',
       header: 'Acciones',
-      cell: ({ row }) => {
-        const contacto = row.original
-        
-        // Si está archivado, mostrar opciones de restaurar/eliminar
-        if (contacto.estado === 'archivado') {
-          return (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleVerDetalle(contacto)}
-                title="Ver detalle"
-                className="dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRestaurar(contacto.id)}
-                title="Restaurar"
-                className="dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-              <RequirePermission permission="contactos.delete">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                  onClick={() => handleEliminarClick(contacto)}
-                  title="Eliminar permanentemente"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </RequirePermission>
-            </div>
-          )
-        }
-        
-        // Para otros estados, solo mostrar botón de ver detalle
-        return (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleVerDetalle(contacto)}
-            title="Ver detalle y cambiar estado"
-            className="dark:text-gray-300 dark:hover:bg-gray-700"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-        )
-      },
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleVerDetalle(row.original)}
+          title="Ver detalle"
+          className="dark:text-gray-300 dark:hover:bg-gray-700"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      ),
     },
   ]
 
@@ -271,24 +219,22 @@ export const ContactosIndex = () => {
         description="Gestiona los mensajes de contacto recibidos"
         actions={
           <>
-            <RequirePermission permission="contactos.delete">
-              <Button
-                variant={showArchived ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowArchived(!showArchived)}
-                className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-              >
-                <Archive className="h-4 w-4 mr-2" />
-                {showArchived ? 'Ocultar Archivados' : 'Ver Archivados'}
-              </Button>
-            </RequirePermission>
+            <Button
+              variant={showDeleted ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowDeleted(!showDeleted)}
+              className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              {showDeleted ? 'Ocultar Archivados' : 'Ver Archivados'}
+            </Button>
           </>
         }
       />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] p-4">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-600 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-300">Nuevos</p>
@@ -297,7 +243,7 @@ export const ContactosIndex = () => {
             <Mail className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] p-4">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-600 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-300">Leídos</p>
@@ -306,16 +252,16 @@ export const ContactosIndex = () => {
             <Eye className="h-8 w-8 text-amber-600 dark:text-amber-400" />
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] p-4">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-600 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-300">Respondidos</p>
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.respondidos}</p>
             </div>
-            <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+            <MessageSquare className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] p-4">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-600 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-300">Total</p>
@@ -338,6 +284,7 @@ export const ContactosIndex = () => {
               <SelectItem value="nuevo">Nuevos</SelectItem>
               <SelectItem value="leido">Leídos</SelectItem>
               <SelectItem value="respondido">Respondidos</SelectItem>
+              <SelectItem value="archivado">Archivados</SelectItem>
             </SelectContent>
           </Select>
           {filtroEstado !== 'todos' && (
@@ -361,23 +308,15 @@ export const ContactosIndex = () => {
         isLoading={isLoading}
       />
 
-      {/* ✅ Modal de Detalle del Contacto */}
-      <ContactoDetalleModal
-        open={isDetalleOpen}
-        onOpenChange={setIsDetalleOpen}
+      {/* Modal de Detalle */}
+      <ContactoDetailModal
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
         contacto={contactoSeleccionado}
-        onSuccess={handleDetalleSuccess}
-      />
-
-      {/* Confirmación de eliminación permanente (solo para archivados) */}
-      <ConfirmDialog
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
-        onConfirm={handleEliminarConfirm}
-        title="¿Eliminar permanentemente?"
-        description={`Se eliminará permanentemente el contacto de "${contactoEliminar?.nombre}". Esta acción no se puede deshacer.`}
-        isLoading={isDeleting}
-        variant="destructive"
+        onMarcarLeido={handleMarcarLeido}
+        onMarcarRespondido={handleMarcarRespondido}
+        onArchivar={handleArchivar}
+        onDesarchivar={handleDesarchivar} // ✅ NUEVO
       />
     </div>
   )

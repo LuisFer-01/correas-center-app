@@ -1,215 +1,209 @@
-import { RequirePermission } from '@/admin/components/shared/RequirePermission'
-import { toast } from '@/admin/components/shared/Toast'
-import {
-    archivarContacto,
-    marcarComoLeido,
-    marcarComoRespondido,
-} from '@/admin/services/contacto.service'
 import type { Contacto, EstadoContacto } from '@/admin/types/contacto'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
-    Archive,
-    Building2,
-    CheckCircle2,
-    Eye,
-    Mail,
-    MessageSquare,
-    Phone,
-    User
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Archive,
+  ArchiveRestore,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Eye,
+  Mail,
+  MessageSquare,
+  Phone,
+  X,
 } from 'lucide-react'
 
-interface ContactoDetalleModalProps {
+interface ContactoDetailModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   contacto: Contacto | null
-  onSuccess: () => void
+  onMarcarLeido: (id: number) => Promise<void>
+  onMarcarRespondido: (id: number) => Promise<void>
+  onArchivar: (id: number) => Promise<void>
+  onDesarchivar: (id: number) => Promise<void> // ✅ NUEVO
 }
 
-const estadoConfig: Record<EstadoContacto, { label: string; className: string }> = {
-  nuevo: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
-  leido: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
-  respondido: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
-  archivado: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
-}
-
-const estadoLabels: Record<EstadoContacto, string> = {
-  nuevo: 'Nuevo',
-  leido: 'Leído',
-  respondido: 'Respondido',
-  archivado: 'Archivado',
-}
-
-export function ContactoDetalleModal({
+export function ContactoDetailModal({
   open,
   onOpenChange,
   contacto,
-  onSuccess,
-}: ContactoDetalleModalProps) {
+  onMarcarLeido,
+  onMarcarRespondido,
+  onArchivar,
+  onDesarchivar, // ✅ NUEVO
+}: ContactoDetailModalProps) {
   if (!contacto) return null
 
-  const handleCambiarEstado = async (nuevoEstado: EstadoContacto) => {
-    try {
-      if (nuevoEstado === 'leido') {
-        await marcarComoLeido(contacto.id)
-        toast.success('Estado actualizado', 'El contacto se marcó como leído')
-      } else if (nuevoEstado === 'respondido') {
-        await marcarComoRespondido(contacto.id)
-        toast.success('Estado actualizado', 'El contacto se marcó como respondido')
-      } else if (nuevoEstado === 'archivado') {
-        await archivarContacto(contacto.id)
-        toast.success('Contacto archivado', 'El contacto se archivó correctamente')
-      }
-      onOpenChange(false)
-      onSuccess()
-    } catch (error: any) {
-      toast.error('Error', error.message || 'No se pudo actualizar el estado')
+  const getEstadoColor = (estado: EstadoContacto) => {
+    const colors = {
+      nuevo: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+      leido: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+      respondido: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
+      archivado: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
     }
+    return colors[estado] || colors.nuevo
   }
 
-  const fechaFormateada = new Date(contacto.creado_en).toLocaleString('es-BO', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const getEstadoLabel = (estado: EstadoContacto) => {
+    const labels = {
+      nuevo: 'Nuevo',
+      leido: 'Leído',
+      respondido: 'Respondido',
+      archivado: 'Archivado',
+    }
+    return labels[estado] || estado
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] dark:bg-gradient-to-r dark:from-[#727272] dark:to-[#333333] dark:border-gray-600">
+      {/* ✅ FIX: max-h-[90vh] overflow-y-auto para evitar desbordamiento vertical */}
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="dark:text-white flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-[#EA0A2A]" />
-              Detalle del Contacto
-            </DialogTitle>
-            <Badge
-              variant="outline"
-              className={estadoConfig[contacto.estado]}
-            >
-              {estadoLabels[contacto.estado]}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-white flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-[#EA0A2A] flex-shrink-0" />
+                Detalle del Contacto
+              </DialogTitle>
+              <DialogDescription className="text-gray-300 mt-1">
+                Información completa del mensaje recibido
+              </DialogDescription>
+            </div>
+            {/* ✅ FIX: Badge no se desborda con flex-shrink-0 */}
+            <Badge className={`${getEstadoColor(contacto.estado)} flex-shrink-0`}>
+              {getEstadoLabel(contacto.estado)}
             </Badge>
           </div>
-          <DialogDescription className="dark:text-gray-300">
-            Recibido el {fechaFormateada}
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="space-y-6 py-4">
           {/* Información del Contacto */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-600">
-              <User className="h-5 w-5 text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Nombre</p>
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {contacto.nombre}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                  <Building2 className="h-4 w-4 flex-shrink-0" />
+                  Empresa
+                </label>
+                <p className="text-sm font-medium text-white break-words">
+                  {contacto.empresa_rel?.nombre || contacto.empresa || '—'}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 flex-shrink-0" />
+                  Fecha de Recepción
+                </label>
+                <p className="text-sm font-medium text-white">
+                  {new Date(contacto.creado_en).toLocaleDateString('es-BO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </p>
               </div>
             </div>
 
-            {contacto.empresa && (
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-600">
-                <Building2 className="h-5 w-5 text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Empresa</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {contacto.empresa}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-600">
-              <Mail className="h-5 w-5 text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Email</p>
-                <a
-                  href={`mailto:${contacto.email}`}
-                  className="text-sm font-medium text-[#EA0A2A] hover:underline truncate block"
-                >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                  <Mail className="h-4 w-4 flex-shrink-0" />
+                  Correo Electrónico
+                </label>
+                {/* ✅ FIX: break-words en lugar de break-all para mejor lectura */}
+                <p className="text-sm text-white break-words">
                   {contacto.email}
-                </a>
+                </p>
               </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-600">
-              <Phone className="h-5 w-5 text-[#EA0A2A] flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Teléfono</p>
-                <a
-                  href={`tel:${contacto.telefono}`}
-                  className="text-sm font-medium text-gray-900 dark:text-white hover:text-[#EA0A2A] truncate block"
-                >
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  Teléfono
+                </label>
+                <p className="text-sm text-white break-words">
                   {contacto.telefono}
-                </a>
+                </p>
               </div>
             </div>
-          </div>
 
-          {/* Mensaje */}
-          <div className="p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-600">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageSquare className="h-4 w-4 text-[#EA0A2A]" />
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Mensaje</p>
-            </div>
-            <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed">
-              {contacto.mensaje}
-            </p>
-          </div>
-
-          {/* Acciones de Estado */}
-          <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-            <p className="text-xs font-medium text-gray-700 dark:text-gray-200 mb-3">
-              Cambiar estado del contacto:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {contacto.estado !== 'leido' && (
-                <RequirePermission permission="contactos.update">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCambiarEstado('leido')}
-                    className="bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-700 dark:hover:bg-amber-900/30"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Marcar como Leído
-                  </Button>
-                </RequirePermission>
-              )}
-
-              {contacto.estado !== 'respondido' && (
-                <RequirePermission permission="contactos.update">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCambiarEstado('respondido')}
-                    className="bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Marcar como Respondido
-                  </Button>
-                </RequirePermission>
-              )}
-
-              {contacto.estado !== 'archivado' && (
-                <RequirePermission permission="contactos.delete">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCambiarEstado('archivado')}
-                    className="bg-gray-50 text-gray-800 border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-                  >
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archivar
-                  </Button>
-                </RequirePermission>
-              )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                Mensaje
+              </label>
+              {/* ✅ FIX: max-h-48 overflow-y-auto para mensajes largos */}
+              <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700 max-h-48 overflow-y-auto">
+                <p className="text-sm text-white whitespace-pre-wrap break-words">
+                  {contacto.mensaje}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* ✅ FIX: flex-wrap para que los botones se adapten al ancho */}
+        <DialogFooter className="flex-col sm:flex-row gap-2 flex-wrap">
+          {contacto.estado === 'nuevo' && (
+            <Button
+              onClick={() => onMarcarLeido(contacto.id)}
+              variant="outline"
+              className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600 hover:text-white"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Marcar como Leído
+            </Button>
+          )}
+          {contacto.estado !== 'respondido' && contacto.estado !== 'archivado' && (
+            <Button
+              onClick={() => onMarcarRespondido(contacto.id)}
+              variant="outline"
+              className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600 hover:text-white"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Marcar como Respondido
+            </Button>
+          )}
+          {contacto.estado !== 'archivado' && (
+            <Button
+              onClick={() => onArchivar(contacto.id)}
+              variant="outline"
+              className="bg-red-900/30 text-red-400 border-red-700 hover:bg-red-900/50 hover:text-red-300"
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              Archivar
+            </Button>
+          )}
+          {/* ✅ NUEVO: Botón Desarchivar solo si está archivado */}
+          {contacto.estado === 'archivado' && (
+            <Button
+              onClick={() => onDesarchivar(contacto.id)}
+              variant="outline"
+              className="bg-emerald-900/30 text-emerald-400 border-emerald-700 hover:bg-emerald-900/50 hover:text-emerald-300"
+            >
+              <ArchiveRestore className="h-4 w-4 mr-2" />
+              Desarchivar
+            </Button>
+          )}
+          <Button
+            onClick={() => onOpenChange(false)}
+            variant="outline"
+            className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600 hover:text-white"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cerrar
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
