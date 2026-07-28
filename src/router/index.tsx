@@ -18,6 +18,7 @@ import { RolesIndex } from '../admin/pages/Roles/Index'
 import { SeccionesIndex } from '../admin/pages/Secciones/Index'
 import { ServiciosIndex } from '../admin/pages/Servicios/Index'
 import { SucursalesIndex } from '../admin/pages/Sucursales/Index'
+import { SuscriptoresIndex } from '../admin/pages/Suscriptores/Index'
 import { UsuariosIndex } from '../admin/pages/Usuarios/Index'
 import { About } from '../web/pages/About'
 import { ApplicationsIndex } from '../web/pages/Applications/Index'
@@ -83,6 +84,7 @@ export const router = createBrowserRouter([
           { path: 'roles', element: <RolesIndex /> },
           { path: 'usuarios', element: <UsuariosIndex /> },
           { path: 'contactos', element: <ContactosIndex /> },
+          { path: 'suscriptores', element: <SuscriptoresIndex /> },
           // Fase 4: Aquí irán los CRUDs (/admin/empresas, /admin/productos, etc.)
         ],
       },
