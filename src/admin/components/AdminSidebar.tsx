@@ -46,7 +46,7 @@ const sidebarItems: SidebarItem[] = [
   { to: '/admin/usuarios', label: 'Usuarios', icon: Users, end: true },
   { to: '/admin/contactos', label: 'Contactos', icon: Mail, end: true },
   { to: '/admin/suscriptores', label: 'Suscriptores', icon: Inbox, end: true },
-  { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, disabled: true },
+  { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, end: true },
   { to: '/admin/configuracion', label: 'Configuración', icon: Settings, disabled: true },
 ]
 

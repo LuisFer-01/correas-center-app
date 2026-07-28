@@ -3,6 +3,7 @@ import { AdminLayout } from '@/admin/layouts/AdminLayout'
 import { PublicLayout } from '@/web/layouts/PublicLayout'
 import { Home } from '@/web/pages/Home'
 import { createBrowserRouter } from 'react-router-dom'
+import { AuditoriaIndex } from '../admin/pages/Auditoria/Index'
 import { CategoriasIndex } from '../admin/pages/Categorias/Index'
 import { ContactosIndex } from '../admin/pages/Contactos/Index'
 import { Dashboard } from '../admin/pages/Dashboard'
@@ -85,6 +86,7 @@ export const router = createBrowserRouter([
           { path: 'usuarios', element: <UsuariosIndex /> },
           { path: 'contactos', element: <ContactosIndex /> },
           { path: 'suscriptores', element: <SuscriptoresIndex /> },
+          { path: 'auditoria', element: <AuditoriaIndex /> },
           // Fase 4: Aquí irán los CRUDs (/admin/empresas, /admin/productos, etc.)
         ],
       },
