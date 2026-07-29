@@ -71,7 +71,7 @@ export const Contact = () => {
       if (dbError) throw new Error('Error al guardar en la base de datos')
 
       // 2. Llamar a la Edge Function para enviar el correo
-      const { data, error: fnError } = await supabase.functions.invoke('send-contact-email', {
+      const { error: fnError } = await supabase.functions.invoke('send-contact-email', {
         body: formData,
       })
 

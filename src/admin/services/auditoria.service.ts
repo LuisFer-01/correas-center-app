@@ -1,5 +1,6 @@
 import type { AuditoriaFilters, AuditoriaLog } from '@/admin/types/auditoria'
 import { supabase } from '@/lib/supabase'
+import * as XLSX from 'xlsx'
 
 // Función base para obtener logs (sin paginación para exportación)
 async function getAuditoriaLogsForExport(filters: AuditoriaFilters = {}): Promise<AuditoriaLog[]> {
@@ -142,7 +143,6 @@ export async function exportarAuditoriaExcel(filters: AuditoriaFilters = {}): Pr
   const datos = transformarLogsParaExportar(logs)
   
   // Importación dinámica para evitar bundle inicial grande
-  const XLSX = await import('xlsx')
   const worksheet = XLSX.utils.json_to_sheet(datos)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Auditoría')

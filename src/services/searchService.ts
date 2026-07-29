@@ -48,7 +48,13 @@ export const searchService = {
       .limit(20)
 
     const productos = productosData || []
-    const categorias = categoriasData || []
+    const categorias = (categoriasData || []).map((c) => ({
+      id: c.id,
+      nombre: c.nombre,
+      slug: c.slug,
+      descripcion_corta: c.descripcion_corta,
+      producto: Array.isArray(c.producto) ? c.producto[0] || null : c.producto || null
+    }))
 
     return {
       productos,

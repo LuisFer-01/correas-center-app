@@ -132,7 +132,9 @@ export const UsuariosIndex = () => {
       header: '',
       cell: ({ row }) => (
         <Avatar className="h-10 w-10 border bg-white dark:bg-gray-700">
-          <AvatarImage src={row.original.avatar_url} alt={row.original.nombre_completo} />
+          <AvatarImage
+            src={row.original.avatar_url ?? undefined} 
+            alt={row.original.nombre_completo} />
           <AvatarFallback className="bg-[#EA0A2A] text-white">
             {row.original.nombre_completo?.charAt(0).toUpperCase() || 'U'}
           </AvatarFallback>

@@ -296,7 +296,7 @@ export const globalsService = {
       imagen: p.imagen,
       orden: p.orden,
       categorias: p.categorias || [],
-      marcas: Array.from(new Map(p.producto_marca?.map((pm: any) => [pm.marca.id, pm.marca])).values())
+      marcas: Array.from(new Map(p.producto_marca?.map((pm: any) => [pm.marca.id, pm.marca])).values()) as Marca[]
     }))
 
     // 6. ✅ NUEVO: Procesar industrias con sus asignaciones

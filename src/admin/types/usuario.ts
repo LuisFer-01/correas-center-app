@@ -12,6 +12,7 @@ export interface UserProfile {
   avatar_url?: string | null
   estado: 'activo' | 'inactivo' | 'eliminado'
   eliminado_en?: string | null
+  email_verified_at?: string | null
   roles: Role[]
 }
 

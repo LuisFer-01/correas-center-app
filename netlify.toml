@@ -2,8 +2,42 @@
   command = "npm run build"
   publish = "dist"
 
+# Especificar la versión de Node.js (recomendado para evitar conflictos)
+[build.environment]
+  NODE_VERSION = "18" # Cambia a "20" si estás usando Node 20
+
 # Redirección para React Router (SPA)
+# Netlify sirve archivos estáticos existentes primero. Si no existe, usa index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# ==============================================================================
+# OPTIMIZACIÓN: Reglas de Caché para Assets Estáticos
+# ==============================================================================
+# Cachea los archivos generados por Vite (hash en el nombre) por 1 año
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ==============================================================================
+# SEGURIDAD: Encabezados básicos de protección
+# ==============================================================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

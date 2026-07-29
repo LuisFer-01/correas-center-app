@@ -5,9 +5,9 @@ import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarContenido,
-    getContenidos,
-    restaurarContenido,
+  eliminarContenido,
+  getContenidos,
+  restaurarContenido,
 } from '@/admin/services/contenido.service'
 import type { ContenidoSeccion } from '@/admin/types/contenido'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -106,7 +106,7 @@ export const SeccionesIndex = () => {
       cell: ({ row }) => (
         <Avatar className="h-12 w-12 rounded-lg border bg-white dark:bg-gray-700">
           <AvatarImage
-            src={row.original.imagen}
+            src={row.original.imagen ?? undefined}
             alt={row.original.titulo || 'Imagen'}
             className="object-contain p-1"
           />

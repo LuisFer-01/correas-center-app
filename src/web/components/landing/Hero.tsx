@@ -76,14 +76,14 @@ export const Hero = () => {
       {/* Fondo con imagen */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/15 to-black/10">
         <img
-          src={currentSlideData.image}
+          src={currentSlideData.image ?? undefined}
           alt="Industrial background"
           className="absolute w-full h-full object-cover transition-opacity duration-[4000ms] ease-in-out"
           style={{ opacity: 1 }}
         />
         {previousSlide !== currentSlide && (
           <img
-            src={carouselSlides[previousSlide].image}
+            src={carouselSlides[previousSlide].image ?? undefined}
             alt=""
             className="absolute w-full h-full object-cover transition-opacity duration-[4000ms] ease-in-out"
             style={{ opacity: 0 }}

@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 // Interfaces
 interface Perfil {

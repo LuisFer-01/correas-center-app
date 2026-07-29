@@ -299,6 +299,7 @@ export const RolesIndex = () => {
       <RolForm
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
+        permisosAgrupados={permisosAgrupados} 
         rolEditar={rolEditar}
         onSuccess={handleSuccess}
       />

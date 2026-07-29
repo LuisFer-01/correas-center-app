@@ -25,7 +25,7 @@ export async function getConfigByGrupo(grupo: string): Promise<Record<string, st
 
   // Convertir array a objeto { clave: valor }
   const config: Record<string, string> = {}
-  data?.forEach((item: ConfiguracionItem) => {
+  data?.forEach((item) => {
     if (item.valor !== null) {
       config[item.clave] = item.valor
     }
@@ -49,7 +49,7 @@ export async function getAllConfig(): Promise<Record<string, Record<string, stri
 
   // Agrupar por grupo
   const grouped: Record<string, Record<string, string>> = {}
-  data?.forEach((item: any) => {
+  data?.forEach((item) => {
     if (!grouped[item.grupo]) {
       grouped[item.grupo] = {}
     }

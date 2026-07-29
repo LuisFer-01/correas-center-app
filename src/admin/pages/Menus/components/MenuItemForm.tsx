@@ -53,7 +53,7 @@ export function MenuItemForm({
     if (open && menuItemEditar) {
       setSuffix(getSuffix(menuItemEditar.ruta, parentRoute || ''))
       setOrden(menuItemEditar.orden)
-      setEstado(menuItemEditar.estado === 'eliminado' ? 'activo' : menuItemEditar.estado)
+      setEstado(menuItemEditar.estado === 'eliminado' ? 'activo' : menuItemEditar.estado as 'activo' | 'inactivo')
     } else if (open && !menuItemEditar) {
       getNextOrdenMenuItem(menuId).then((nextOrden) => {
         setOrden(nextOrden)
@@ -66,9 +66,9 @@ export function MenuItemForm({
   // Sincronizar el valor real de la ruta en el formulario para la validación
   useEffect(() => {
     if (parentRoute) {
-      const cleanParent = parentRoute.replace(/\/$/, '')
+      /* const cleanParent = parentRoute.replace(/\/$/, '')
       const cleanSuffix = suffix.replace(/^\//, '').trim()
-      const finalRoute = cleanSuffix ? `${cleanParent}/${cleanSuffix}` : cleanParent
+      const finalRoute = cleanSuffix ? `${cleanParent}/${cleanSuffix}` : cleanParent */
       // Actualizamos un campo oculto o validamos manualmente, aquí lo usamos directo en onSubmit
     }
   }, [suffix, parentRoute])

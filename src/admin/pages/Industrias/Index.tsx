@@ -5,9 +5,9 @@ import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarIndustria,
-    getIndustrias,
-    restaurarIndustria,
+  eliminarIndustria,
+  getIndustrias,
+  restaurarIndustria,
 } from '@/admin/services/industria.service'
 import type { Industria } from '@/admin/types/industria'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -107,7 +107,7 @@ export const IndustriasIndex = () => {
       cell: ({ row }) => (
         <Avatar className="h-12 w-12 rounded-lg border bg-white dark:bg-gray-700">
           <AvatarImage
-            src={row.original.imagen}
+            src={row.original.imagen ?? undefined}
             alt={row.original.nombre}
             className="object-contain p-1"
           />

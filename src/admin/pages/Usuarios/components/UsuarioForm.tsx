@@ -4,7 +4,7 @@ import { FormShell } from '@/admin/components/shared/FormShell'
 import { ImageUpload } from '@/admin/components/shared/ImageUpload'
 import { SelectField } from '@/admin/components/shared/SelectField'
 import { toast } from '@/admin/components/shared/Toast'
-import { actualizarUsuario, crearUsuario, getRolesDisponibles, restablecerContrasena } from '@/admin/services/usuario.service'
+import { actualizarUsuario, crearUsuario, restablecerContrasena } from '@/admin/services/usuario.service'
 import type { Role, UserProfile } from '@/admin/types/usuario'
 import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/providers/AuthProvider'
@@ -47,7 +47,7 @@ export function UsuarioForm({
   useEffect(() => {
     const checkSuperAdmin = async () => {
       if (user) {
-        const roles = await getRolesDisponibles()
+        //const roles = await getRolesDisponibles()
         // Aquí deberías obtener los roles del usuario actual
         // Por ahora asumimos que si puede abrir el formulario, tiene permisos
         setEsSuperAdmin(true) // Simplificado - en producción verifica los roles del usuario

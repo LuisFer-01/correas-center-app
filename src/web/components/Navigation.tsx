@@ -242,7 +242,7 @@ export const Navigation = () => {
                                         .split('/')
                                         .pop()
                                         ?.replace(/-/g, ' ')
-                                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                                        .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                     </Link>
                                   </li>
                                 ))}
@@ -400,7 +400,7 @@ export const Navigation = () => {
                                     .split('/')
                                     .pop()
                                     ?.replace(/-/g, ' ')
-                                    .replace(/\b\w/g, (l) => l.toUpperCase())}
+                                    .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                 </span>
                               </Link>
                             ))}

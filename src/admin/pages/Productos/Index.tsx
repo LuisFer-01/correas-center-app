@@ -5,9 +5,9 @@ import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarProducto,
-    getProductos,
-    restaurarProducto,
+  eliminarProducto,
+  getProductos,
+  restaurarProducto,
 } from '@/admin/services/producto.service'
 import type { Producto } from '@/admin/types/producto'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -107,7 +107,7 @@ export const ProductosIndex = () => {
       cell: ({ row }) => (
         <Avatar className="h-12 w-12 rounded-lg border bg-white dark:bg-gray-700">
           <AvatarImage
-            src={row.original.imagen}
+            src={row.original.imagen ?? undefined}
             alt={row.original.nombre}
             className="object-contain p-1"
           />

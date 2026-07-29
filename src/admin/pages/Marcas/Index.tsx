@@ -4,9 +4,9 @@ import { PageHeader } from '@/admin/components/shared/PageHeader'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarMarca,
-    getMarcas,
-    restaurarMarca,
+  eliminarMarca,
+  getMarcas,
+  restaurarMarca,
 } from '@/admin/services/marca.service'
 import type { Marca } from '@/admin/types/marca'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -106,7 +106,7 @@ export const MarcasIndex = () => {
       cell: ({ row }) => (
         <Avatar className="h-12 w-12 rounded-lg border bg-white dark:bg-gray-700">
           <AvatarImage
-            src={row.original.logo}
+            src={row.original.logo ?? undefined}
             alt={row.original.nombre}
             className="object-contain p-1"
           />
