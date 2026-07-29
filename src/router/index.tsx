@@ -16,6 +16,7 @@ import { Login } from '../admin/pages/Login'
 import { MarcasIndex } from '../admin/pages/Marcas/Index'
 import { MenusIndex } from '../admin/pages/Menus/Index'
 import { PasosWizardIndex } from '../admin/pages/PasosWizard/Index'
+import { PerfilIndex } from '../admin/pages/Perfil/Index'
 import { ProductosIndex } from '../admin/pages/Productos/Index'
 import { RegistrosIndex } from '../admin/pages/Registros/Index'
 import { RolesIndex } from '../admin/pages/Roles/Index'
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { index: true, element: <Dashboard /> },
+          { path: 'perfil', element: <PerfilIndex /> },
           { path: 'empresas', element: <EmpresasIndex /> },
           { path: 'sucursales', element: <SucursalesIndex /> },
           { path: 'marcas', element: <MarcasIndex /> },

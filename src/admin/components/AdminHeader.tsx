@@ -1,6 +1,6 @@
 import { getSupabaseImageUrl } from '@/lib/supabase'
 import { useAdminContext } from '@/providers/AdminProvider'
-import { Building2, LogOut, Moon, Sun, User } from 'lucide-react'
+import { Building2, LogOut, Moon, Sun, User, UserCog } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -182,6 +182,16 @@ export const AdminHeader = () => {
                     </div>
                   </div>
                   <div className="p-2">
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false)
+                        navigate('/admin/perfil')
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                      <UserCog className="h-4 w-4" />
+                      Administrar Perfil
+                    </button>
                     <button
                       onClick={handleGoToSite}
                       className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
