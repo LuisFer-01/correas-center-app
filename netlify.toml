@@ -4,7 +4,7 @@
 
 # Especificar la versión de Node.js (recomendado para evitar conflictos)
 [build.environment]
-  NODE_VERSION = "18" # Cambia a "20" si estás usando Node 20
+  NODE_VERSION = "20"
 
 # Redirección para React Router (SPA)
 # Netlify sirve archivos estáticos existentes primero. Si no existe, usa index.html
