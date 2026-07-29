@@ -1,25 +1,10 @@
 import type { CreateUserDTO, Role, UpdateUserDTO, UserProfile } from '@/admin/types/usuario'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 export async function getUsuarios(includeDeleted: boolean = false): Promise<UserProfile[]> {
   let query = supabase
     .from('perfiles')
-    .select(`
-      id, 
-      nombre_completo, 
-      email, 
-      telefono, 
-      avatar_url, 
-      estado, 
-      eliminado_en,
-      usuario_rol (
-        roles (
-          id,
-          nombre,
-          slug
-        )
-      )
-    `)
+    .select(`id, nombre_completo, email, telefono, avatar_url, estado, eliminado_en, usuario_rol ( roles ( id, nombre, slug ) )`)
   
   if (!includeDeleted) {
     query = query.neq('estado', 'eliminado')
@@ -57,141 +42,58 @@ export async function getRolesDisponibles(): Promise<Role[]> {
 }
 
 export async function crearUsuario(dto: CreateUserDTO) {
-  // 1. Crear usuario en Auth con metadata
-  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-    email: dto.email,
-    password: dto.password,
-    email_confirm: true,
-    user_metadata: {
-      nombre_completo: dto.nombre_completo,
-      telefono: dto.telefono,
-      avatar_url: dto.avatar_url,
-    }
-  })
-  
-  if (authError || !authData.user) {
-    throw new Error(authError?.message || 'Error al crear usuario en Auth')
-  }
-  
-  // 2. Insertar/Actualizar el perfil en la tabla perfiles
-  const { error: profileError } = await supabaseAdmin
-    .from('perfiles')
-    .upsert({
-      id: authData.user.id,
-      nombre_completo: dto.nombre_completo,
-      email: dto.email,
-      telefono: dto.telefono,
-      avatar_url: dto.avatar_url,
-      estado: dto.estado
+  // Usar función RPC con SECURITY DEFINER para crear usuario en auth
+  const { data: authData, error: rpcError } = await supabase
+    .rpc('rpc_create_user_with_profile', {
+      p_email: dto.email,
+      p_password: dto.password,
+      p_nombre_completo: dto.nombre_completo,
+      p_telefono: dto.telefono || null,
+      p_avatar_url: dto.avatar_url || null,
+      p_estado: dto.estado,
+      p_role_ids: dto.role_ids,
     })
   
-  if (profileError) throw new Error(profileError.message)
-  
-  // 3. Asignar roles
-  if (dto.role_ids.length > 0) {
-    const rolesToInsert = dto.role_ids.map((roleId) => ({
-      usuario_id: authData.user.id,
-      rol_id: roleId,
-    }))
-    
-    const { error: roleError } = await supabaseAdmin
-      .from('usuario_rol')
-      .insert(rolesToInsert)
-    
-    if (roleError) throw new Error(roleError.message)
+  if (rpcError) {
+    throw new Error(rpcError.message || 'Error al crear usuario')
   }
   
-  return authData.user
+  return authData
 }
 
 export async function actualizarUsuario(dto: UpdateUserDTO) {
-  // 1. Actualizar usuario en Auth
-  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
-    dto.id,
-    {
-      email: dto.email,
-      user_metadata: {
-        nombre_completo: dto.nombre_completo,
-        telefono: dto.telefono,
-        avatar_url: dto.avatar_url,
-      }
-    }
-  )
+  // Usar función RPC con SECURITY DEFINER para actualizar usuario
+  const { error: rpcError } = await supabase
+    .rpc('rpc_update_user_profile', {
+      p_user_id: dto.id,
+      p_nombre_completo: dto.nombre_completo,
+      p_telefono: dto.telefono || null,
+      p_avatar_url: dto.avatar_url || null,
+      p_estado: dto.estado,
+      p_role_ids: dto.role_ids,
+    })
   
-  if (authError) {
-    throw new Error(`Error actualizando auth: ${authError.message}`)
-  }
-  
-  // 2. Preparar datos de actualización del perfil
-  const updateData: any = {
-    nombre_completo: dto.nombre_completo,
-    email: dto.email,
-    telefono: dto.telefono,
-    avatar_url: dto.avatar_url,
-    estado: dto.estado,
-  }
-  
-  if (dto.estado === 'eliminado') {
-    updateData.eliminado_en = new Date().toISOString()
-  } else if (dto.estado === 'activo' || dto.estado === 'inactivo') {
-    updateData.eliminado_en = null
-  }
-  
-  // 3. Actualizar perfil
-  const { error: profileError } = await supabaseAdmin
-    .from('perfiles')
-    .update(updateData)
-    .eq('id', dto.id)
-  
-  if (profileError) throw new Error(profileError.message)
-  
-  // 4. Reemplazar roles (solo si no está eliminado)
-  if (dto.estado !== 'eliminado') {
-    // Borrar roles antiguos
-    const { error: deleteError } = await supabaseAdmin
-      .from('usuario_rol')
-      .delete()
-      .eq('usuario_id', dto.id)
-    
-    if (deleteError) throw new Error(deleteError.message)
-    
-    // Insertar nuevos roles
-    if (dto.role_ids.length > 0) {
-      const rolesToInsert = dto.role_ids.map((roleId) => ({
-        usuario_id: dto.id,
-        rol_id: roleId,
-      }))
-      
-      const { error: insertError } = await supabaseAdmin
-        .from('usuario_rol')
-        .insert(rolesToInsert)
-      
-      if (insertError) throw new Error(insertError.message)
-    }
+  if (rpcError) {
+    throw new Error(rpcError.message || 'Error al actualizar usuario')
   }
 }
 
 export async function eliminarUsuario(id: string) {
-  const now = new Date().toISOString()
-  const { error } = await supabaseAdmin
-    .from('perfiles')
-    .update({
-      estado: 'eliminado',
-      eliminado_en: now
+  // Usar función RPC con SECURITY DEFINER para soft delete
+  const { error } = await supabase
+    .rpc('rpc_soft_delete_user', {
+      p_user_id: id
     })
-    .eq('id', id)
   
   if (error) throw new Error(error.message)
 }
 
 export async function restaurarUsuario(id: string) {
-  const { error } = await supabaseAdmin
-    .from('perfiles')
-    .update({
-      estado: 'activo',
-      eliminado_en: null
+  // Usar función RPC con SECURITY DEFINER para restaurar
+  const { error } = await supabase
+    .rpc('rpc_restore_user', {
+      p_user_id: id
     })
-    .eq('id', id)
   
   if (error) throw new Error(error.message)
 }
@@ -201,7 +103,7 @@ export async function verificarUsuario(id: string) {
   const now = new Date().toISOString()
   
   // 1. Actualizar en tabla perfiles
-  const { error: profileError } = await supabaseAdmin
+  const { error: profileError } = await supabase
     .from('perfiles')
     .update({
       email_verified_at: now,
@@ -212,7 +114,7 @@ export async function verificarUsuario(id: string) {
   if (profileError) throw new Error(profileError.message)
   
   // 2. Actualizar en auth.users (marcar email confirmado)
-  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+  const { error: authError } = await supabase.auth.admin.updateUserById(
     id,
     {
       email_confirm: true
@@ -224,13 +126,14 @@ export async function verificarUsuario(id: string) {
 
 // Restablecer contraseña a valor por defecto
 export async function restablecerContrasena(id: string, nuevaContrasena: string = 'prueba123') {
-  // Actualizar contraseña en auth.users
-  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
-    id,
-    {
-      password: nuevaContrasena
-    }
-  )
+  // Usar función RPC con SECURITY DEFINER
+  const { error } = await supabase
+    .rpc('rpc_reset_password', {
+      p_user_id: id,
+      p_new_password: nuevaContrasena
+    })
   
-  if (authError) throw new Error(authError.message)
+  if (error) {
+    throw new Error(error.message || 'Error al restablecer contraseña')
+  }
 }

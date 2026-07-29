@@ -1,5 +1,9 @@
-import type { CreateTipoAtributoDTO, TipoAtributo, UpdateTipoAtributoDTO } from '@/admin/types/tipo-atributo'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import type {
+  CreateTipoAtributoDTO,
+  TipoAtributo,
+  UpdateTipoAtributoDTO,
+} from '@/admin/types/tipo-atributo'
+import { supabase } from '@/lib/supabase'
 
 export async function getTiposAtributo(includeDeleted: boolean = false): Promise<TipoAtributo[]> {
   let query = supabase
@@ -39,14 +43,14 @@ async function generarSlugUnico(slugBase: string): Promise<string> {
   }
 }
 
-// Obtener siguiente orden disponible
+// Obtener siguiente orden
 export async function getNextOrdenTipoAtributo(): Promise<number> {
   const { data, error } = await supabase
     .from('tipo_atributo')
     .select('orden')
     .order('orden', { ascending: false })
     .limit(1)
-    .maybeSingle()
+    .single()
   
   if (error || !data) return 1
   return (data.orden || 0) + 1
@@ -55,16 +59,16 @@ export async function getNextOrdenTipoAtributo(): Promise<number> {
 export async function crearTipoAtributo(dto: CreateTipoAtributoDTO) {
   const slugFinal = await generarSlugUnico(dto.slug)
   
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('tipo_atributo')
     .insert({
       nombre: dto.nombre,
       slug: slugFinal,
       descripcion: dto.descripcion,
-      icono: dto.icono,
       permite_descripcion: dto.permite_descripcion ?? false,
       permite_valor_numerico: dto.permite_valor_numerico ?? false,
       permite_unidad_medida: dto.permite_unidad_medida ?? false,
+      icono: dto.icono,
       orden: dto.orden ?? 0,
       estado: dto.estado || 'activo',
     })
@@ -79,12 +83,25 @@ export async function actualizarTipoAtributo(dto: UpdateTipoAtributoDTO) {
   const updateData: any = {}
   
   if (dto.nombre !== undefined) updateData.nombre = dto.nombre
-  if (dto.slug !== undefined) updateData.slug = dto.slug
+  if (dto.slug !== undefined) {
+    const { data: existe } = await supabase
+      .from('tipo_atributo')
+      .select('id')
+      .eq('slug', dto.slug)
+      .neq('id', dto.id)
+      .single()
+    
+    if (existe) {
+      throw new Error(`El slug "${dto.slug}" ya está en uso`)
+    }
+    updateData.slug = dto.slug
+  }
+  
   if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion
-  if (dto.icono !== undefined) updateData.icono = dto.icono
   if (dto.permite_descripcion !== undefined) updateData.permite_descripcion = dto.permite_descripcion
   if (dto.permite_valor_numerico !== undefined) updateData.permite_valor_numerico = dto.permite_valor_numerico
   if (dto.permite_unidad_medida !== undefined) updateData.permite_unidad_medida = dto.permite_unidad_medida
+  if (dto.icono !== undefined) updateData.icono = dto.icono
   if (dto.orden !== undefined) updateData.orden = dto.orden
   
   if (dto.estado !== undefined) {
@@ -96,7 +113,7 @@ export async function actualizarTipoAtributo(dto: UpdateTipoAtributoDTO) {
     }
   }
   
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('tipo_atributo')
     .update(updateData)
     .eq('id', dto.id)
@@ -109,24 +126,18 @@ export async function actualizarTipoAtributo(dto: UpdateTipoAtributoDTO) {
 
 export async function eliminarTipoAtributo(id: number) {
   const now = new Date().toISOString()
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('tipo_atributo')
-    .update({
-      estado: 'eliminado',
-      eliminado_en: now
-    })
+    .update({ estado: 'eliminado', eliminado_en: now })
     .eq('id', id)
   
   if (error) throw new Error(error.message)
 }
 
 export async function restaurarTipoAtributo(id: number) {
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('tipo_atributo')
-    .update({
-      estado: 'activo',
-      eliminado_en: null
-    })
+    .update({ estado: 'activo', eliminado_en: null })
     .eq('id', id)
   
   if (error) throw new Error(error.message)

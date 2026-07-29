@@ -1,8 +1,8 @@
 import type {
-    CreateRegistroContenidoDTO,
-    Registro,
-    RegistroContenido,
-    UpdateRegistroContenidoDTO,
+  CreateRegistroContenidoDTO,
+  Registro,
+  RegistroContenido,
+  UpdateRegistroContenidoDTO,
 } from '@/admin/types/registro'
 import { supabase } from '@/lib/supabase'
 
@@ -47,11 +47,7 @@ export async function getRegistros(includeDeleted: boolean = false): Promise<Reg
 export async function getContenidosByRegistroId(registroId: number): Promise<RegistroContenido[]> {
   const { data, error } = await supabase
     .from('registro_contenido')
-    .select(`
-      *,
-      empresa:empresas(id, nombre),
-      registro:registros(id, identificador, nombre)
-    `)
+    .select(`*, empresa:empresas(id, nombre), registro:registros(id, identificador, nombre)`)
     .eq('registro_id', registroId)
     .neq('estado', 'eliminado')
     .order('orden', { ascending: true })

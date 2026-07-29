@@ -1,5 +1,5 @@
 import type { CreateTipoSeccionDTO, TipoSeccion, UpdateTipoSeccionDTO } from '@/admin/types/tipo-seccion'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 export async function getTiposSeccion(includeDeleted: boolean = false): Promise<TipoSeccion[]> {
   let query = supabase
@@ -15,32 +15,11 @@ export async function getTiposSeccion(includeDeleted: boolean = false): Promise<
   const { data, error } = await query
   if (error) throw error
   
-  return (data || []).map((t: any) => ({
+  return (data || []).map((t) => ({
     ...t,
     estado: t.estado || 'activo',
     campos_metadata: t.campos_metadata || [],
   }))
-}
-
-async function generarSlugUnico(slugBase: string, excludeId?: number): Promise<string> {
-  let slug = slugBase
-  let contador = 1
-  
-  while (true) {
-    let query = supabase
-      .from('tipo_seccion')
-      .select('id')
-      .eq('slug', slug)
-    
-    if (excludeId) {
-      query = query.neq('id', excludeId)
-    }
-    
-    const { data } = await query.maybeSingle()
-    if (!data) return slug
-    slug = `${slugBase}-${contador}`
-    contador++
-  }
 }
 
 export async function getNextOrdenTipoSeccion(): Promise<number> {
@@ -49,20 +28,18 @@ export async function getNextOrdenTipoSeccion(): Promise<number> {
     .select('orden')
     .order('orden', { ascending: false })
     .limit(1)
-    .maybeSingle()
+    .single()
   
   if (error || !data) return 1
   return (data.orden || 0) + 1
 }
 
 export async function crearTipoSeccion(dto: CreateTipoSeccionDTO) {
-  const slugFinal = await generarSlugUnico(dto.slug)
-  
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('tipo_seccion')
     .insert({
       nombre: dto.nombre,
-      slug: slugFinal,
+      slug: dto.slug,
       descripcion: dto.descripcion,
       campos_metadata: dto.campos_metadata,
       icono: dto.icono,
@@ -80,21 +57,7 @@ export async function actualizarTipoSeccion(dto: UpdateTipoSeccionDTO) {
   const updateData: any = {}
   
   if (dto.nombre !== undefined) updateData.nombre = dto.nombre
-  
-  if (dto.slug !== undefined) {
-    const { data: existe } = await supabase
-      .from('tipo_seccion')
-      .select('id')
-      .eq('slug', dto.slug)
-      .neq('id', dto.id)
-      .maybeSingle()
-    
-    if (existe) {
-      throw new Error(`El slug "${dto.slug}" ya está en uso por otro tipo de sección`)
-    }
-    updateData.slug = dto.slug
-  }
-  
+  if (dto.slug !== undefined) updateData.slug = dto.slug
   if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion
   if (dto.campos_metadata !== undefined) updateData.campos_metadata = dto.campos_metadata
   if (dto.icono !== undefined) updateData.icono = dto.icono
@@ -109,7 +72,7 @@ export async function actualizarTipoSeccion(dto: UpdateTipoSeccionDTO) {
     }
   }
   
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('tipo_seccion')
     .update(updateData)
     .eq('id', dto.id)
@@ -122,7 +85,7 @@ export async function actualizarTipoSeccion(dto: UpdateTipoSeccionDTO) {
 
 export async function eliminarTipoSeccion(id: number) {
   const now = new Date().toISOString()
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('tipo_seccion')
     .update({ estado: 'eliminado', eliminado_en: now })
     .eq('id', id)
@@ -131,7 +94,7 @@ export async function eliminarTipoSeccion(id: number) {
 }
 
 export async function restaurarTipoSeccion(id: number) {
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('tipo_seccion')
     .update({ estado: 'activo', eliminado_en: null })
     .eq('id', id)
