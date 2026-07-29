@@ -1,3 +1,8 @@
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
   BookType,
@@ -22,135 +27,116 @@ import {
   Type,
   Users,
   Wand2,
-  Wrench
+  Wrench,
 } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
-// ============================================================================
-// INTERFACES
-// ============================================================================
 interface SidebarItem {
   to: string
   label: string
   icon: any
+  permission: string
   end?: boolean
-  permission?: string
 }
 
 interface SidebarGroup {
   label: string
+  icon: any
   items: SidebarItem[]
 }
 
-// ============================================================================
-// GRUPOS DEL SIDEBAR CON PERMISOS
-// ============================================================================
 const sidebarGroups: SidebarGroup[] = [
   {
-    label: 'Principal',
-    items: [
-      { to: '/admin', label: 'Dashboard', icon: Home, end: true },
-    ],
-  },
-  {
     label: 'Catálogo',
+    icon: Package,
     items: [
-      { to: '/admin/empresas', label: 'Empresas', icon: Building2, end: true, permission: 'empresa.view' },
-      { to: '/admin/sucursales', label: 'Sucursales', icon: Store, end: true, permission: 'sucursales.view' },
-      { to: '/admin/productos', label: 'Productos', icon: Package, end: true, permission: 'productos.view' },
-      { to: '/admin/categorias', label: 'Categorías', icon: Tag, end: true, permission: 'categorias.view' },
-      { to: '/admin/marcas', label: 'Marcas', icon: FolderBookmark, end: true, permission: 'marcas.view' },
+      { to: '/admin/empresas', label: 'Empresas', icon: Building2, permission: 'empresa.view', end: true },
+      { to: '/admin/sucursales', label: 'Sucursales', icon: Store, permission: 'sucursales.view', end: true },
+      { to: '/admin/marcas', label: 'Marcas', icon: FolderBookmark, permission: 'marcas.view', end: true },
+      { to: '/admin/productos', label: 'Productos', icon: Package, permission: 'productos.view', end: true },
+      { to: '/admin/categorias', label: 'Categorías', icon: Tag, permission: 'categorias.view', end: true },
     ],
   },
   {
     label: 'Aplicaciones',
+    icon: Factory,
     items: [
-      { to: '/admin/servicios', label: 'Servicios', icon: Wrench, end: true, permission: 'servicios.view' },
-      { to: '/admin/industrias', label: 'Industrias', icon: Factory, end: true, permission: 'industrias.view' },
+      { to: '/admin/servicios', label: 'Servicios', icon: Wrench, permission: 'servicios.view', end: true },
+      { to: '/admin/industrias', label: 'Industrias', icon: Factory, permission: 'industrias.view', end: true },
     ],
   },
   {
     label: 'Contenido Web',
+    icon: LayoutDashboard,
     items: [
-      { to: '/admin/menus', label: 'Menús', icon: List, end: true, permission: 'menus.view' },
-      { to: '/admin/footers', label: 'Footers', icon: LayoutDashboard, end: true, permission: 'footers.view' },
-      { to: '/admin/secciones', label: 'Secciones', icon: LayoutGrid, end: true, permission: 'contenido.view' },
-      { to: '/admin/tipos-seccion', label: 'Tipos Sección', icon: BookType, end: true, permission: 'tipo_seccion.view' },
-      { to: '/admin/registros', label: 'Registros', icon: Type, end: true, permission: 'registros.view' },
-      { to: '/admin/pasos-wizard', label: 'Pasos Wizard', icon: Wand2, end: true, permission: 'wizard.view' },
+      { to: '/admin/menus', label: 'Menús', icon: List, permission: 'menus.view', end: true },
+      { to: '/admin/footers', label: 'Footers', icon: LayoutDashboard, permission: 'footers.view', end: true },
+      { to: '/admin/secciones', label: 'Secciones', icon: LayoutGrid, permission: 'contenidos.view', end: true },
+      { to: '/admin/registros', label: 'Registros', icon: Type, permission: 'registros.view', end: true },
+      { to: '/admin/pasos-wizard', label: 'Pasos Wizard', icon: Wand2, permission: 'wizard.view', end: true },
+      { to: '/admin/tipos-seccion', label: 'Tipos Sección', icon: BookType, permission: 'tipo_seccion.view', end: true },
     ],
   },
   {
     label: 'Atributos',
+    icon: Tags,
     items: [
-      { to: '/admin/tipos-atributo', label: 'Tipos Atributo', icon: TagIcon, end: true, permission: 'tipos_atributo.view' },
-      { to: '/admin/atributos', label: 'Atributos', icon: Tags, end: true, permission: 'atributos.view' },
+      { to: '/admin/tipos-atributo', label: 'Tipos Atributo', icon: TagIcon, permission: 'tipos_atributo.view', end: true },
+      { to: '/admin/atributos', label: 'Atributos', icon: Tags, permission: 'atributos.view', end: true },
     ],
   },
   {
     label: 'Gestión',
+    icon: Users,
     items: [
-      { to: '/admin/usuarios', label: 'Usuarios', icon: Users, end: true, permission: 'usuarios.view' },
-      { to: '/admin/roles', label: 'Roles', icon: Shield, end: true, permission: 'roles.view' },
-      { to: '/admin/contactos', label: 'Contactos', icon: Mail, end: true, permission: 'contactos.view' },
-      { to: '/admin/suscriptores', label: 'Suscriptores', icon: Inbox, end: true, permission: 'suscriptores.view' },
-      { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, end: true, permission: 'auditoria.view' },
-      { to: '/admin/configuracion', label: 'Configuración', icon: Settings, end: true, permission: 'configuracion.view' },
+      { to: '/admin/roles', label: 'Roles', icon: Shield, permission: 'roles.manage', end: true },
+      { to: '/admin/usuarios', label: 'Usuarios', icon: Users, permission: 'usuarios.view', end: true },
+      { to: '/admin/contactos', label: 'Contactos', icon: Mail, permission: 'contactos.view', end: true },
+      { to: '/admin/suscriptores', label: 'Suscriptores', icon: Inbox, permission: 'suscriptores.view', end: true },
+      { to: '/admin/auditoria', label: 'Auditoría', icon: FileText, permission: 'auditoria.view', end: true },
+    ],
+  },
+  {
+    label: 'Configuración',
+    icon: Settings,
+    items: [
+      { to: '/admin/configuracion', label: 'Configuración', icon: Settings, permission: 'configuracion.view', end: true },
     ],
   },
 ]
 
-// ============================================================================
-// COMPONENTE
-// ============================================================================
 export const AdminSidebar = () => {
   const location = useLocation()
   const [isExpanded, setIsExpanded] = useState(false)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const { hasPermission } = usePermissions()
 
-  // Filtrar grupos e items según permisos
-  const filteredGroups = sidebarGroups
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((item) => {
-        if (!item.permission) return true
-        return hasPermission(item.permission)
-      }),
-    }))
-    .filter((group) => group.items.length > 0)
-
   const toggleGroup = (groupLabel: string) => {
-    setExpandedGroups((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(groupLabel)) {
-        newSet.delete(groupLabel)
-      } else {
-        newSet.add(groupLabel)
-      }
-      return newSet
-    })
+    setOpenGroups((prev) => ({
+      ...prev,
+      [groupLabel]: !prev[groupLabel],
+    }))
   }
 
-  const isGroupExpanded = (groupLabel: string) => {
-    return expandedGroups.has(groupLabel)
+  // Filtrar items según permisos
+  const getFilteredGroups = () => {
+    return sidebarGroups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) => hasPermission(item.permission)),
+      }))
+      .filter((group) => group.items.length > 0)
   }
 
-  // Auto-expandir el grupo que contiene la ruta actual
-  useState(() => {
-    filteredGroups.forEach((group) => {
-      const hasActiveItem = group.items.some((item) => {
-        const isActive = item.end
-          ? location.pathname === item.to
-          : location.pathname.startsWith(item.to)
-        return isActive
-      })
-      if (hasActiveItem) {
-        setExpandedGroups((prev) => new Set(prev).add(group.label))
-      }
-    })
-  })
+  const filteredGroups = getFilteredGroups()
+
+  const isActive = (to: string, end?: boolean) => {
+    if (end) {
+      return location.pathname === to
+    }
+    return location.pathname.startsWith(to)
+  }
 
   return (
     <aside
@@ -163,86 +149,104 @@ export const AdminSidebar = () => {
       {/* Navegación */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3">
         <ul className="space-y-2">
+          {/* Dashboard (siempre visible) */}
+          <li className="relative group">
+            <NavLink
+              to="/admin"
+              end
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                isActive('/admin', true)
+                  ? 'bg-[#EA0A2A] text-white'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+              }`}
+            >
+              <Home className="h-5 w-5 flex-shrink-0" />
+              <span
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+                  isExpanded ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0'
+                }`}
+              >
+                Dashboard
+              </span>
+            </NavLink>
+            {!isExpanded && (
+              <div className="absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                Dashboard
+              </div>
+            )}
+          </li>
+
+          {/* Grupos de navegación */}
           {filteredGroups.map((group) => {
-            const isExpanded = isGroupExpanded(group.label)
-            const hasActiveItem = group.items.some((item) => {
-              const isActive = item.end
-                ? location.pathname === item.to
-                : location.pathname.startsWith(item.to)
-              return isActive
-            })
+            const GroupIcon = group.icon
+            const isGroupOpen = openGroups[group.label] || false
 
             return (
               <li key={group.label}>
-                {/* Botón del grupo */}
-                <button
-                  onClick={() => toggleGroup(group.label)}
-                  className={`w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    hasActiveItem
-                      ? 'bg-[#EA0A2A]/10 text-[#EA0A2A] dark:bg-[#EA0A2A]/20'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <span
-                      className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                        isExpanded ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0'
+                <Collapsible open={isGroupOpen} onOpenChange={() => toggleGroup(group.label)}>
+                  <CollapsibleTrigger asChild>
+                    <div
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                        isExpanded
+                          ? 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                       }`}
                     >
-                      {group.label}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
-                      isExpanded ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
+                      <GroupIcon className="h-5 w-5 flex-shrink-0" />
+                      <span
+                        className={`overflow-hidden whitespace-nowrap transition-all duration-300 flex-1 text-left ${
+                          isExpanded ? 'max-w-[160px] opacity-100' : 'max-w-0 opacity-0'
+                        }`}
+                      >
+                        {group.label}
+                      </span>
+                      {isExpanded && (
+                        <ChevronDown
+                          className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${
+                            isGroupOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
 
-                {/* Items del grupo (expandibles) */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    isExpanded ? 'max-h-[1000px] opacity-100 mt-1' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <ul className="space-y-1 pl-4">
-                    {group.items.map((item) => {
-                      const Icon = item.icon
-                      const isActive = item.end
-                        ? location.pathname === item.to
-                        : location.pathname.startsWith(item.to)
+                  <CollapsibleContent>
+                    <ul className="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                      {group.items.map((item) => {
+                        const ItemIcon = item.icon
+                        const itemActive = isActive(item.to, item.end)
 
-                      return (
-                        <li key={item.to} className="relative group">
-                          <NavLink
-                            to={item.to}
-                            end={item.end}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                              isActive
-                                ? 'bg-[#EA0A2A] text-white'
-                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            <span
-                              className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                                isExpanded ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0'
+                        return (
+                          <li key={item.to} className="relative group">
+                            <NavLink
+                              to={item.to}
+                              end={item.end}
+                              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                itemActive
+                                  ? 'bg-[#EA0A2A]/10 text-[#EA0A2A] dark:bg-[#EA0A2A]/20 dark:text-[#EA0A2A]'
+                                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
                               }`}
                             >
-                              {item.label}
-                            </span>
-                          </NavLink>
-                          {/* Tooltip cuando está colapsado */}
-                          {!isExpanded && (
-                            <div className="absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
-                              {item.label}
-                            </div>
-                          )}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
+                              <ItemIcon className="h-4 w-4 flex-shrink-0" />
+                              <span
+                                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
+                                  isExpanded ? 'max-w-[160px] opacity-100' : 'max-w-0 opacity-0'
+                                }`}
+                              >
+                                {item.label}
+                              </span>
+                            </NavLink>
+                            {!isExpanded && (
+                              <div className="absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                                {item.label}
+                              </div>
+                            )}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </CollapsibleContent>
+                </Collapsible>
               </li>
             )
           })}
