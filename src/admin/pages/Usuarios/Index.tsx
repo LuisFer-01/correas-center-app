@@ -5,17 +5,18 @@ import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
 import {
-    eliminarUsuario,
-    getRolesDisponibles,
-    getUsuarios,
-    restaurarUsuario,
+  eliminarUsuario,
+  getRolesDisponibles,
+  getUsuarios,
+  restaurarUsuario,
+  verificarUsuario, // ✅ NUEVO
 } from '@/admin/services/usuario.service'
 import type { Role, UserProfile } from '@/admin/types/usuario'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { CheckCircle2, Eye, Pencil, Plus, RotateCcw, Trash2, UserCheck } from 'lucide-react'; // ✅ UserCheck agregado
 import { useEffect, useState } from 'react'
 import { UsuarioForm } from './components/UsuarioForm'
 
@@ -59,6 +60,17 @@ export const UsuariosIndex = () => {
   const handleEditarUsuario = (usuario: UserProfile) => {
     setUsuarioEditar(usuario)
     setIsFormOpen(true)
+  }
+
+  // ✅ NUEVO: Verificar usuario
+  const handleVerificarUsuario = async (usuario: UserProfile) => {
+    try {
+      await verificarUsuario(usuario.id)
+      toast.success('Usuario verificado', 'El email del usuario ha sido verificado')
+      await loadData()
+    } catch (error: any) {
+      toast.error('Error al verificar', error.message || 'Ocurrió un error')
+    }
   }
 
   const handleEliminarClick = (usuario: UserProfile) => {
@@ -177,6 +189,7 @@ export const UsuariosIndex = () => {
       cell: ({ row }) => {
         const usuario = row.original
         const esSuperAdmin = usuario.roles.some((r) => r.slug === 'super_admin')
+        const estaVerificado = usuario.email_verified_at !== null && usuario.email_verified_at !== undefined
 
         if (usuario.estado === 'eliminado') {
           return (
@@ -194,6 +207,28 @@ export const UsuariosIndex = () => {
 
         return (
           <div className="flex items-center gap-2">
+            {/* ✅ NUEVO: Botón Verificar (solo si no está verificado y no es super_admin) */}
+            {!estaVerificado && !esSuperAdmin && (
+              <RequirePermission permission="usuarios.verify">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleVerificarUsuario(usuario)}
+                  title="Verificar email"
+                  className="dark:text-gray-300 dark:hover:bg-gray-700 text-emerald-600 dark:text-emerald-400"
+                >
+                  <UserCheck className="h-4 w-4" />
+                </Button>
+              </RequirePermission>
+            )}
+            
+            {/* Indicador de verificado */}
+            {estaVerificado && (
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400" title="Email verificado">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+            )}
+
             <RequirePermission permission="usuarios.update">
               <Button
                 variant="ghost"

@@ -195,3 +195,42 @@ export async function restaurarUsuario(id: string) {
   
   if (error) throw new Error(error.message)
 }
+
+// Verificar email de usuario
+export async function verificarUsuario(id: string) {
+  const now = new Date().toISOString()
+  
+  // 1. Actualizar en tabla perfiles
+  const { error: profileError } = await supabaseAdmin
+    .from('perfiles')
+    .update({
+      email_verified_at: now,
+      actualizado_en: now
+    })
+    .eq('id', id)
+  
+  if (profileError) throw new Error(profileError.message)
+  
+  // 2. Actualizar en auth.users (marcar email confirmado)
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+    id,
+    {
+      email_confirm: true
+    }
+  )
+  
+  if (authError) throw new Error(authError.message)
+}
+
+// Restablecer contraseña a valor por defecto
+export async function restablecerContrasena(id: string, nuevaContrasena: string = 'prueba123') {
+  // Actualizar contraseña en auth.users
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+    id,
+    {
+      password: nuevaContrasena
+    }
+  )
+  
+  if (authError) throw new Error(authError.message)
+}

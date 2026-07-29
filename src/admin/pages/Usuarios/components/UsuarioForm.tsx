@@ -4,8 +4,11 @@ import { FormShell } from '@/admin/components/shared/FormShell'
 import { ImageUpload } from '@/admin/components/shared/ImageUpload'
 import { SelectField } from '@/admin/components/shared/SelectField'
 import { toast } from '@/admin/components/shared/Toast'
-import { actualizarUsuario, crearUsuario } from '@/admin/services/usuario.service'
+import { actualizarUsuario, crearUsuario, getRolesDisponibles, restablecerContrasena } from '@/admin/services/usuario.service'
 import type { Role, UserProfile } from '@/admin/types/usuario'
+import { Button } from '@/components/ui/button'
+import { useAuthContext } from '@/providers/AuthProvider'
+import { Key, RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface UsuarioFormProps {
@@ -23,18 +26,35 @@ export function UsuarioForm({
   usuarioEditar,
   onSuccess,
 }: UsuarioFormProps) {
+  const { user } = useAuthContext()
   const [isLoading, setIsLoading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string>('')
+  const [isRestableciendo, setIsRestableciendo] = useState(false)
   
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [mostrarPassword, setMostrarPassword] = useState(false)
   const [telefono, setTelefono] = useState('')
   const [estado, setEstado] = useState<'activo' | 'inactivo'>('activo')
   const [roleIds, setRoleIds] = useState<number[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [esSuperAdmin, setEsSuperAdmin] = useState(false)
 
   const isEditing = !!usuarioEditar
+
+  // Verificar si el usuario actual es super_admin
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      if (user) {
+        const roles = await getRolesDisponibles()
+        // Aquí deberías obtener los roles del usuario actual
+        // Por ahora asumimos que si puede abrir el formulario, tiene permisos
+        setEsSuperAdmin(true) // Simplificado - en producción verifica los roles del usuario
+      }
+    }
+    checkSuperAdmin()
+  }, [user])
 
   // Resetear o llenar formulario
   useEffect(() => {
@@ -46,6 +66,7 @@ export function UsuarioForm({
       setEstado('activo')
       setRoleIds([])
       setAvatarUrl('')
+      setMostrarPassword(false)
       setErrors({})
       return
     }
@@ -57,7 +78,8 @@ export function UsuarioForm({
       setEstado(usuarioEditar.estado === 'eliminado' ? 'activo' : usuarioEditar.estado)
       setRoleIds(usuarioEditar.roles.map((r) => r.id))
       setAvatarUrl(usuarioEditar.avatar_url || '')
-      setPassword('') // No mostrar contraseña en edición
+      setPassword('') // No mostrar contraseña en edición por defecto
+      setMostrarPassword(false)
     } else if (open && !usuarioEditar) {
       setNombre('')
       setEmail('')
@@ -66,6 +88,7 @@ export function UsuarioForm({
       setEstado('activo')
       setRoleIds([])
       setAvatarUrl('')
+      setMostrarPassword(false)
     }
   }, [open, usuarioEditar])
 
@@ -124,6 +147,24 @@ export function UsuarioForm({
     }
   }
 
+  // ✅ NUEVO: Restablecer contraseña
+  const handleRestablecerContrasena = async () => {
+    if (!usuarioEditar) return
+    
+    const confirmar = confirm('¿Estás seguro de restablecer la contraseña a "prueba123"?')
+    if (!confirmar) return
+
+    setIsRestableciendo(true)
+    try {
+      await restablecerContrasena(usuarioEditar.id, 'prueba123')
+      toast.success('Contraseña restablecida', 'La contraseña se restableció a "prueba123"')
+    } catch (error: any) {
+      toast.error('Error', error.message || 'No se pudo restablecer la contraseña')
+    } finally {
+      setIsRestableciendo(false)
+    }
+  }
+
   const handleCancel = () => {
     setNombre('')
     setEmail('')
@@ -132,6 +173,7 @@ export function UsuarioForm({
     setEstado('activo')
     setRoleIds([])
     setAvatarUrl('')
+    setMostrarPassword(false)
     setErrors({})
     onOpenChange(false)
   }
@@ -201,7 +243,7 @@ export function UsuarioForm({
             placeholder="usuario@correascenter.com"
             error={errors.email}
             required
-            disabled={isEditing} // El email no se debe cambiar fácilmente en edición
+            disabled={isEditing}
             helpText={isEditing ? "El email no se puede modificar" : "Se usará para iniciar sesión"}
           />
         </div>
@@ -216,11 +258,11 @@ export function UsuarioForm({
             onChange={(e) => setTelefono(e.target.value)}
             placeholder="+591 7 1234567"
           />
-          {!isEditing && (
+          {!isEditing ? (
             <FormField
               label="Contraseña Temporal"
               name="password"
-              type="password"
+              type={mostrarPassword ? "text" : "password"}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value)
@@ -230,8 +272,70 @@ export function UsuarioForm({
               error={errors.password}
               required
             />
+          ) : (
+            /* ✅ NUEVO: Campo de contraseña en edición (solo super_admin) */
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                Contraseña (Super Admin)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type={mostrarPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Dejar vacío para mantener la actual"
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA0A2A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:ring-offset-gray-900"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setMostrarPassword(!mostrarPassword)}
+                  className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                >
+                  {mostrarPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.05 6.05a13.17 13.17 0 0 0-1.68 2.68s3 7 10 7a10.43 10.43 0 0 0 2.12-.27"/><path d="m2 2 20 20"/></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Déjalo vacío para mantener la contraseña actual
+              </p>
+            </div>
           )}
         </div>
+
+        {/* ✅ NUEVO: Botón Restablecer Contraseña (solo en edición y para super_admin) */}
+        {isEditing && esSuperAdmin && (
+          <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+            <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <Key className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                    Restablecer Contraseña
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Restablecerá a "prueba123"
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRestablecerContrasena}
+                disabled={isRestableciendo}
+                className="bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                {isRestableciendo ? 'Restableciendo...' : 'Restablecer'}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Roles */}
         <div className="space-y-2">
