@@ -40,6 +40,8 @@ export interface Producto {
     slug: string
     descripcion_corta: string | null
     uso: string | null
+    imagen: string | null
+    estado: string
   }>
   marcas: Marca[]
 }
@@ -62,7 +64,9 @@ export interface Industria {
     id: number
     nombre: string
     slug: string
+    descripcion: string | null
     descripcion_corta: string | null
+    imagen: string | null
     producto?: {
       id: number
       nombre: string
@@ -250,7 +254,7 @@ export const globalsService = {
       { data: registrosData, error: errorRegistros }
     ] = await Promise.all([
       supabase.from('sucursales').select('id, nombre, direccion, telefono, email, horarios, mapa_incrustado, latitud, longitud, es_principal, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias(id, nombre, slug, descripcion_corta, uso),producto_marca(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias(id, nombre, slug, descripcion_corta, uso, estado, imagen, descripcion),producto_marca(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industria_asignacion').select('id, industria_id, tipo_registro, registro_id, orden').eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
@@ -299,7 +303,7 @@ export const globalsService = {
       marcas: Array.from(new Map(p.producto_marca?.map((pm: any) => [pm.marca.id, pm.marca])).values()) as Marca[]
     }))
 
-    // 6. ✅ NUEVO: Procesar industrias con sus asignaciones
+    // 6. Procesar industrias con sus asignaciones
     const industriasProcesadas = (industriasData || []).map((industria: any) => {
       // Filtrar asignaciones para esta industria
       const asignaciones = industriaAsignacionesData?.filter((a: any) => a.industria_id === industria.id) || []
