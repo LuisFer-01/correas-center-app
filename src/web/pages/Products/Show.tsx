@@ -20,8 +20,8 @@ export const ProductShow = () => {
 
   // Filtrar categorías activas
   const categoriasActivas = producto.categorias?.filter(
-    (categoria) => categoria.estado === 'activo'
-  ) || []
+    (categoria) => categoria.estado === 'activo')
+  .sort((a, b) => a.orden - b.orden) || []
 
   // Función para enviar mensaje a WhatsApp
   const handleConsultarWhatsApp = (categoria: any) => {
