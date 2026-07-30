@@ -72,7 +72,7 @@ const sidebarGroups: SidebarGroup[] = [
     items: [
       { to: '/admin/menus', label: 'Menús', icon: List, permission: 'menus.view', end: true },
       { to: '/admin/footers', label: 'Footers', icon: LayoutDashboard, permission: 'footers.view', end: true },
-      { to: '/admin/secciones', label: 'Secciones', icon: LayoutGrid, permission: 'contenidos.view', end: true },
+      { to: '/admin/secciones', label: 'Secciones', icon: LayoutGrid, permission: 'contenido.view', end: true },
       { to: '/admin/registros', label: 'Registros', icon: Type, permission: 'registros.view', end: true },
       { to: '/admin/pasos-wizard', label: 'Pasos Wizard', icon: Wand2, permission: 'wizard.view', end: true },
       { to: '/admin/tipos-seccion', label: 'Tipos Sección', icon: BookType, permission: 'tipo_seccion.view', end: true },
