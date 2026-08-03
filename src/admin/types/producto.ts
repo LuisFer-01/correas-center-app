@@ -2,6 +2,8 @@ export interface MarcaResumen {
   id: number
   nombre: string
   slug: string
+  orden: number | null
+  estado: 'activo' | 'inactivo'
 }
 
 export interface Producto {
@@ -26,7 +28,6 @@ export interface CreateProductoDTO {
   imagen?: string
   orden?: number
   estado?: 'activo' | 'inactivo'
-  marca_ids: number[]
 }
 
 export interface UpdateProductoDTO {
@@ -37,5 +38,11 @@ export interface UpdateProductoDTO {
   imagen?: string
   orden?: number
   estado?: 'activo' | 'inactivo' | 'eliminado'
-  marca_ids: number[]
+}
+
+// DTO para el modal de marcas
+export interface ProductoMarcaDTO {
+  marca_id: number
+  orden: number | null
+  estado: 'activo' | 'inactivo'
 }

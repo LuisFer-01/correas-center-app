@@ -1,16 +1,10 @@
-import type { CreateProductoDTO, Producto, UpdateProductoDTO } from '@/admin/types/producto'
+import type { CreateProductoDTO, Producto, ProductoMarcaDTO, UpdateProductoDTO } from '@/admin/types/producto'
 import { supabase } from '@/lib/supabase'
 
 export async function getProductos(includeDeleted: boolean = false): Promise<Producto[]> {
   let query = supabase
     .from('productos')
-    .select(`
-      *,
-      empresa:empresas(id, nombre),
-      producto_marca(
-        marca:marcas(id, nombre, slug)
-      )
-    `)
+    .select(`*, empresa:empresas(id, nombre), producto_marca( marca:marcas(id, nombre, slug), orden, estado )`)
   
   if (!includeDeleted) {
     query = query.neq('estado', 'eliminado')
@@ -24,7 +18,12 @@ export async function getProductos(includeDeleted: boolean = false): Promise<Pro
   return (data || []).map((p: any) => ({
     ...p,
     estado: p.estado || 'activo',
-    marcas: p.producto_marca?.map((pm: any) => pm.marca).filter(Boolean) || [],
+    // Mapeamos las marcas incluyendo orden y estado
+    marcas: p.producto_marca?.map((pm: any) => ({
+      ...pm.marca,
+      orden: pm.orden,
+      estado: pm.estado || 'activo'
+    })).filter(Boolean) || [],
   }))
 }
 
@@ -101,41 +100,17 @@ export async function crearProducto(dto: CreateProductoDTO) {
     .single()
   
   if (productoError) throw new Error(productoError.message)
-  
-  // Asociar marcas
-  if (dto.marca_ids && dto.marca_ids.length > 0) {
-    const asociaciones = dto.marca_ids.map((marcaId) => ({
-      producto_id: productoData.id,
-      marca_id: marcaId,
-    }))
-    
-    const { error: marcaError } = await supabase
-      .from('producto_marca')
-      .insert(asociaciones)
-      
-    if (marcaError) throw new Error(marcaError.message)
-  }
-  
   return productoData
 }
 
 export async function actualizarProducto(dto: UpdateProductoDTO) {
   const updateData: any = {}
-  
   if (dto.empresa_id !== undefined) updateData.empresa_id = dto.empresa_id
   if (dto.nombre !== undefined) updateData.nombre = dto.nombre
   
   if (dto.slug !== undefined) {
-    const { data: existe } = await supabase
-      .from('productos')
-      .select('id')
-      .eq('slug', dto.slug)
-      .neq('id', dto.id)
-      .maybeSingle()
-    
-    if (existe) {
-      throw new Error(`El slug "${dto.slug}" ya está en uso por otro producto`)
-    }
+    const { data: existe } = await supabase.from('productos').select('id').eq('slug', dto.slug).neq('id', dto.id).maybeSingle()
+    if (existe) throw new Error(`El slug "${dto.slug}" ya está en uso`)
     updateData.slug = dto.slug
   }
   
@@ -144,13 +119,9 @@ export async function actualizarProducto(dto: UpdateProductoDTO) {
   
   if (dto.estado !== undefined) {
     updateData.estado = dto.estado
-    if (dto.estado === 'eliminado') {
-      updateData.eliminado_en = new Date().toISOString()
-    } else if (dto.estado === 'activo' || dto.estado === 'inactivo') {
-      updateData.eliminado_en = null
-    }
+    updateData.eliminado_en = dto.estado === 'eliminado' ? new Date().toISOString() : null
   }
-  
+
   const { data: productoData, error: productoError } = await supabase
     .from('productos')
     .update(updateData)
@@ -159,42 +130,29 @@ export async function actualizarProducto(dto: UpdateProductoDTO) {
     .single()
   
   if (productoError) throw new Error(productoError.message)
-  
-  // Actualizar asociaciones de marcas
-  if (dto.marca_ids !== undefined) {
-    // Borrar asociaciones antiguas
-    const { error: deleteError } = await supabase
-      .from('producto_marca')
-      .delete()
-      .eq('producto_id', dto.id)
-    
-    if (deleteError) throw new Error(deleteError.message)
-    
-    // Insertar nuevas asociaciones
-    if (dto.marca_ids.length > 0) {
-      const asociaciones = dto.marca_ids.map((marcaId) => ({
-        producto_id: dto.id,
-        marca_id: marcaId,
-      }))
-      
-      const { error: insertError } = await supabase
-        .from('producto_marca')
-        .insert(asociaciones)
-        
-      if (insertError) throw new Error(insertError.message)
-    }
-  }
-  
   return productoData
+}
+
+// ✅ NUEVA FUNCIÓN: Actualizar marcas asociadas desde el modal
+export async function actualizarMarcasProducto(productoId: number, marcasData: ProductoMarcaDTO[]) {
+  // Usamos upsert para actualizar o insertar, manejando tanto 'activo' como 'inactivo'
+  const dataToUpsert = marcasData.map(m => ({
+    producto_id: productoId,
+    marca_id: m.marca_id,
+    orden: m.orden,
+    estado: m.estado
+  }))
+
+  const { error } = await supabase
+    .from('producto_marca')
+    .upsert(dataToUpsert, { onConflict: 'producto_id,marca_id' })
+  
+  if (error) throw new Error(error.message)
 }
 
 export async function eliminarProducto(id: number) {
   const now = new Date().toISOString()
-  const { error } = await supabase
-    .from('productos')
-    .update({ estado: 'eliminado', eliminado_en: now })
-    .eq('id', id)
-  
+  const { error } = await supabase.from('productos').update({ estado: 'eliminado', eliminado_en: now }).eq('id', id)
   if (error) throw new Error(error.message)
 }
 

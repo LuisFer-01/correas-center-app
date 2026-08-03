@@ -14,8 +14,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Package, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { CirclePlus, Eye, Package, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'; // ✅ CirclePlus agregado
 import { useEffect, useState } from 'react'
+import { MarcasAsociadasModal } from './components/MarcasAsociadasModal'; // ✅ Nuevo modal importado
 import { ProductoForm } from './components/ProductoForm'
 
 export const ProductosIndex = () => {
@@ -27,11 +28,15 @@ export const ProductosIndex = () => {
   const [productoEliminar, setProductoEliminar] = useState<Producto | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleted, setShowDeleted] = useState(false)
+  
+  // ✅ Estados para el modal de marcas
+  const [isMarcasModalOpen, setIsMarcasModalOpen] = useState(false)
+  const [productoParaMarcas, setProductoParaMarcas] = useState<Producto | null>(null)
 
   const loadProductos = async () => {
     setIsLoading(true)
     try {
-      const data = await getProductos(true) // Incluir eliminados
+      const data = await getProductos(true)
       setProductos(data)
     } catch (error) {
       console.error('Error al cargar productos:', error)
@@ -53,6 +58,12 @@ export const ProductosIndex = () => {
   const handleEditarProducto = (producto: Producto) => {
     setProductoEditar(producto)
     setIsFormOpen(true)
+  }
+
+  // ✅ Nuevo handler para abrir el modal de marcas
+  const handleGestionarMarcas = (producto: Producto) => {
+    setProductoParaMarcas(producto)
+    setIsMarcasModalOpen(true)
   }
 
   const handleEliminarClick = (producto: Producto) => {
@@ -92,7 +103,12 @@ export const ProductosIndex = () => {
     loadProductos()
   }
 
-  // Filtrar productos según si mostrar eliminados
+  const handleMarcasSuccess = () => {
+    setIsMarcasModalOpen(false)
+    setProductoParaMarcas(null)
+    loadProductos() // Recargar para reflejar cambios en la tabla
+  }
+
   const filteredProductos = productos.filter((p) => {
     if (p.estado === 'eliminado') {
       return showDeleted
@@ -106,11 +122,7 @@ export const ProductosIndex = () => {
       header: '',
       cell: ({ row }) => (
         <Avatar className="h-12 w-12 rounded-lg border bg-white dark:bg-gray-700">
-          <AvatarImage
-            src={row.original.imagen ?? undefined}
-            alt={row.original.nombre}
-            className="object-contain p-1"
-          />
+          <AvatarImage src={row.original.imagen ?? undefined} alt={row.original.nombre} className="object-contain p-1" />
           <AvatarFallback className="bg-[#EA0A2A] text-white rounded-lg">
             <Package className="h-5 w-5" />
           </AvatarFallback>
@@ -122,31 +134,55 @@ export const ProductosIndex = () => {
       header: 'Producto',
       cell: ({ row }) => (
         <div>
-          <div className="font-medium text-gray-900 dark:text-white">
-            {row.getValue('nombre')}
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-            {row.original.slug}
-          </div>
+          <div className="font-medium text-gray-900 dark:text-white">{row.getValue('nombre')}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">{row.original.slug}</div>
         </div>
       ),
     },
     {
       accessorKey: 'marcas',
       header: 'Marcas',
-      cell: ({ row }) => (
-        <div className="flex flex-wrap gap-1">
-          {row.original.marcas && row.original.marcas.length > 0 ? (
-            row.original.marcas.map((marca) => (
-              <Badge key={marca.id} variant="secondary" className="text-xs dark:bg-gray-600 dark:text-gray-200">
-                {marca.nombre}
-              </Badge>
-            ))
-          ) : (
-            <span className="text-sm text-gray-500 dark:text-gray-400">—</span>
-          )}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const producto = row.original
+        // ✅ Filtrar solo marcas activas y ordenarlas
+        const marcasActivas = (producto.marcas || [])
+          .filter(m => m.estado === 'activo')
+          .sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999))
+        
+        const marcasParaMostrar = marcasActivas.slice(0, 3)
+        const hayMas = marcasActivas.length > 3
+
+        return (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-1 items-center">
+              {marcasParaMostrar.map((marca) => (
+                <Badge key={marca.id} variant="secondary" className="text-xs dark:bg-gray-600 dark:text-gray-200">
+                  {marca.nombre}
+                </Badge>
+              ))}
+              {hayMas && (
+                <Badge variant="outline" className="text-xs dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                  +{marcasActivas.length - 3}
+                </Badge>
+              )}
+              {marcasActivas.length === 0 && (
+                <span className="text-sm text-gray-400 italic">Sin marcas</span>
+              )}
+              
+              {/* ✅ Botón CirclePlus para abrir el modal */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-[#EA0A2A] hover:text-[#c90825] hover:bg-[#EA0A2A]/10"
+                onClick={() => handleGestionarMarcas(producto)}
+                title="Gestionar marcas asociadas"
+              >
+                <CirclePlus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'empresa',
@@ -176,42 +212,22 @@ export const ProductosIndex = () => {
       header: 'Acciones',
       cell: ({ row }) => {
         const producto = row.original
-
         if (producto.estado === 'eliminado') {
           return (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRestaurar(producto)}
-              className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Restaurar
+            <Button variant="outline" size="sm" onClick={() => handleRestaurar(producto)} className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+              <RotateCcw className="h-4 w-4 mr-2" /> Restaurar
             </Button>
           )
         }
-
         return (
           <div className="flex items-center gap-2">
             <RequirePermission permission="productos.update">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleEditarProducto(producto)}
-                title="Editar"
-                className="dark:text-gray-300 dark:hover:bg-gray-700"
-              >
+              <Button variant="ghost" size="icon" onClick={() => handleEditarProducto(producto)} title="Editar" className="dark:text-gray-300 dark:hover:bg-gray-700">
                 <Pencil className="h-4 w-4" />
               </Button>
             </RequirePermission>
             <RequirePermission permission="productos.delete">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                onClick={() => handleEliminarClick(producto)}
-                title="Eliminar"
-              >
+              <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => handleEliminarClick(producto)} title="Eliminar">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </RequirePermission>
@@ -229,43 +245,33 @@ export const ProductosIndex = () => {
         actions={
           <>
             <RequirePermission permission="productos.view_deleted">
-              <Button
-                variant={showDeleted ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowDeleted(!showDeleted)}
-                className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                {showDeleted ? 'Ocultar Eliminados' : 'Ver Eliminados'}
+              <Button variant={showDeleted ? 'default' : 'outline'} size="sm" onClick={() => setShowDeleted(!showDeleted)} className="dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+                <Eye className="h-4 w-4 mr-2" /> {showDeleted ? 'Ocultar Eliminados' : 'Ver Eliminados'}
               </Button>
             </RequirePermission>
             <RequirePermission permission="productos.create">
-              <Button
-                onClick={handleNuevoProducto}
-                className="bg-[#EA0A2A] hover:bg-[#c90825] dark:bg-[#EA0A2A] dark:hover:bg-[#c90825]"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo Producto
+              <Button onClick={handleNuevoProducto} className="bg-[#EA0A2A] hover:bg-[#c90825] dark:bg-[#EA0A2A] dark:hover:bg-[#c90825]">
+                <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
               </Button>
             </RequirePermission>
           </>
         }
       />
 
-      <DataTable
-        columns={columns}
-        data={filteredProductos}
-        searchKey="nombre"
-        searchPlaceholder="Buscar productos..."
-        isLoading={isLoading}
-      />
+      <DataTable columns={columns} data={filteredProductos} searchKey="nombre" searchPlaceholder="Buscar productos..." isLoading={isLoading} />
 
-      <ProductoForm
-        open={isFormOpen}
-        onOpenChange={setIsFormOpen}
-        productoEditar={productoEditar}
-        onSuccess={handleSuccess}
-      />
+      <ProductoForm open={isFormOpen} onOpenChange={setIsFormOpen} productoEditar={productoEditar} onSuccess={handleSuccess} />
+
+      {/* ✅ Nuevo Modal de Marcas Asociadas */}
+      {productoParaMarcas && (
+        <MarcasAsociadasModal
+          open={isMarcasModalOpen}
+          onOpenChange={setIsMarcasModalOpen}
+          productoId={productoParaMarcas.id}
+          marcasActuales={productoParaMarcas.marcas || []}
+          onSuccess={handleMarcasSuccess}
+        />
+      )}
 
       <ConfirmDialog
         open={isDeleteOpen}
