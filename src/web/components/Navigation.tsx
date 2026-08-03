@@ -234,7 +234,7 @@ export const Navigation = () => {
                                 {submenus.map((submenu: any) => (
                                   <li key={submenu.id}>
                                     <Link
-                                      to={submenu.ruta}
+                                      to={menu.ruta}
                                       className="flex items-center gap-2 text-gray-700 hover:text-[#EA0A2A] text-sm block py-1.5 px-3 rounded hover:bg-white transition-all"
                                     >
                                       {menu.icono && <Icon name={menu.icono} size="xs" className="text-[#EA0A2A]/60" />}
@@ -389,7 +389,7 @@ export const Navigation = () => {
                             {submenus.map((submenu: any) => (
                               <Link
                                 key={submenu.id}
-                                to={submenu.ruta}
+                                to={menu.ruta}
                                 className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all"
                                 onClick={() => setIsOpen(false)}
                               >
