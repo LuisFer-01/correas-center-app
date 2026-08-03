@@ -126,6 +126,7 @@ export interface MenuItem {
   id: number
   ruta: string
   orden: number
+  estado: 'activo' | 'inactivo' | 'eliminado' 
 }
 
 export interface Menu {
@@ -264,7 +265,7 @@ export const globalsService = {
       supabase.from('contenido_seccion').select('id, titulo, icono, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 4).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, icono, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 2).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('pasos_wizard').select('id, identificador, titulo, descripcion, fuente_datos, campo_filtro, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, orden, menu_item(id, ruta, orden)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('menus').select('id, grupo, tipo_registro, registro_id, ruta, icono, cargar_submenu, orden, menu_item(id, ruta, orden, estado)').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('footers').select('id, tipo, titulo, url, icono, orden, registro_id').eq('empresa_id', empresaId).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('contenido_seccion').select('id, titulo, subtitulo, descripcion, imagen, metadata, orden').eq('empresa_id', empresaId).eq('tipo_seccion_id', 1).eq('mostrar', true).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('registros').select('id, identificador, nombre, descripcion, registro_contenido(id, titulo, subtitulo, descripcion, icono, stats, orden)').eq('registro_contenido.empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true })

@@ -18,6 +18,7 @@ export interface Menu {
   ruta: string
   icono?: string | null
   mostrar: boolean
+  cargar_submenu: 'activo' | 'inactivo'
   orden: number
   estado: 'activo' | 'inactivo' | 'eliminado'
   eliminado_en?: string | null
@@ -35,6 +36,7 @@ export interface CreateMenuDTO {
   ruta: string
   icono?: string
   mostrar?: boolean
+  cargar_submenu?: 'activo' | 'inactivo'
   orden?: number
   estado?: 'activo' | 'inactivo'
 }
@@ -48,6 +50,7 @@ export interface UpdateMenuDTO {
   ruta?: string
   icono?: string
   mostrar?: boolean
+  cargar_submenu?: 'activo' | 'inactivo'
   orden?: number
   estado?: 'activo' | 'inactivo' | 'eliminado'
 }

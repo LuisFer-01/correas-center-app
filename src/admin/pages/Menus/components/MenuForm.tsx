@@ -7,7 +7,7 @@ import { actualizarMenu, crearMenu, getEmpresasActivas, getNextOrdenMenu, getNex
 import type { Menu } from '@/admin/types/menu'
 import { useEffect, useState } from 'react'
 
-// ✅ NUEVO: Mapeo de tipo_registro a su prefijo de ruta
+// Mapeo de tipo_registro a su prefijo de ruta
 const tipoRegistroPrefijos: Record<string, string> = {
   producto: '/products/',
   industria: '/applications/',
@@ -35,9 +35,10 @@ export function MenuForm({
   const [grupo, setGrupo] = useState('')
   const [tipoRegistro, setTipoRegistro] = useState<'producto' | 'industria' | 'servicio'>('producto')
   const [registroId, setRegistroId] = useState<number>(0)
-  const [suffix, setSuffix] = useState('') // ✅ NUEVO: Solo la parte final de la ruta
+  const [suffix, setSuffix] = useState('') // Solo la parte final de la ruta
   const [icono, setIcono] = useState('')
   const [mostrar, setMostrar] = useState(true)
+  const [cargarSubmenu, setCargarSubmenu] = useState(true) // Nuevo estado para cargar_submenu
   const [orden, setOrden] = useState(0)
   const [estado, setEstado] = useState<'activo' | 'inactivo'>('activo')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -54,7 +55,7 @@ export function MenuForm({
     }
   }, [open, empresasLoaded])
 
-  // ✅ NUEVO: Actualizar registro_id automáticamente al cambiar tipo_registro (solo en creación)
+  // Actualizar registro_id automáticamente al cambiar tipo_registro (solo en creación)
   useEffect(() => {
     if (!isEditing && tipoRegistro) {
       getNextRegistroId(tipoRegistro).then((nextId) => {
@@ -73,6 +74,7 @@ export function MenuForm({
       setSuffix('')
       setIcono('')
       setMostrar(true)
+      setCargarSubmenu(true)
       setOrden(0)
       setEstado('activo')
       setErrors({})
@@ -86,10 +88,11 @@ export function MenuForm({
       setRegistroId(menuEditar.registro_id)
       setIcono(menuEditar.icono || '')
       setMostrar(menuEditar.mostrar)
+      setCargarSubmenu(menuEditar?.cargar_submenu === 'activo')
       setOrden(menuEditar.orden)
       setEstado(menuEditar.estado === 'eliminado' ? 'activo' : menuEditar.estado)
       
-      // ✅ NUEVO: Extraer el suffix de la ruta existente
+      // Extraer el suffix de la ruta existente
       const prefijo = tipoRegistroPrefijos[menuEditar.tipo_registro] || ''
       const rutaCompleta = menuEditar.ruta || ''
       if (rutaCompleta.startsWith(prefijo)) {
@@ -128,7 +131,7 @@ export function MenuForm({
 
     setIsLoading(true)
     try {
-      // ✅ NUEVO: Construir la ruta final concatenada
+      // Construir la ruta final concatenada
       const prefijo = tipoRegistroPrefijos[tipoRegistro] || ''
       const cleanSuffix = suffix.replace(/^\//, '').replace(/\/$/, '').trim()
       const rutaFinal = `${prefijo}${cleanSuffix}/`
@@ -143,6 +146,7 @@ export function MenuForm({
           ruta: rutaFinal,
           icono: icono.trim() || undefined,
           mostrar,
+          cargar_submenu: cargarSubmenu ? 'activo' : 'inactivo',
           orden,
           estado,
         })
@@ -156,6 +160,7 @@ export function MenuForm({
           ruta: rutaFinal,
           icono: icono.trim() || undefined,
           mostrar,
+          cargar_submenu: cargarSubmenu ? 'activo' : 'inactivo',
           orden,
           estado,
         })
@@ -179,6 +184,7 @@ export function MenuForm({
     setSuffix('')
     setIcono('')
     setMostrar(true)
+    setCargarSubmenu(true)
     setOrden(0)
     setEstado('activo')
     setErrors({})
@@ -262,7 +268,7 @@ export function MenuForm({
           helpText="Se autocompleta según el tipo de registro seleccionado"
         />
 
-        {/* ✅ NUEVO: Ruta con Prefijo */}
+        {/* Ruta con Prefijo */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
             Ruta *
@@ -325,6 +331,13 @@ export function MenuForm({
             name="mostrar"
             checked={mostrar}
             onCheckedChange={setMostrar}
+          />
+          <CheckboxField
+            label= "Cargar Submenús en navegación"
+            name="cargar_submenu"
+            checked={cargarSubmenu}
+            onCheckedChange={setCargarSubmenu}
+            description="Si esta activo, los submenús serán clickeables. Si están inactivos, redirigirá al producto o menú padre."
           />
           <FormField
             label="Orden de visualización"

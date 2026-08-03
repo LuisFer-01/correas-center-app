@@ -70,11 +70,15 @@ export const Navigation = () => {
     if (!menu.menu_item || menu.menu_item.length === 0) {
       return []
     }
-    return menu.menu_item.map((item: any) => ({
-      id: item.id,
-      ruta: item.ruta,
-      orden: item.orden,
-    }))
+    // ✅ Filtrar solo los submenús con estado 'activo'
+    return menu.menu_item
+      .filter((item: any) => item.estado === 'activo')
+      .map((item: any) => ({
+        id: item.id,
+        ruta: item.ruta,
+        orden: item.orden,
+        estado: item.estado,
+      }))
   }
 
   if (isLoading) {
@@ -91,7 +95,7 @@ export const Navigation = () => {
     <nav className="fixed top-0 left-0 right-0 bg-[#b1001b] z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
-          {/* LOGO - ✅ CORREGIDO: Cambiado h1 por span y agregado max-w al logo */}
+          {/* LOGO */}
           <Link to="/" className="flex items-center cursor-pointer group flex-shrink-0">
             <div className="relative h-10 w-auto sm:h-12 md:h-14 flex-shrink-0">
               {logoUrl ? (
@@ -107,7 +111,6 @@ export const Navigation = () => {
               )}
             </div>
             <div className="text-white ml-2 sm:ml-3">
-              {/* ✅ CORREGIDO: Cambiado h1 por span para evitar estilos globales */}
               <span className="block text-sm sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight group-hover:text-gray-200 transition-colors leading-tight">
                 {globals?.empresa?.nombre || 'CORREAS CENTER'}
               </span>
@@ -231,21 +234,26 @@ export const Navigation = () => {
                           >
                             <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
                               <ul className="space-y-1">
-                                {submenus.map((submenu: any) => (
-                                  <li key={submenu.id}>
-                                    <Link
-                                      to={menu.ruta}
-                                      className="flex items-center gap-2 text-gray-700 hover:text-[#EA0A2A] text-sm block py-1.5 px-3 rounded hover:bg-white transition-all"
-                                    >
-                                      {menu.icono && <Icon name={menu.icono} size="xs" className="text-[#EA0A2A]/60" />}
-                                      {submenu.ruta
-                                        .split('/')
-                                        .pop()
-                                        ?.replace(/-/g, ' ')
-                                        .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                    </Link>
-                                  </li>
-                                ))}
+                                {submenus.map((submenu: any) => {
+                                  // ✅ Verificar cargar_submenu del menú padre para la redirección
+                                  const rutaDestino = menu.cargar_submenu === 'activo' ? submenu.ruta : menu.ruta
+                                  
+                                  return (
+                                    <li key={submenu.id}>
+                                      <Link
+                                        to={rutaDestino}
+                                        className="flex items-center gap-2 text-gray-700 hover:text-[#EA0A2A] text-sm block py-1.5 px-3 rounded hover:bg-white transition-all"
+                                      >
+                                        {menu.icono && <Icon name={menu.icono} size="xs" className="text-[#EA0A2A]/60" />}
+                                        {submenu.ruta
+                                          .split('/')
+                                          .pop()
+                                          ?.replace(/-/g, ' ')
+                                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                      </Link>
+                                    </li>
+                                  )
+                                })}
                               </ul>
                             </div>
                           </div>
@@ -386,24 +394,29 @@ export const Navigation = () => {
                             >
                               Ver todo →
                             </Link>
-                            {submenus.map((submenu: any) => (
-                              <Link
-                                key={submenu.id}
-                                to={menu.ruta}
-                                className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all"
-                                onClick={() => setIsOpen(false)}
-                              >
-                                {menu.icono && <Icon name={menu.icono} size="xs" />}
-                                <span>
-                                  •{' '}
-                                  {submenu.ruta
-                                    .split('/')
-                                    .pop()
-                                    ?.replace(/-/g, ' ')
-                                    .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                </span>
-                              </Link>
-                            ))}
+                            {submenus.map((submenu: any) => {
+                              // ✅ Verificar cargar_submenu del menú padre para la redirección
+                              const rutaDestino = menu.cargar_submenu === 'activo' ? submenu.ruta : menu.ruta
+                              
+                              return (
+                                <Link
+                                  key={submenu.id}
+                                  to={rutaDestino}
+                                  className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all"
+                                  onClick={() => setIsOpen(false)}
+                                >
+                                  {menu.icono && <Icon name={menu.icono} size="xs" />}
+                                  <span>
+                                    •{' '}
+                                    {submenu.ruta
+                                      .split('/')
+                                      .pop()
+                                      ?.replace(/-/g, ' ')
+                                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                  </span>
+                                </Link>
+                              )
+                            })}
                           </div>
                         </div>
                       )}

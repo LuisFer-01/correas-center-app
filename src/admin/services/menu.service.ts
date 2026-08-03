@@ -1,9 +1,9 @@
 import type {
-    CreateMenuDTO,
-    CreateMenuItemDTO,
-    Menu,
-    UpdateMenuDTO,
-    UpdateMenuItemDTO
+  CreateMenuDTO,
+  CreateMenuItemDTO,
+  Menu,
+  UpdateMenuDTO,
+  UpdateMenuItemDTO
 } from '@/admin/types/menu'
 import { supabase } from '@/lib/supabase'
 
@@ -99,6 +99,7 @@ export async function crearMenu(dto: CreateMenuDTO) {
       ruta: dto.ruta,
       icono: dto.icono,
       mostrar: dto.mostrar ?? true,
+      cargar_submenu: dto.cargar_submenu || 'activo',
       orden: dto.orden ?? 0,
       estado: dto.estado || 'activo',
     })
@@ -118,6 +119,7 @@ export async function actualizarMenu(dto: UpdateMenuDTO) {
   if (dto.ruta !== undefined) updateData.ruta = dto.ruta
   if (dto.icono !== undefined) updateData.icono = dto.icono
   if (dto.mostrar !== undefined) updateData.mostrar = dto.mostrar
+  if (dto.cargar_submenu !== undefined) updateData.cargar_submenu = dto.cargar_submenu
   if (dto.orden !== undefined) updateData.orden = dto.orden
   
   if (dto.estado !== undefined) {
@@ -202,6 +204,25 @@ export async function actualizarMenuItem(dto: UpdateMenuItemDTO) {
   return data
 }
 
+// Actualizar el estado de un MenuItem 
+export async function actualizarMenuItemEstado(id: number, estado: 'activo' | 'inactivo' | 'eliminado') {
+  const updateData: any = { estado }
+
+  if (estado === 'eliminado') {
+    updateData.eliminado_en = new Date().toISOString()
+  } else {
+    updateData.eliminado_en = null
+  }
+
+  const { error } = await supabase
+    .from('menu_item')
+    .update(updateData)
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}
+  
+
 export async function eliminarMenuItem(id: number) {
   const now = new Date().toISOString()
   const { error } = await supabase
@@ -215,7 +236,10 @@ export async function eliminarMenuItem(id: number) {
 export async function restaurarMenuItem(id: number) {
   const { error } = await supabase
     .from('menu_item')
-    .update({ estado: 'activo', eliminado_en: null })
+    .update({ 
+      estado: 'activo', 
+      eliminado_en: null 
+    })
     .eq('id', id)
   
   if (error) throw new Error(error.message)
