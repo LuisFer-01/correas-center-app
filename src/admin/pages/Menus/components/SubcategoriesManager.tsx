@@ -1,12 +1,12 @@
 import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { toast } from '@/admin/components/shared/Toast'
-import { actualizarMenuItemEstado, restaurarMenuItem } from '@/admin/services/menu.service'
+import { actualizarMenuItemEstado, getMenuById, restaurarMenuItem } from '@/admin/services/menu.service'
 import type { Menu, MenuItem } from '@/admin/types/menu'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Eye, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MenuItemForm } from './MenuItemForm'
 
 interface SubcategoriesManagerProps {
@@ -21,8 +21,35 @@ export function SubcategoriesManager({ open, onOpenChange, menu, onSuccess }: Su
   const [itemToEdit, setItemToEdit] = useState<MenuItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleted, setShowDeleted] = useState(false)
+  
+  // ✅ Estado local para manejar los datos del menú de forma independiente
+  const [localMenu, setLocalMenu] = useState<Menu | null>(menu)
 
-  if (!menu) return null
+  // Refrescar datos cuando se abre el modal o cambia la prop menu
+  useEffect(() => {
+    if (open && menu) {
+      setLocalMenu(menu)
+      refreshMenuData() // Fuerza una consulta fresca al abrir
+    } else if (!open) {
+      setLocalMenu(null)
+      setShowDeleted(false)
+    }
+  }, [open, menu])
+
+  // ✅ Función centralizada para refrescar los datos del menú
+  const refreshMenuData = async () => {
+    if (!menu) return
+    try {
+      const updatedMenu = await getMenuById(menu.id)
+      if (updatedMenu) {
+        setLocalMenu(updatedMenu)
+      }
+    } catch (error) {
+      console.error('Error al refrescar datos del menú:', error)
+    }
+  }
+
+  if (!localMenu) return null
 
   const handleAdd = () => {
     setItemToEdit(null)
@@ -34,14 +61,21 @@ export function SubcategoriesManager({ open, onOpenChange, menu, onSuccess }: Su
     setIsFormOpen(true)
   }
 
+  // ✅ Wrapper para ejecutar acciones y luego refrescar
+  const handleActionSuccess = async () => {
+    setIsFormOpen(false)
+    setItemToEdit(null)
+    await refreshMenuData() // Refresca los datos locales inmediatamente
+    onSuccess() // Notifica al componente padre
+  }
+
   const handleDelete = async (item: MenuItem) => {
     if (!confirm(`¿Estás seguro de eliminar la subcategoría "${item.ruta}"?`)) return
     setIsDeleting(true)
     try {
-      // Soft delete: solo cambia el estado a 'eliminado'
       await actualizarMenuItemEstado(item.id, 'eliminado')
       toast.success('Subcategoría eliminada', 'Se marcó como eliminada correctamente')
-      onSuccess()
+      await handleActionSuccess()
     } catch (error: any) {
       toast.error('Error', error.message || 'No se pudo eliminar')
     } finally {
@@ -54,7 +88,7 @@ export function SubcategoriesManager({ open, onOpenChange, menu, onSuccess }: Su
     try {
       await actualizarMenuItemEstado(item.id, nuevoEstado)
       toast.success('Estado actualizado', `Subcategoría ${nuevoEstado === 'activo' ? 'activada' : 'desactivada'}`)
-      onSuccess()
+      await handleActionSuccess()
     } catch (error: any) {
       toast.error('Error', error.message || 'No se pudo actualizar el estado')
     }
@@ -64,36 +98,32 @@ export function SubcategoriesManager({ open, onOpenChange, menu, onSuccess }: Su
     try {
       await restaurarMenuItem(item.id)
       toast.success('Subcategoría restaurada', 'Volvió a estado activo')
-      onSuccess()
+      await handleActionSuccess()
     } catch (error: any) {
       toast.error('Error', error.message || 'No se pudo restaurar')
     }
   }
 
-  const handleFormSuccess = () => {
-    setIsFormOpen(false)
-    setItemToEdit(null)
-    onSuccess()
-  }
-
   // ✅ Filtrar y ordenar subcategorías respetando el campo 'orden'
-  const menuItemsFiltrados = (menu.menu_items || [])
+  const menuItemsFiltrados = (localMenu.menu_items || [])
     .filter((item) => (item.estado === 'eliminado' ? showDeleted : true))
     .sort((a, b) => a.orden - b.orden)
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[700px] dark:bg-gray-800 dark:border-gray-600">
-          <DialogHeader>
+        {/* ✅ Clases para limitar altura y permitir scroll general del modal si es necesario */}
+        <DialogContent className="sm:max-w-[700px] dark:bg-gray-800 dark:border-gray-600 flex flex-col max-h-[90vh]">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="dark:text-white">Gestionar Subcategorías</DialogTitle>
             <DialogDescription className="dark:text-gray-300">
-              Menú: <span className="font-semibold text-[#EA0A2A]">{menu.grupo}</span> ({menu.ruta})
+              Menú: <span className="font-semibold text-[#EA0A2A]">{localMenu.grupo}</span> ({localMenu.ruta})
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 mt-4">
-            <div className="flex justify-between items-center">
+          {/* ✅ Contenedor con scroll interno para la lista */}
+          <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-2">
+            <div className="flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10 pb-2">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Subcategorías ({menuItemsFiltrados.length})
@@ -110,15 +140,18 @@ export function SubcategoriesManager({ open, onOpenChange, menu, onSuccess }: Su
                   </Button>
                 </RequirePermission>
               </div>
-              <Button onClick={handleAdd} size="sm" className="bg-[#EA0A2A] hover:bg-[#c90825]">
-                <Plus className="h-4 w-4 mr-2" />
-                Agregar
-              </Button>
+              <RequirePermission permission="menu_items.create">
+                <Button onClick={handleAdd} size="sm" className="bg-[#EA0A2A] hover:bg-[#c90825]">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar
+                </Button>
+              </RequirePermission>
             </div>
 
             <div className="border rounded-md dark:border-gray-600 bg-white dark:bg-gray-800/50">
               {menuItemsFiltrados.length > 0 ? (
-                <div className="divide-y dark:divide-gray-600">
+                // ✅ Scroll específico para la lista de items
+                <div className="divide-y dark:divide-gray-600 max-h-[400px] overflow-y-auto">
                   {menuItemsFiltrados.map((item) => (
                     <div key={item.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <div className="flex-1 min-w-0">
@@ -195,17 +228,23 @@ export function SubcategoriesManager({ open, onOpenChange, menu, onSuccess }: Su
               )}
             </div>
           </div>
+
+          <DialogFooter className="flex-shrink-0 border-t dark:border-gray-700 pt-4">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cerrar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {isFormOpen && (
+      {isFormOpen && localMenu && (
         <MenuItemForm
           open={isFormOpen}
           onOpenChange={setIsFormOpen}
-          menuId={menu.id}
-          parentRoute={menu.ruta}
+          menuId={localMenu.id}
+          parentRoute={localMenu.ruta}
           menuItemEditar={itemToEdit}
-          onSuccess={handleFormSuccess}
+          onSuccess={handleActionSuccess}
         />
       )}
     </>

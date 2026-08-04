@@ -244,3 +244,24 @@ export async function restaurarMenuItem(id: number) {
   
   if (error) throw new Error(error.message)
 }
+
+// Obtener un menú específico con sus items actualizados
+export async function getMenuById(id: number): Promise<Menu | null> {
+  const { data, error } = await supabase
+    .from('menus')
+    .select(`
+      *,
+      empresa:empresas(id, nombre),
+      menu_item:menu_item(id, ruta, orden, estado, eliminado_en, creado_en, actualizado_en)
+    `)
+    .eq('id', id)
+    .single()
+  
+  if (error) return null
+  
+  return {
+    ...data,
+    estado: data.estado || 'activo',
+    menu_items: data.menu_item || [],
+  } as Menu
+}
