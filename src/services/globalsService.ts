@@ -256,7 +256,7 @@ export const globalsService = {
       { data: registrosData, error: errorRegistros }
     ] = await Promise.all([
       supabase.from('sucursales').select('id, nombre, direccion, telefono, email, horarios, mapa_incrustado, latitud, longitud, es_principal, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
-      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias(id, nombre, slug, descripcion_corta, uso, estado, imagen, descripcion, orden),producto_marca(marca:marcas(id, nombre, slug, logo))`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
+      supabase.from('productos').select(`id, nombre, slug, imagen, orden,categorias(id, nombre, slug, descripcion_corta, uso, estado, imagen, descripcion, orden),producto_marca(marca:marcas(id, nombre, slug, logo), estado, orden)`).eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industrias').select('id, nombre, slug, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('industria_asignacion').select('id, industria_id, tipo_registro, registro_id, orden').eq('estado', 'activo').order('orden', { ascending: true }),
       supabase.from('servicios').select('id, nombre, descripcion, imagen, orden').eq('empresa_id', empresaId).eq('estado', 'activo').order('orden', { ascending: true }),
@@ -302,7 +302,12 @@ export const globalsService = {
       imagen: p.imagen,
       orden: p.orden,
       categorias: (p.categorias || []).sort((a: any, b: any) => a.orden - b.orden),
-      marcas: Array.from(new Map(p.producto_marca?.map((pm: any) => [pm.marca.id, pm.marca])).values()) as Marca[]
+      // Filtrar solo marcas activas y ordenar por el campo orden de producto_marca
+      marcas: (p.producto_marca || [])
+        .filter((pm: any) => pm.estado === 'activo')
+        .sort((a: any, b: any) => (a.orden ?? 999) - (b.orden ?? 999))
+        .map((pm: any) => pm.marca)
+        .filter(Boolean) as Marca[]
     }))
 
     // 6. Procesar industrias con sus asignaciones

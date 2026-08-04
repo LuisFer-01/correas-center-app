@@ -193,7 +193,7 @@ export const ProductsIndex = () => {
               {productosFiltrados.map((producto: any, index: number) => (
                 viewMode === 'grid' ? (
                   <Link key={producto.id} to={`/products/${producto.slug}`} className={`group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#EA0A2A]/30 transform hover:-translate-y-1 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`} style={{ transitionDelay: `${index * 50}ms` }}>
-                    <div className="relative h-52 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                    <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                       {producto.imagen ? (
                         <img src={getSupabaseImageUrl(producto.imagen, 'productos-imagenes') || ''} alt={producto.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       ) : (
@@ -234,7 +234,7 @@ export const ProductsIndex = () => {
                   </Link>
                 ) : (
                   <Link key={producto.id} to={`/products/${producto.slug}`} className={`group flex gap-4 md:gap-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#EA0A2A]/30 p-4 md:p-6 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`} style={{ transitionDelay: `${index * 30}ms` }}>
-                    <div className="relative w-32 md:w-48 h-32 md:h-36 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative w-40 md:w-56 h-40 md:h-44 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                       {producto.imagen ? (
                         <img src={getSupabaseImageUrl(producto.imagen, 'productos-imagenes') || ''} alt={producto.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       ) : (

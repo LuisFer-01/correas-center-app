@@ -39,7 +39,7 @@ export const ProductShow = () => {
             <img 
               src={getSupabaseImageUrl(producto.imagen, 'productos-imagenes') || ''} 
               alt={producto.nombre} 
-              className="w-full h-full object-cover opacity-20" 
+              className="w-full h-full object-cover opacity-30 scale-105" 
             />
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-800/90 to-gray-900"></div>
           </div>
