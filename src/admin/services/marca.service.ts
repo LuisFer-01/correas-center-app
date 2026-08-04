@@ -26,7 +26,7 @@ async function generarSlugUnico(slugBase: string, excludeId?: number): Promise<s
       query = query.neq('id', excludeId)
     }
     
-    // ✅ CORREGIDO: Usar maybeSingle() para evitar errores si no existe el slug
+    // CORREGIDO: Usar maybeSingle() para evitar errores si no existe el slug
     const { data } = await query.maybeSingle()
     
     // Si no hay datos, significa que el slug está disponible
@@ -45,7 +45,7 @@ export async function getNextOrdenMarca(): Promise<number> {
     .select('orden')
     .order('orden', { ascending: false })
     .limit(1)
-    .maybeSingle() // ✅ CORREGIDO: maybeSingle para evitar error si la tabla está vacía
+    .maybeSingle() // CORREGIDO: maybeSingle para evitar error si la tabla está vacía
   
   if (error || !data) return 1
   return (data.orden || 0) + 1
@@ -150,4 +150,24 @@ export async function restaurarMarca(id: number) {
     .eq('id', id)
   
   if (error) throw new Error(error.message)
+}
+
+// Función para upload directo de imagen recortada
+export async function uploadLogoCropped(file: File, folder: string = 'logos'): Promise<string> {
+  // Generar nombre único
+  const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.png`
+
+  const { error: uploadError } = await supabase.storage
+    .from('marcas-logos')
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: 'image/png',
+    })
+
+  if (uploadError) throw new Error(uploadError.message)
+
+  // Obtener URL pública
+  const { data } = supabase.storage.from('marcas-logos').getPublicUrl(fileName)
+  return data.publicUrl
 }
