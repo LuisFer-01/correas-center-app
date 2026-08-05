@@ -1,3 +1,4 @@
+import { useScrollToTop } from '@/hooks/useScrollToTop'
 import { Breadcrumbs } from '@/web/components/Breadcrumbs'
 import { Footer } from '@/web/components/Footer'
 import { Navigation } from '@/web/components/Navigation'
@@ -12,6 +13,9 @@ interface AppLayoutProps {
 
 export const AppLayout = ({ children, showBreadcrumbs = true }: AppLayoutProps) => {
   const location = useLocation()
+
+  // 2. Activar el scroll to top para toda la aplicación pública
+  useScrollToTop()
 
   // Rutas donde NO queremos mostrar breadcrumbs
   const hideBreadcrumbsRoutes = ['/']
