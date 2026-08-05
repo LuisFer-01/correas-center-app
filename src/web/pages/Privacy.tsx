@@ -13,7 +13,7 @@ export const Privacy = () => {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
             Política de Privacidad
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-1xl mx-auto">
             Tu privacidad es importante para nosotros
           </p>
         </div>

@@ -1,6 +1,6 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { ArrowRight, Check, ChevronLeft, Filter, MessageCircle, RotateCcw, Sparkles } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const ProductSelector = () => {
   const { data: globals } = useGlobalData()
@@ -11,6 +11,9 @@ export const ProductSelector = () => {
   const [selections, setSelections] = useState<Record<string, any>>({})
   const [isAnimating, setIsAnimating] = useState(false)
   const [showResult, setShowResult] = useState(false)
+
+  // ✅ NUEVO: Ref para el contenedor del resultado final
+  const resultContainerRef = useRef<HTMLDivElement>(null)
 
   // Configuración de WhatsApp
   const WHATSAPP_NUMBER = '59177306576'
@@ -37,6 +40,19 @@ export const ProductSelector = () => {
     const timer = setTimeout(() => setIsAnimating(false), 300)
     return () => clearTimeout(timer)
   }, [currentStep])
+
+  // ✅ NUEVO: Efecto para centrar la vista cuando se muestra el resultado
+  useEffect(() => {
+    if (showResult && resultContainerRef.current) {
+      // Pequeño delay para asegurar que el DOM ya renderizó el resultado
+      setTimeout(() => {
+        resultContainerRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' // ✅ Esto centra el elemento en la pantalla
+        })
+      }, 100)
+    }
+  }, [showResult])
 
   // Manejar selección de industria (paso 0)
   const handleIndustriaSelect = (industria: any) => {
@@ -131,7 +147,11 @@ export const ProductSelector = () => {
     return (
       <section className="py-16 md:py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-[#EA0A2A] to-[#c90825] rounded-3xl shadow-2xl p-8 md:p-12 text-white">
+          {/* ✅ NUEVO: Asignar ref al contenedor del resultado */}
+          <div 
+            ref={resultContainerRef}
+            className="bg-gradient-to-br from-[#EA0A2A] to-[#c90825] rounded-3xl shadow-2xl p-8 md:p-12 text-white"
+          >
             {/* Header */}
             <div className="text-center mb-10">
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
