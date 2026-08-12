@@ -7,6 +7,7 @@ import { toast } from '@/admin/components/shared/Toast'
 import {
   eliminarCategoria,
   getCategorias,
+  getProductosActivos,
   restaurarCategoria,
 } from '@/admin/services/categoria.service'
 import type { Categoria } from '@/admin/types/categoria'
@@ -27,6 +28,10 @@ export const CategoriasIndex = () => {
   const [categoriaEliminar, setCategoriaEliminar] = useState<Categoria | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleted, setShowDeleted] = useState(false)
+  
+  // ✅ NUEVO: Estados para el filtro de productos
+  const [productos, setProductos] = useState<{ id: number; nombre: string }[]>([])
+  const [productoFiltro, setProductoFiltro] = useState<number | ''>('')
 
   const loadCategorias = async () => {
     setIsLoading(true)
@@ -41,8 +46,19 @@ export const CategoriasIndex = () => {
     }
   }
 
+  // ✅ NUEVO: Cargar productos activos para el filtro
+  const loadProductos = async () => {
+    try {
+      const data = await getProductosActivos()
+      setProductos(data)
+    } catch (error) {
+      console.error('Error al cargar productos:', error)
+    }
+  }
+
   useEffect(() => {
     loadCategorias()
+    loadProductos()
   }, [])
 
   const handleNuevaCategoria = () => {
@@ -99,6 +115,26 @@ export const CategoriasIndex = () => {
     }
     return true
   })
+
+  // ✅ NUEVO: Filtrar y ordenar categorías por producto
+  const categoriasFiltradas = filteredCategorias
+    .filter((c) => {
+      if (!productoFiltro) return true
+      return c.producto_id === Number(productoFiltro)
+    })
+    .sort((a, b) => {
+      // ✅ Ordenar por producto primero
+      if (a.producto?.nombre && b.producto?.nombre) {
+        const comp = a.producto.nombre.localeCompare(b.producto.nombre)
+        if (comp !== 0) return comp
+      } else if (a.producto?.nombre) {
+        return -1
+      } else if (b.producto?.nombre) {
+        return 1
+      }
+      // ✅ Luego ordenar por orden de categoría
+      return (a.orden || 0) - (b.orden || 0)
+    })
 
   const columns: ColumnDef<Categoria>[] = [
     {
@@ -168,7 +204,6 @@ export const CategoriasIndex = () => {
       header: 'Acciones',
       cell: ({ row }) => {
         const categoria = row.original
-
         if (categoria.estado === 'eliminado') {
           return (
             <Button
@@ -182,7 +217,6 @@ export const CategoriasIndex = () => {
             </Button>
           )
         }
-
         return (
           <div className="flex items-center gap-2">
             <RequirePermission permission="categorias.update">
@@ -244,21 +278,50 @@ export const CategoriasIndex = () => {
         }
       />
 
+      {/* ✅ NUEVO: Filtro de productos */}
+      {productos.length > 0 && (
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Filtrar por producto:
+          </label>
+          <select
+            value={productoFiltro}
+            onChange={(e) => setProductoFiltro(e.target.value ? Number(e.target.value) : '')}
+            className="px-4 py-2 rounded-lg bg-gray-600 text-white border-0 focus:ring-2 focus:ring-[#EA0A2A] focus:outline-none cursor-pointer hover:bg-gray-700 transition-colors"
+          >
+            <option value="">Todos los productos</option>
+            {productos.map((producto) => (
+              <option key={producto.id} value={producto.id}>
+                {producto.nombre}
+              </option>
+            ))}
+          </select>
+          {productoFiltro && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setProductoFiltro('')}
+              className="text-gray-600 dark:text-gray-400 hover:text-[#EA0A2A]"
+            >
+              Limpiar filtro
+            </Button>
+          )}
+        </div>
+      )}
+
       <DataTable
         columns={columns}
-        data={filteredCategorias}
+        data={categoriasFiltradas}
         searchKey="nombre"
         searchPlaceholder="Buscar categorías..."
         isLoading={isLoading}
       />
-
       <CategoriaForm
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         categoriaEditar={categoriaEditar}
         onSuccess={handleSuccess}
       />
-
       <ConfirmDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
