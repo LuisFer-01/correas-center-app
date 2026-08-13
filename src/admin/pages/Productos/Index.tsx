@@ -4,6 +4,7 @@ import { PageHeader } from '@/admin/components/shared/PageHeader'
 import { RequirePermission } from '@/admin/components/shared/RequirePermission'
 import { StatusBadge } from '@/admin/components/shared/StatusBadge'
 import { toast } from '@/admin/components/shared/Toast'
+import { DataTableSkeleton } from '@/admin/components/skeletons/DataTableSkeleton'
 import {
   eliminarProducto,
   getProductos,
@@ -14,9 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { ColumnDef } from '@tanstack/react-table'
-import { CirclePlus, Eye, Package, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'; // ✅ CirclePlus agregado
+import { CirclePlus, Eye, Package, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { MarcasAsociadasModal } from './components/MarcasAsociadasModal'; // ✅ Nuevo modal importado
+import { MarcasAsociadasModal } from './components/MarcasAsociadasModal'
 import { ProductoForm } from './components/ProductoForm'
 
 export const ProductosIndex = () => {
@@ -28,8 +29,6 @@ export const ProductosIndex = () => {
   const [productoEliminar, setProductoEliminar] = useState<Producto | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleted, setShowDeleted] = useState(false)
-  
-  // ✅ Estados para el modal de marcas
   const [isMarcasModalOpen, setIsMarcasModalOpen] = useState(false)
   const [productoParaMarcas, setProductoParaMarcas] = useState<Producto | null>(null)
 
@@ -60,7 +59,6 @@ export const ProductosIndex = () => {
     setIsFormOpen(true)
   }
 
-  // ✅ Nuevo handler para abrir el modal de marcas
   const handleGestionarMarcas = (producto: Producto) => {
     setProductoParaMarcas(producto)
     setIsMarcasModalOpen(true)
@@ -106,7 +104,7 @@ export const ProductosIndex = () => {
   const handleMarcasSuccess = () => {
     setIsMarcasModalOpen(false)
     setProductoParaMarcas(null)
-    loadProductos() // Recargar para reflejar cambios en la tabla
+    loadProductos()
   }
 
   const filteredProductos = productos.filter((p) => {
@@ -144,14 +142,11 @@ export const ProductosIndex = () => {
       header: 'Marcas',
       cell: ({ row }) => {
         const producto = row.original
-        // ✅ Filtrar solo marcas activas y ordenarlas
         const marcasActivas = (producto.marcas || [])
           .filter(m => m.estado === 'activo')
           .sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999))
-        
         const marcasParaMostrar = marcasActivas.slice(0, 3)
         const hayMas = marcasActivas.length > 3
-
         return (
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-1 items-center">
@@ -168,8 +163,6 @@ export const ProductosIndex = () => {
               {marcasActivas.length === 0 && (
                 <span className="text-sm text-gray-400 italic">Sin marcas</span>
               )}
-              
-              {/* ✅ Botón CirclePlus para abrir el modal */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -258,11 +251,20 @@ export const ProductosIndex = () => {
         }
       />
 
-      <DataTable columns={columns} data={filteredProductos} searchKey="nombre" searchPlaceholder="Buscar productos..." isLoading={isLoading} />
+      {/* ✅ NUEVO: Mostrar skeleton mientras carga */}
+      {isLoading ? (
+        <DataTableSkeleton columns={6} rows={8} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filteredProductos}
+          searchKey="nombre"
+          searchPlaceholder="Buscar productos..."
+          isLoading={isLoading}
+        />
+      )}
 
       <ProductoForm open={isFormOpen} onOpenChange={setIsFormOpen} productoEditar={productoEditar} onSuccess={handleSuccess} />
-
-      {/* ✅ Nuevo Modal de Marcas Asociadas */}
       {productoParaMarcas && (
         <MarcasAsociadasModal
           open={isMarcasModalOpen}
@@ -272,7 +274,6 @@ export const ProductosIndex = () => {
           onSuccess={handleMarcasSuccess}
         />
       )}
-
       <ConfirmDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}

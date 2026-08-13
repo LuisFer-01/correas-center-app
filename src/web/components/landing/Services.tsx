@@ -1,5 +1,4 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
-import { getSupabaseImageUrl } from '@/lib/supabase'
 import { OptimizedImage } from '@/web/components/OptimizedImage'
 import { ArrowRight, Wrench } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -33,9 +32,9 @@ export const Services = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {servicios.map((servicio) => {
             const slug = generateSlug(servicio.nombre)
-            const imageUrl = servicio.imagen
+            /* const imageUrl = servicio.imagen
               ? getSupabaseImageUrl(servicio.imagen, 'servicios-imagenes')
-              : null
+              : null */
 
             return (
               <Link

@@ -1,13 +1,13 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { getSupabaseImageUrl } from '@/lib/supabase'
+import { ProductCardSkeleton } from '@/web/components/skeletons/ProductCardSkeleton'
 import { ArrowRight, Grid3X3, Layers, List, Package, Search, SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 export const ProductsIndex = () => {
-  const { data: globals } = useGlobalData()
+  const { data: globals, isLoading } = useGlobalData()
   const productos = globals?.productos || []
-  
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedMarca, setSelectedMarca] = useState<string>('')
   const [selectedUso, setSelectedUso] = useState<string>('')
@@ -35,7 +35,6 @@ export const ProductsIndex = () => {
   const usosUnicos = useMemo(() => {
     const usos = new Set<string>()
     productos.forEach((producto: any) => {
-      // Como un producto tiene múltiples categorías, revisamos sus categorías para el uso
       producto.categorias?.forEach((cat: any) => {
         if (cat.uso) usos.add(cat.uso)
       })
@@ -46,7 +45,6 @@ export const ProductsIndex = () => {
   // Filtrar y ordenar productos
   const productosFiltrados = useMemo(() => {
     let resultado = [...productos]
-
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase()
       resultado = resultado.filter((p: any) =>
@@ -55,15 +53,12 @@ export const ProductsIndex = () => {
         p.marcas?.some((m: any) => m.nombre.toLowerCase().includes(term))
       )
     }
-
     if (selectedMarca) {
       resultado = resultado.filter((p: any) => p.marcas?.some((m: any) => m.id === Number(selectedMarca)))
     }
-
     if (selectedUso) {
       resultado = resultado.filter((p: any) => p.categorias?.some((c: any) => c.uso === selectedUso))
     }
-
     switch (orderBy) {
       case 'nombre_asc':
         resultado.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre))
@@ -90,6 +85,46 @@ export const ProductsIndex = () => {
   }
 
   const hasActiveFilters = searchTerm || selectedMarca || selectedUso || orderBy !== 'orden'
+
+  // ✅ NUEVO: Mostrar skeletons mientras carga
+  if (isLoading) {
+    return (
+      <>
+        <section className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-16 md:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="animate-pulse">
+              <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 mb-6">
+                <div className="w-4 h-4 bg-white/20 rounded-full" />
+                <div className="h-4 w-32 bg-white/20 rounded" />
+              </div>
+              <div className="h-12 w-96 bg-white/20 rounded mx-auto mb-4" />
+              <div className="h-5 w-128 bg-white/20 rounded mx-auto" />
+            </div>
+          </div>
+        </section>
+
+        <section className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="animate-pulse flex gap-4">
+              <div className="h-10 w-64 bg-gray-200 rounded-lg" />
+              <div className="h-10 w-32 bg-gray-200 rounded-lg" />
+              <div className="h-10 w-24 bg-gray-200 rounded-lg" />
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-16 bg-white min-h-[400px]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8' : 'space-y-4'}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <ProductCardSkeleton key={i} viewMode={viewMode} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </>
+    )
+  }
 
   return (
     <>
@@ -120,7 +155,7 @@ export const ProductsIndex = () => {
                 <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   <X size={16} />
                 </button>
-            )}
+              )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -150,7 +185,6 @@ export const ProductsIndex = () => {
               </div>
             </div>
           </div>
-
           <div className={`${showFilters ? 'block' : 'hidden'} md:block mt-3 pt-3 border-t border-gray-100`}>
             <div className="flex flex-wrap gap-3 items-center">
               <select value={selectedMarca} onChange={(e) => setSelectedMarca(e.target.value)} className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white focus:border-[#EA0A2A] focus:ring-2 focus:ring-[#EA0A2A]/20 transition-all">
