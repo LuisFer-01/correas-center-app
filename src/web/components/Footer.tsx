@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom'
 export const Footer = () => {
   const { data: globals, isLoading } = useGlobalData()
   const currentYear = new Date().getFullYear()
-
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -91,13 +90,15 @@ export const Footer = () => {
   }
 
   return (
-    <footer className="bg-gray-900 text-white relative">
+    <footer className="bg-gray-900 text-white relative" role="contentinfo">
       {/* Mensajes Flash (reemplazo de Inertia flash) */}
       {message && (
         <div
           className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-slide-in ${
             message.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
           }`}
+          role="alert"
+          aria-live="polite"
         >
           <span>{message.text}</span>
         </div>
@@ -111,7 +112,7 @@ export const Footer = () => {
           aria-label="Volver arriba"
           title="Volver arriba"
         >
-          <ArrowUp size={20} />
+          <ArrowUp size={20} aria-hidden="true" />
         </button>
       )}
 
@@ -125,10 +126,12 @@ export const Footer = () => {
                 Suscríbete a nuestro newsletter y recibe novedades, promociones y contenido exclusivo
               </p>
             </div>
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3">
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3" role="form" aria-label="Formulario de suscripción al newsletter">
               <div className="relative flex-1">
-                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                <label htmlFor="newsletter-email" className="sr-only">Correo electrónico</label>
                 <input
+                  id="newsletter-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -136,29 +139,35 @@ export const Footer = () => {
                   required
                   disabled={isSubmitting}
                   className="w-full pl-11 pr-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
+                  aria-required="true"
                 />
               </div>
-              <input
-                type="text"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Tu nombre (opcional)"
-                disabled={isSubmitting}
-                className="hidden sm:block px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
-              />
+              <div className="relative flex-1">
+                <label htmlFor="newsletter-nombre" className="sr-only">Nombre</label>
+                <input
+                  id="newsletter-nombre"
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Tu nombre (opcional)"
+                  disabled={isSubmitting}
+                  className="hidden sm:block px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105 flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Suscribirse al newsletter"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true"></div>
                     Enviando...
                   </>
                 ) : (
                   <>
-                    <Send size={18} />
+                    <Send size={18} aria-hidden="true" />
                     Suscribirse
                   </>
                 )}
@@ -173,7 +182,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           {/* COLUMNA 1: Logo y descripción */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-3 cursor-pointer mb-4">
+            <Link to="/" className="flex items-center gap-3 cursor-pointer mb-4" aria-label="Ir a la página de inicio">
               <h3 className="text-2xl font-bold tracking-tight">
                 {globals?.empresa?.nombre || 'CORREAS CENTER'}
               </h3>
@@ -184,7 +193,7 @@ export const Footer = () => {
             </p>
 
             {/* Redes sociales - ✅ USANDO COMPONENTE Icon */}
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-3 mb-6" role="list" aria-label="Redes sociales">
               {globals?.footer_redes_sociales &&
                 globals.footer_redes_sociales.map((red) => (
                   <a
@@ -195,18 +204,19 @@ export const Footer = () => {
                     className={`w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center transition-all ${
                       socialColors[red.icono || ''] || 'hover:bg-[#EA0A2A]'
                     }`}
-                    aria-label={red.titulo || 'Red social'}
+                    aria-label={`Visitar ${red.titulo || 'nuestra red social'}`}
                     title={red.titulo || ''}
+                    role="listitem"
                   >
                     {/* ✅ CAMBIO: Usar componente Icon en lugar de FontAwesomeIcon */}
-                    {red.icono && <Icon name={red.icono} size="lg" />}
+                    {red.icono && <Icon name={red.icono} size="lg" aria-hidden="true" />}
                   </a>
                 ))}
             </div>
 
             {/* Badge de licencia */}
             <div className="inline-flex items-center gap-2 bg-[#EA0A2A]/20 border border-[#EA0A2A]/30 rounded-lg px-3 py-2">
-              <div className="w-2 h-2 bg-[#EA0A2A] rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-[#EA0A2A] rounded-full animate-pulse" aria-hidden="true"></div>
               <span className="text-xs text-white font-semibold">Fabricante Autorizado SKF Bolivia</span>
             </div>
           </div>
@@ -214,16 +224,16 @@ export const Footer = () => {
           {/* COLUMNA 2: Productos */}
           <div className="lg:col-span-1">
             <h4 className="text-base font-bold mb-4 text-white flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-[#EA0A2A]"></span>
+              <span className="w-8 h-0.5 bg-[#EA0A2A]" aria-hidden="true"></span>
               Productos
             </h4>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-sm" role="list" aria-label="Lista de productos">
               {globals?.footer_productos &&
                 globals.footer_productos.slice(0, 8).map((item) => {
                   // Buscar el producto por registro_id
                   const producto = globals.productos.find((p) => p.id === item.registro_id)
                   return (
-                    <li key={item.id}>
+                    <li key={item.id} role="listitem">
                       {producto ? (
                         <Link
                           to={`/products/${producto.slug}`}
@@ -237,7 +247,7 @@ export const Footer = () => {
                     </li>
                   )
                 })}
-              <li>
+              <li role="listitem">
                 <Link
                   to="/products"
                   className="text-[#EA0A2A] font-semibold hover:text-white transition-colors inline-flex items-center gap-1"
@@ -251,15 +261,15 @@ export const Footer = () => {
           {/* COLUMNA 3: Aplicaciones y Servicios */}
           <div>
             <h4 className="text-base font-bold mb-4 text-white flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-[#EA0A2A]"></span>
+              <span className="w-8 h-0.5 bg-[#EA0A2A]" aria-hidden="true"></span>
               Aplicaciones
             </h4>
-            <ul className="space-y-2 text-sm mb-6">
+            <ul className="space-y-2 text-sm mb-6" role="list" aria-label="Lista de aplicaciones">
               {globals?.footer_industrias &&
                 globals.footer_industrias.slice(0, 6).map((item) => {
                   const industria = globals.industrias.find((i) => i.id === item.registro_id)
                   return (
-                    <li key={item.id}>
+                    <li key={item.id} role="listitem">
                       {industria ? (
                         <Link
                           to={`/applications/${industria.slug}`}
@@ -273,7 +283,7 @@ export const Footer = () => {
                     </li>
                   )
                 })}
-              <li>
+              <li role="listitem">
                 <Link
                   to="/applications"
                   className="text-[#EA0A2A] font-semibold hover:text-white transition-colors inline-flex items-center gap-1"
@@ -284,15 +294,15 @@ export const Footer = () => {
             </ul>
 
             <h4 className="text-base font-bold mb-4 text-white flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-[#EA0A2A]"></span>
+              <span className="w-8 h-0.5 bg-[#EA0A2A]" aria-hidden="true"></span>
               Servicios
             </h4>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-sm" role="list" aria-label="Lista de servicios">
               {globals?.footer_servicios &&
                 globals.footer_servicios.slice(0, 4).map((item) => {
                   const servicio = globals.servicios.find((s) => s.id === item.registro_id)
                   return (
-                    <li key={item.id}>
+                    <li key={item.id} role="listitem">
                       {servicio ? (
                         <Link
                           to={`/services/${servicio.nombre.toLowerCase().replace(/\s+/g, '-')}`}
@@ -306,7 +316,7 @@ export const Footer = () => {
                     </li>
                   )
                 })}
-              <li>
+              <li role="listitem">
                 <Link
                   to="/services"
                   className="text-[#EA0A2A] font-semibold hover:text-white transition-colors inline-flex items-center gap-1"
@@ -320,34 +330,36 @@ export const Footer = () => {
           {/* COLUMNA 4: Sucursales */}
           <div>
             <h4 className="text-base font-bold mb-3 text-white flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-[#EA0A2A]"></span>
+              <span className="w-8 h-0.5 bg-[#EA0A2A]" aria-hidden="true"></span>
               Nuestras Sucursales
             </h4>
-            <div className="space-y-4">
+            <div className="space-y-4" role="list" aria-label="Lista de sucursales">
               {globals?.sucursales &&
                 globals.sucursales.slice(0, 3).map((sucursal) => (
                   <div
                     key={sucursal.id}
                     className="border-l-2 border-[#EA0A2A]/30 pl-3 hover:border-[#EA0A2A] transition-colors"
+                    role="listitem"
                   >
                     <p className="text-white text-sm font-semibold mb-1">{sucursal.nombre}</p>
                     <div className="space-y-1 text-xs text-gray-400">
                       <div className="flex items-start gap-2">
-                        <MapPin size={12} className="flex-shrink-0 mt-0.5 text-[#EA0A2A]" />
+                        <MapPin size={12} className="flex-shrink-0 mt-0.5 text-[#EA0A2A]" aria-hidden="true" />
                         <span>{sucursal.direccion}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Phone size={12} className="flex-shrink-0 text-[#EA0A2A]" />
+                        <Phone size={12} className="flex-shrink-0 text-[#EA0A2A]" aria-hidden="true" />
                         <a
                           href={`tel:${sucursal.telefono.replace(/\s/g, '')}`}
                           className="hover:text-white transition-colors"
+                          aria-label={`Llamar a ${sucursal.nombre}: ${sucursal.telefono}`}
                         >
                           {sucursal.telefono}
                         </a>
                       </div>
                       {sucursal.horarios && (
                         <div className="flex items-start gap-2">
-                          <Clock size={12} className="flex-shrink-0 mt-0.5 text-[#EA0A2A]" />
+                          <Clock size={12} className="flex-shrink-0 mt-0.5 text-[#EA0A2A]" aria-hidden="true" />
                           <span>{sucursal.horarios}</span>
                         </div>
                       )}
@@ -367,7 +379,7 @@ export const Footer = () => {
               © {currentYear}{' '}
               <span className="font-semibold text-white">CORREAS CENTER LTDA.</span> Todos los derechos reservados.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
+            <nav className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400" role="navigation" aria-label="Enlaces del footer">
               <Link to="/privacy" className="hover:text-[#EA0A2A] transition-colors">
                 Política de Privacidad
               </Link>
@@ -377,7 +389,7 @@ export const Footer = () => {
               <Link to="/branches" className="hover:text-[#EA0A2A] transition-colors">
                 Mapa del Sitio
               </Link>
-            </div>
+            </nav>
           </div>
         </div>
       </div>

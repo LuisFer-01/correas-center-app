@@ -92,11 +92,11 @@ export const Navigation = () => {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-[#b1001b] z-50 shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 bg-[#b1001b] z-50 shadow-lg" role="navigation" aria-label="Navegación principal">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
           {/* LOGO */}
-          <Link to="/" className="flex items-center cursor-pointer group flex-shrink-0">
+          <Link to="/" className="flex items-center cursor-pointer group flex-shrink-0" aria-label="Ir a la página de inicio">
             <div className="relative h-10 w-auto sm:h-12 md:h-14 flex-shrink-0">
               {logoUrl ? (
                 <img
@@ -125,7 +125,9 @@ export const Navigation = () => {
             {/* BUSCADOR */}
             <div ref={searchContainerRef} className="relative">
               <form onSubmit={handleSearch} className="flex items-center">
+                <label htmlFor="search-desktop" className="sr-only">Buscar productos</label>
                 <input
+                  id="search-desktop"
                   type="text"
                   value={searchQuery}
                   onChange={(e) => {
@@ -135,16 +137,18 @@ export const Navigation = () => {
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Buscar productos..."
                   className="w-48 xl:w-64 px-3 xl:px-4 py-2 rounded-l-md border-0 bg-[#C0939A] focus:bg-[#D9B0B6] focus:outline-none focus:ring-2 focus:ring-white text-gray-900 placeholder:text-gray-700 transition-colors duration-200 text-sm xl:text-base"
+                  aria-label="Buscar productos"
                 />
                 <button
                   type="submit"
                   className="bg-white text-[#ea0a2cf8] px-3 xl:px-4 py-2 rounded-r-md hover:bg-gray-100 transition-colors"
+                  aria-label="Buscar"
                 >
-                  <Search size={24} />
+                  <Search size={24} aria-hidden="true" />
                 </button>
               </form>
               {showSuggestions && (
-                <div className="absolute top-full left-0 w-64 xl:w-80 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                <div className="absolute top-full left-0 w-64 xl:w-80 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50" role="listbox" aria-label="Sugerencias de búsqueda">
                   {searchQuery.length === 0 ? (
                     <>
                       <p className="px-4 py-2 text-xs text-gray-500 font-semibold uppercase">
@@ -156,6 +160,7 @@ export const Navigation = () => {
                             key={product.id}
                             onClick={() => handleSuggestionClick(product.nombre)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
+                            role="option"
                           >
                             {product.nombre}
                           </button>
@@ -182,12 +187,14 @@ export const Navigation = () => {
                 setActiveCategory(null)
               }}
             >
-              <button className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium">
+              <button 
+                className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium"
+                aria-label="Menú de productos"
+                aria-expanded={showProducts}
+                aria-haspopup="true"
+              >
                 Productos
-                <ChevronDown
-                  size={18}
-                  className={`transition-transform duration-200 ${showProducts ? 'rotate-180' : ''}`}
-                />
+                <ChevronDown size={18} className={`transition-transform duration-200 ${showProducts ? 'rotate-180' : ''}`} aria-hidden="true" />
               </button>
               <div
                 className={`absolute top-full left-0 w-[600px] bg-white rounded-lg shadow-2xl border border-gray-200 p-6 -translate-x-1/4 transition-all duration-300 max-h-[85vh] overflow-y-auto ${
@@ -195,13 +202,13 @@ export const Navigation = () => {
                     ? 'opacity-100 visible translate-y-0'
                     : 'opacity-0 invisible -translate-y-2 pointer-events-none'
                 }`}
+                role="menu"
               >
                 <div className="grid grid-cols-2 gap-4">
                   {menusProductos.map((menu: any, index: number) => {
                     const producto = globals?.productos.find((p) => p.id === menu.registro_id)
                     if (!producto) return null
                     const submenus = getSubmenusForMenu(menu)
-
                     return (
                       <div key={menu.id} className="relative">
                         <div
@@ -212,7 +219,7 @@ export const Navigation = () => {
                             to={menu.ruta}
                             className="flex items-center gap-2 font-bold text-[#EA0A2A] text-sm uppercase tracking-wide hover:underline"
                           >
-                            {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
+                            {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" aria-hidden="true" />}
                             {producto.nombre}
                           </Link>
                           {submenus.length > 0 && (
@@ -221,6 +228,7 @@ export const Navigation = () => {
                               className={`text-[#EA0A2A] transition-transform duration-300 ${
                                 activeCategory === index ? 'rotate-180' : ''
                               }`}
+                              aria-hidden="true"
                             />
                           )}
                         </div>
@@ -233,18 +241,18 @@ export const Navigation = () => {
                             }`}
                           >
                             <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
-                              <ul className="space-y-1">
+                              <ul className="space-y-1" role="menu">
                                 {submenus.map((submenu: any) => {
                                   // ✅ Verificar cargar_submenu del menú padre para la redirección
                                   const rutaDestino = menu.cargar_submenu === 'activo' ? submenu.ruta : menu.ruta
-                                  
                                   return (
-                                    <li key={submenu.id}>
+                                    <li key={submenu.id} role="none">
                                       <Link
                                         to={rutaDestino}
                                         className="flex items-center gap-2 text-gray-700 hover:text-[#EA0A2A] text-sm block py-1.5 px-3 rounded hover:bg-white transition-all"
+                                        role="menuitem"
                                       >
-                                        {menu.icono && <Icon name={menu.icono} size="xs" className="text-[#EA0A2A]/60" />}
+                                        {menu.icono && <Icon name={menu.icono} size="xs" className="text-[#EA0A2A]/60" aria-hidden="true" />}
                                         {submenu.ruta
                                           .split('/')
                                           .pop()
@@ -267,11 +275,15 @@ export const Navigation = () => {
 
             {/* APLICACIONES */}
             <div className="relative group">
-              <button className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium">
+              <button 
+                className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium"
+                aria-label="Menú de aplicaciones"
+                aria-haspopup="true"
+              >
                 Aplicaciones
-                <ChevronDown size={18} className="transition-transform duration-200 group-hover:rotate-180" />
+                <ChevronDown size={18} className="transition-transform duration-200 group-hover:rotate-180" aria-hidden="true" />
               </button>
-              <div className="absolute top-full left-0 w-64 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="absolute top-full left-0 w-64 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" role="menu">
                 {menusAplicaciones.map((menu: any) => {
                   const industria = globals?.industrias.find((i) => i.id === menu.registro_id)
                   if (!industria) return null
@@ -280,8 +292,9 @@ export const Navigation = () => {
                       key={menu.id}
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
+                      role="menuitem"
                     >
-                      {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
+                      {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" aria-hidden="true" />}
                       <span>{industria.nombre}</span>
                     </Link>
                   )
@@ -291,11 +304,15 @@ export const Navigation = () => {
 
             {/* SERVICIOS */}
             <div className="relative group">
-              <button className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium">
+              <button 
+                className="flex items-center gap-1 text-white hover:text-gray-200 transition-colors py-2 font-medium"
+                aria-label="Menú de servicios"
+                aria-haspopup="true"
+              >
                 Servicios
-                <ChevronDown size={18} className="transition-transform duration-200 group-hover:rotate-180" />
+                <ChevronDown size={18} className="transition-transform duration-200 group-hover:rotate-180" aria-hidden="true" />
               </button>
-              <div className="absolute top-full left-0 w-72 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="absolute top-full left-0 w-72 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" role="menu">
                 {menusServicios.map((menu: any) => {
                   const servicio = globals?.servicios.find((s) => s.id === menu.registro_id)
                   if (!servicio) return null
@@ -304,8 +321,9 @@ export const Navigation = () => {
                       key={menu.id}
                       to={menu.ruta}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#EA0A2A] transition-colors"
+                      role="menuitem"
                     >
-                      {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" />}
+                      {menu.icono && <Icon name={menu.icono} size="sm" className="text-[#EA0A2A]" aria-hidden="true" />}
                       <span>{servicio.nombre}</span>
                     </Link>
                   )
@@ -325,9 +343,11 @@ export const Navigation = () => {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden text-white p-2 hover:bg-white/10 rounded-md transition-colors"
-            aria-label="Toggle menu"
+            aria-label={isOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
           </button>
         </div>
       </div>
@@ -335,20 +355,28 @@ export const Navigation = () => {
       {/* MENÚ MÓVIL */}
       {isOpen && (
         <>
-          <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsOpen(false)} />
-          <div className="fixed top-16 sm:top-18 right-0 bottom-0 w-[85%] max-w-sm bg-[#b1001b] shadow-2xl lg:hidden z-50 overflow-y-auto animate-slide-in">
+          <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsOpen(false)} aria-hidden="true" />
+          <div 
+            id="mobile-menu"
+            className="fixed top-16 sm:top-18 right-0 bottom-0 w-[85%] max-w-sm bg-[#b1001b] shadow-2xl lg:hidden z-50 overflow-y-auto animate-slide-in"
+            role="navigation"
+            aria-label="Menú de navegación móvil"
+          >
             <div className="px-4 py-4 space-y-4">
               {/* Buscador móvil */}
               <form onSubmit={handleSearch} className="flex items-center">
+                <label htmlFor="search-mobile" className="sr-only">Buscar productos</label>
                 <input
+                  id="search-mobile"
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar productos..."
                   className="flex-1 px-4 py-3 rounded-l-md border-0 bg-[#C0939A] focus:bg-[#D9B0B6] focus:outline-none text-gray-900 placeholder:text-gray-700 text-sm"
+                  aria-label="Buscar productos en móvil"
                 />
-                <button type="submit" className="bg-white text-[#EA0A2A] px-4 py-3 rounded-r-md">
-                  <Search size={20} />
+                <button type="submit" className="bg-white text-[#EA0A2A] px-4 py-3 rounded-r-md" aria-label="Buscar">
+                  <Search size={20} aria-hidden="true" />
                 </button>
               </form>
               <div className="border-t border-white/20"></div>
@@ -360,15 +388,16 @@ export const Navigation = () => {
                   const producto = globals?.productos.find((p) => p.id === menu.registro_id)
                   if (!producto) return null
                   const submenus = getSubmenusForMenu(menu)
-
                   return (
                     <div key={menu.id} className="rounded-md overflow-hidden">
                       <button
                         onClick={() => setMobileActiveCategory(mobileActiveCategory === index ? null : index)}
                         className="w-full flex items-center justify-between px-3 py-2.5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
+                        aria-expanded={mobileActiveCategory === index}
+                        aria-controls={`mobile-submenu-${index}`}
                       >
                         <span className="flex items-center gap-2">
-                          {menu.icono && <Icon name={menu.icono} size="sm" />}
+                          {menu.icono && <Icon name={menu.icono} size="sm" aria-hidden="true" />}
                           {producto.nombre}
                         </span>
                         {submenus.length > 0 && (
@@ -377,11 +406,13 @@ export const Navigation = () => {
                             className={`text-white/80 transition-transform duration-300 ${
                               mobileActiveCategory === index ? 'rotate-180' : ''
                             }`}
+                            aria-hidden="true"
                           />
                         )}
                       </button>
                       {submenus.length > 0 && (
                         <div
+                          id={`mobile-submenu-${index}`}
                           className={`overflow-hidden transition-all duration-300 ease-in-out ${
                             mobileActiveCategory === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                           }`}
@@ -397,7 +428,6 @@ export const Navigation = () => {
                             {submenus.map((submenu: any) => {
                               // ✅ Verificar cargar_submenu del menú padre para la redirección
                               const rutaDestino = menu.cargar_submenu === 'activo' ? submenu.ruta : menu.ruta
-                              
                               return (
                                 <Link
                                   key={submenu.id}
@@ -405,7 +435,7 @@ export const Navigation = () => {
                                   className="flex items-center gap-2 text-white/90 hover:text-white hover:bg-white/10 py-2 px-3 text-sm rounded transition-all"
                                   onClick={() => setIsOpen(false)}
                                 >
-                                  {menu.icono && <Icon name={menu.icono} size="xs" />}
+                                  {menu.icono && <Icon name={menu.icono} size="xs" aria-hidden="true" />}
                                   <span>
                                     •{' '}
                                     {submenu.ruta
@@ -439,7 +469,7 @@ export const Navigation = () => {
                       className="flex items-center gap-3 text-white hover:bg-white/10 px-3 py-2.5 rounded-md transition-colors text-sm"
                       onClick={() => setIsOpen(false)}
                     >
-                      {menu.icono && <Icon name={menu.icono} size="sm" />}
+                      {menu.icono && <Icon name={menu.icono} size="sm" aria-hidden="true" />}
                       <span>{industria.nombre}</span>
                     </Link>
                   )
@@ -460,7 +490,7 @@ export const Navigation = () => {
                       className="flex items-center gap-3 text-white hover:bg-white/10 px-3 py-2.5 rounded-md transition-colors text-sm"
                       onClick={() => setIsOpen(false)}
                     >
-                      {menu.icono && <Icon name={menu.icono} size="sm" />}
+                      {menu.icono && <Icon name={menu.icono} size="sm" aria-hidden="true" />}
                       <span>{servicio.nombre}</span>
                     </Link>
                   )
@@ -488,8 +518,9 @@ export const Navigation = () => {
               <a
                 href={`tel:+${globals?.whatsapp?.numero || '59177306576'}`}
                 className="flex items-center justify-center gap-2 bg-white text-[#EA0A2A] px-4 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors"
+                aria-label={`Llamar al número ${globals?.whatsapp?.numero || '59177306576'}`}
               >
-                <Phone size={18} /> Llamar ahora
+                <Phone size={18} aria-hidden="true" /> Llamar ahora
               </a>
             </div>
           </div>
