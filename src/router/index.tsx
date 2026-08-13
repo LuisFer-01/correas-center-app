@@ -1,104 +1,131 @@
+import { Spinner } from '@/components/ui/spinner'
+import React, { Suspense } from 'react'
+import { createBrowserRouter } from 'react-router-dom'
+
+// ============================================================================
+// 1. IMPORTACIÓN ESTÁTICA DE LAYOUTS (La "cáscara" de la app)
+// ============================================================================
 import { ProtectedRoute } from '@/admin/components/ProtectedRoute'
 import { AdminLayout } from '@/admin/layouts/AdminLayout'
 import { PublicLayout } from '@/web/layouts/PublicLayout'
-import { Home } from '@/web/pages/Home'
-import { createBrowserRouter } from 'react-router-dom'
-import { AtributosIndex } from '../admin/pages/Atributos/Index'
-import { AuditoriaIndex } from '../admin/pages/Auditoria/Index'
-import { CategoriasIndex } from '../admin/pages/Categorias/Index'
-import { ConfiguracionIndex } from '../admin/pages/Configuracion/Index'
-import { ContactosIndex } from '../admin/pages/Contactos/Index'
-import { Dashboard } from '../admin/pages/Dashboard'
-import { EmpresasIndex } from '../admin/pages/Empresas/Index'
-import { FootersIndex } from '../admin/pages/Footers/Index'
-import { IndustriasIndex } from '../admin/pages/Industrias/Index'
-import { Login } from '../admin/pages/Login'
-import { MarcasIndex } from '../admin/pages/Marcas/Index'
-import { MenusIndex } from '../admin/pages/Menus/Index'
-import { PasosWizardIndex } from '../admin/pages/PasosWizard/Index'
-import { PerfilIndex } from '../admin/pages/Perfil/Index'
-import { ProductosIndex } from '../admin/pages/Productos/Index'
-import { RegistrosIndex } from '../admin/pages/Registros/Index'
-import { RolesIndex } from '../admin/pages/Roles/Index'
-import { SeccionesIndex } from '../admin/pages/Secciones/Index'
-import { ServiciosIndex } from '../admin/pages/Servicios/Index'
-import { SucursalesIndex } from '../admin/pages/Sucursales/Index'
-import { SuscriptoresIndex } from '../admin/pages/Suscriptores/Index'
-import { TiposAtributoIndex } from '../admin/pages/TiposAtributo/Index'
-import { TiposSeccionIndex } from '../admin/pages/TiposSeccion/Index'
-import { UsuariosIndex } from '../admin/pages/Usuarios/Index'
-import { About } from '../web/pages/About'
-import { ApplicationsIndex } from '../web/pages/Applications/Index'
-import { ApplicationsShow } from '../web/pages/Applications/Show'
-import { Branches } from '../web/pages/Branches'
-import { Contact } from '../web/pages/Contact'
-import { Privacy } from '../web/pages/Privacy'
-import { CategoryDetail } from '../web/pages/Products/CategoryDetail'
-import { ProductsIndex } from '../web/pages/Products/Index'
-import { ProductShow } from '../web/pages/Products/Show'
-import { Results } from '../web/pages/Search/Results'
-import { ServicesIndex } from '../web/pages/Services/Index'
-import { ServicesShow } from '../web/pages/Services/Show'
-import { Terms } from '../web/pages/Terms'
 
-// Placeholder pages (se reemplazarán en las Fases 2 y 4)
-// const HomePage = () => <div className="p-4">Página de Inicio (Web)</div>
-// const AdminDashboard = () => <div className="p-4">Dashboard del Admin</div>
-// const AdminLogin = () => <div className="p-4">Login del Admin</div>
+// ============================================================================
+// 2. HELPER PARA LAZY LOAD DE EXPORTACIONES NOMBRADAS
+// ============================================================================
+// Esto soluciona el error de TypeScript: "La propiedad default falta..."
+const lazyLoad = (importFunc: () => Promise<any>, exportName: string) =>
+  React.lazy(() => importFunc().then((module) => ({ default: module[exportName] })))
 
+// ============================================================================
+// 3. IMPORTACIÓN LAZY (Diferida) DE PÁGINAS
+// ============================================================================
+
+// --- Rutas Públicas ---
+const Home = lazyLoad(() => import('@/web/pages/Home'), 'Home')
+const Results = lazyLoad(() => import('@/web/pages/Search/Results'), 'Results')
+const ProductsIndex = lazyLoad(() => import('@/web/pages/Products/Index'), 'ProductsIndex')
+const ProductShow = lazyLoad(() => import('@/web/pages/Products/Show'), 'ProductShow')
+const CategoryDetail = lazyLoad(() => import('@/web/pages/Products/CategoryDetail'), 'CategoryDetail')
+const ApplicationsIndex = lazyLoad(() => import('@/web/pages/Applications/Index'), 'ApplicationsIndex')
+const ApplicationsShow = lazyLoad(() => import('@/web/pages/Applications/Show'), 'ApplicationsShow')
+const ServicesIndex = lazyLoad(() => import('@/web/pages/Services/Index'), 'ServicesIndex')
+const ServicesShow = lazyLoad(() => import('@/web/pages/Services/Show'), 'ServicesShow')
+const About = lazyLoad(() => import('@/web/pages/About'), 'About')
+const Privacy = lazyLoad(() => import('@/web/pages/Privacy'), 'Privacy')
+const Terms = lazyLoad(() => import('@/web/pages/Terms'), 'Terms')
+const Branches = lazyLoad(() => import('@/web/pages/Branches'), 'Branches')
+const Contact = lazyLoad(() => import('@/web/pages/Contact'), 'Contact')
+
+// --- Rutas de Admin ---
+const Login = lazyLoad(() => import('@/admin/pages/Login'), 'Login')
+const Dashboard = lazyLoad(() => import('@/admin/pages/Dashboard'), 'Dashboard')
+const PerfilIndex = lazyLoad(() => import('@/admin/pages/Perfil/Index'), 'PerfilIndex')
+const EmpresasIndex = lazyLoad(() => import('@/admin/pages/Empresas/Index'), 'EmpresasIndex')
+const SucursalesIndex = lazyLoad(() => import('@/admin/pages/Sucursales/Index'), 'SucursalesIndex')
+const MarcasIndex = lazyLoad(() => import('@/admin/pages/Marcas/Index'), 'MarcasIndex')
+const ProductosIndex = lazyLoad(() => import('@/admin/pages/Productos/Index'), 'ProductosIndex')
+const CategoriasIndex = lazyLoad(() => import('@/admin/pages/Categorias/Index'), 'CategoriasIndex')
+const ServiciosIndex = lazyLoad(() => import('@/admin/pages/Servicios/Index'), 'ServiciosIndex')
+const IndustriasIndex = lazyLoad(() => import('@/admin/pages/Industrias/Index'), 'IndustriasIndex')
+const MenusIndex = lazyLoad(() => import('@/admin/pages/Menus/Index'), 'MenusIndex')
+const FootersIndex = lazyLoad(() => import('@/admin/pages/Footers/Index'), 'FootersIndex')
+const SeccionesIndex = lazyLoad(() => import('@/admin/pages/Secciones/Index'), 'SeccionesIndex')
+const RegistrosIndex = lazyLoad(() => import('@/admin/pages/Registros/Index'), 'RegistrosIndex')
+const RolesIndex = lazyLoad(() => import('@/admin/pages/Roles/Index'), 'RolesIndex')
+const UsuariosIndex = lazyLoad(() => import('@/admin/pages/Usuarios/Index'), 'UsuariosIndex')
+const ContactosIndex = lazyLoad(() => import('@/admin/pages/Contactos/Index'), 'ContactosIndex')
+const SuscriptoresIndex = lazyLoad(() => import('@/admin/pages/Suscriptores/Index'), 'SuscriptoresIndex')
+const AuditoriaIndex = lazyLoad(() => import('@/admin/pages/Auditoria/Index'), 'AuditoriaIndex')
+const PasosWizardIndex = lazyLoad(() => import('@/admin/pages/PasosWizard/Index'), 'PasosWizardIndex')
+const TiposAtributoIndex = lazyLoad(() => import('@/admin/pages/TiposAtributo/Index'), 'TiposAtributoIndex')
+const AtributosIndex = lazyLoad(() => import('@/admin/pages/Atributos/Index'), 'AtributosIndex')
+const TiposSeccionIndex = lazyLoad(() => import('@/admin/pages/TiposSeccion/Index'), 'TiposSeccionIndex')
+const ConfiguracionIndex = lazyLoad(() => import('@/admin/pages/Configuracion/Index'), 'ConfiguracionIndex')
+
+// ============================================================================
+// 4. COMPONENTE FALLBACK (Se muestra mientras carga la ruta)
+// ============================================================================
+const PageLoader = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-gray-900">
+    <Spinner className="h-10 w-10 text-[#EA0A2A]" />
+  </div>
+)
+
+// ============================================================================
+// 5. CONFIGURACIÓN DEL ROUTER
+// ============================================================================
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <PublicLayout />,
     children: [
-      { index: true, element: <Home /> },
-      { path: 'search', element: <Results /> },
-      { path: 'products', element: <ProductsIndex /> },
-      { path: 'products/:slug', element: <ProductShow /> },
-      { path: 'products/:productSlug/:categorySlug', element: <CategoryDetail /> },
-      { path: 'applications', element: <ApplicationsIndex /> },
-      { path: 'applications/:slug', element: <ApplicationsShow /> },
-      { path: 'services', element: <ServicesIndex /> },
-      { path: 'services/:slug', element: <ServicesShow /> },
-      { path: 'about', element: <About /> },
-      { path: 'privacy', element: <Privacy /> },
-      { path: 'terms', element: <Terms /> },
-      { path: 'branches', element: <Branches /> },
-      { path: 'contact', element: <Contact /> }, 
+      { index: true, element: <Suspense fallback={<PageLoader />}><Home /></Suspense> },
+      { path: 'search', element: <Suspense fallback={<PageLoader />}><Results /></Suspense> },
+      { path: 'products', element: <Suspense fallback={<PageLoader />}><ProductsIndex /></Suspense> },
+      { path: 'products/:slug', element: <Suspense fallback={<PageLoader />}><ProductShow /></Suspense> },
+      { path: 'products/:productSlug/:categorySlug', element: <Suspense fallback={<PageLoader />}><CategoryDetail /></Suspense> },
+      { path: 'applications', element: <Suspense fallback={<PageLoader />}><ApplicationsIndex /></Suspense> },
+      { path: 'applications/:slug', element: <Suspense fallback={<PageLoader />}><ApplicationsShow /></Suspense> },
+      { path: 'services', element: <Suspense fallback={<PageLoader />}><ServicesIndex /></Suspense> },
+      { path: 'services/:slug', element: <Suspense fallback={<PageLoader />}><ServicesShow /></Suspense> },
+      { path: 'about', element: <Suspense fallback={<PageLoader />}><About /></Suspense> },
+      { path: 'privacy', element: <Suspense fallback={<PageLoader />}><Privacy /></Suspense> },
+      { path: 'terms', element: <Suspense fallback={<PageLoader />}><Terms /></Suspense> },
+      { path: 'branches', element: <Suspense fallback={<PageLoader />}><Branches /></Suspense> },
+      { path: 'contact', element: <Suspense fallback={<PageLoader />}><Contact /></Suspense> },
     ],
   },
   {
     path: '/admin',
     element: <AdminLayout />,
     children: [
-      { path: 'login', element: <Login /> },
+      { path: 'login', element: <Suspense fallback={<PageLoader />}><Login /></Suspense> },
       {
-        // Todas las rutas dentro de este bloque estarán protegidas
         element: <ProtectedRoute />,
         children: [
-          { index: true, element: <Dashboard /> },
-          { path: 'perfil', element: <PerfilIndex /> },
-          { path: 'empresas', element: <EmpresasIndex /> },
-          { path: 'sucursales', element: <SucursalesIndex /> },
-          { path: 'marcas', element: <MarcasIndex /> },
-          { path: 'productos', element: <ProductosIndex /> },
-          { path: 'categorias', element: <CategoriasIndex /> },
-          { path: 'servicios', element: <ServiciosIndex /> },
-          { path: 'industrias', element: <IndustriasIndex /> },
-          { path: 'menus', element: <MenusIndex /> },
-          { path: 'footers', element: <FootersIndex /> },
-          { path: 'secciones', element: <SeccionesIndex /> },
-          { path: 'registros', element: <RegistrosIndex /> },
-          { path: 'roles', element: <RolesIndex /> },
-          { path: 'usuarios', element: <UsuariosIndex /> },
-          { path: 'contactos', element: <ContactosIndex /> },
-          { path: 'suscriptores', element: <SuscriptoresIndex /> },
-          { path: 'auditoria', element: <AuditoriaIndex /> },
-          { path: 'pasos-wizard', element: <PasosWizardIndex /> },
-          { path: 'tipos-atributo', element: <TiposAtributoIndex /> },
-          { path: 'atributos', element: <AtributosIndex /> },
-          { path: 'tipos-seccion', element: <TiposSeccionIndex /> },
-          { path: 'configuracion', element: <ConfiguracionIndex /> }
+          { index: true, element: <Suspense fallback={<PageLoader />}><Dashboard /></Suspense> },
+          { path: 'perfil', element: <Suspense fallback={<PageLoader />}><PerfilIndex /></Suspense> },
+          { path: 'empresas', element: <Suspense fallback={<PageLoader />}><EmpresasIndex /></Suspense> },
+          { path: 'sucursales', element: <Suspense fallback={<PageLoader />}><SucursalesIndex /></Suspense> },
+          { path: 'marcas', element: <Suspense fallback={<PageLoader />}><MarcasIndex /></Suspense> },
+          { path: 'productos', element: <Suspense fallback={<PageLoader />}><ProductosIndex /></Suspense> },
+          { path: 'categorias', element: <Suspense fallback={<PageLoader />}><CategoriasIndex /></Suspense> },
+          { path: 'servicios', element: <Suspense fallback={<PageLoader />}><ServiciosIndex /></Suspense> },
+          { path: 'industrias', element: <Suspense fallback={<PageLoader />}><IndustriasIndex /></Suspense> },
+          { path: 'menus', element: <Suspense fallback={<PageLoader />}><MenusIndex /></Suspense> },
+          { path: 'footers', element: <Suspense fallback={<PageLoader />}><FootersIndex /></Suspense> },
+          { path: 'secciones', element: <Suspense fallback={<PageLoader />}><SeccionesIndex /></Suspense> },
+          { path: 'registros', element: <Suspense fallback={<PageLoader />}><RegistrosIndex /></Suspense> },
+          { path: 'roles', element: <Suspense fallback={<PageLoader />}><RolesIndex /></Suspense> },
+          { path: 'usuarios', element: <Suspense fallback={<PageLoader />}><UsuariosIndex /></Suspense> },
+          { path: 'contactos', element: <Suspense fallback={<PageLoader />}><ContactosIndex /></Suspense> },
+          { path: 'suscriptores', element: <Suspense fallback={<PageLoader />}><SuscriptoresIndex /></Suspense> },
+          { path: 'auditoria', element: <Suspense fallback={<PageLoader />}><AuditoriaIndex /></Suspense> },
+          { path: 'pasos-wizard', element: <Suspense fallback={<PageLoader />}><PasosWizardIndex /></Suspense> },
+          { path: 'tipos-atributo', element: <Suspense fallback={<PageLoader />}><TiposAtributoIndex /></Suspense> },
+          { path: 'atributos', element: <Suspense fallback={<PageLoader />}><AtributosIndex /></Suspense> },
+          { path: 'tipos-seccion', element: <Suspense fallback={<PageLoader />}><TiposSeccionIndex /></Suspense> },
+          { path: 'configuracion', element: <Suspense fallback={<PageLoader />}><ConfiguracionIndex /></Suspense> },
         ],
       },
     ],
