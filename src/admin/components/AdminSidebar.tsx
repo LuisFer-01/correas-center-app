@@ -264,7 +264,7 @@ export const AdminSidebar = () => {
             Correas Center Admin
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
-            v1.0.11
+            v1.0.12
           </p>
         </div>
       </div>

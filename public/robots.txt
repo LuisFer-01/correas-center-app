@@ -1,0 +1,9 @@
+# Permitir que todos los motores de búsqueda rastreen el sitio
+User-agent: *
+Allow: /
+
+# Bloquear el acceso al panel de administración (Seguridad y SEO)
+Disallow: /admin/
+
+# Indicar la ubicación del mapa del sitio
+Sitemap: https://correascenter.netlify.app/sitemap.xml

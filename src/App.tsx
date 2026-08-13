@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { GoogleAnalytics } from './admin/components/analytics/GoogleAnalytics'
-import { TawkTo } from './admin/components/chat/TawkTo'
 import { router } from './router'
 
 function App() {
@@ -21,12 +20,12 @@ function App() {
   )
 
   // Actualizar el título de la pestaña del navegador
-  document.title = import.meta.env.VITE_APP_TITLE || 'Correas Center'
+  //document.title = import.meta.env.VITE_APP_TITLE || 'Correas Center'
 
   return (
     <QueryClientProvider client={queryClient}>
       <GoogleAnalytics />
-      <TawkTo />
+      {/* <TawkTo /> */}
       <RouterProvider router={router} />
       <Toaster
         position='top-right'
