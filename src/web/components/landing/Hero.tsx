@@ -1,5 +1,6 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { getSupabaseImageUrl } from '@/lib/supabase'
+import { OptimizedImage } from '@/web/components/OptimizedImage'
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -73,22 +74,33 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Fondo con imagen */}
+      {/* Fondo con imagen optimizada */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/15 to-black/10">
-        <img
-          src={currentSlideData.image ?? undefined}
-          alt="Industrial background"
-          className="absolute w-full h-full object-cover transition-opacity duration-[4000ms] ease-in-out"
-          style={{ opacity: 1 }}
-        />
-        {previousSlide !== currentSlide && (
-          <img
-            src={carouselSlides[previousSlide].image ?? undefined}
-            alt=""
-            className="absolute w-full h-full object-cover transition-opacity duration-[4000ms] ease-in-out"
-            style={{ opacity: 0 }}
-            aria-hidden="true"
+        <div className="absolute inset-0">
+          <OptimizedImage
+            src={currentSlideData.image}
+            alt="Industrial background"
+            bucket="secciones-imagenes"
+            className="absolute w-full h-full"
+            objectFit="cover"
+            quality={70}
+            priority={currentSlide === 0} // Solo el primer slide es priority
+            placeholder={
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 animate-pulse" />
+            }
           />
+        </div>
+        {previousSlide !== currentSlide && (
+          <div className="absolute inset-0 opacity-0" aria-hidden="true">
+            <OptimizedImage
+              src={carouselSlides[previousSlide].image}
+              alt=""
+              bucket="secciones-imagenes"
+              className="absolute w-full h-full"
+              objectFit="cover"
+              quality={70}
+            />
+          </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-black/15"></div>
       </div>

@@ -1,5 +1,5 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
-import { getSupabaseImageUrl } from '@/lib/supabase'
+import { OptimizedImage } from '@/web/components/OptimizedImage'
 import { useEffect, useState } from 'react'
 
 export const Brands = () => {
@@ -53,17 +53,29 @@ export const Brands = () => {
               {duplicatedMarcas.map((marca, index) => (
                 <div
                   key={`${marca.id}-${index}`}
-                  className="flex-shrink-0 w-48 h-32 flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200 hover:border-[#EA0A2A] hover:shadow-lg transition-all duration-300 p-4"
+                  className="flex-shrink-0 w-44 h-32 flex items-center justify-center bg-white rounded-lg border border-gray-200 hover:border-[#EA0A2A] hover:shadow-lg transition-all duration-300 p-3 overflow-hidden"
                 >
                   {marca.logo ? (
-                    <img
-                      src={getSupabaseImageUrl(marca.logo, 'marcas-logos') || ''}
+                    <OptimizedImage
+                      src={marca.logo}
                       alt={marca.nombre}
-                      className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all duration-300"
+                      bucket="marcas-logos"
+                      className="w-full h-full object-contain grayscale hover:grayscale-0 transition-all duration-300"
+                      width={200}
+                      height={150}
+                      quality={90}
+                      objectFit="contain"
+                      fallback={
+                        <div className="text-center">
+                          <div className="text-sm font-bold text-gray-700 hover:text-[#EA0A2A] transition-colors">
+                            {marca.nombre}
+                          </div>
+                        </div>
+                      }
                     />
                   ) : (
                     <div className="text-center">
-                      <div className="text-lg font-bold text-gray-700 hover:text-[#EA0A2A] transition-colors">
+                      <div className="text-sm font-bold text-gray-700 hover:text-[#EA0A2A] transition-colors">
                         {marca.nombre}
                       </div>
                     </div>

@@ -1,5 +1,6 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { getSupabaseImageUrl } from '@/lib/supabase'
+import { OptimizedImage } from '@/web/components/OptimizedImage'
 import { ArrowRight, Wrench } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -44,11 +45,22 @@ export const Services = () => {
               >
                 {/* Imagen del servicio */}
                 <div className="relative h-48 bg-gradient-to-br from-[#EA0A2A]/10 to-[#EA0A2A]/20 overflow-hidden">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
+                  {servicio.imagen ? (
+                    <OptimizedImage
+                      src={servicio.imagen}
                       alt={servicio.nombre}
+                      bucket="servicios-imagenes"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      width={400}
+                      height={300}
+                      quality={75}
+                      fallback={
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-[#EA0A2A]/10 p-4 rounded-full">
+                            <Wrench size={48} className="text-[#EA0A2A]" />
+                          </div>
+                        </div>
+                      }
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">

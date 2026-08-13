@@ -1,5 +1,5 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
-import { getSupabaseImageUrl } from '@/lib/supabase'
+import { OptimizedImage } from '@/web/components/OptimizedImage'
 import { ArrowRight, Package } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -43,16 +43,24 @@ export const Products = () => {
                 {/* Imagen del producto - ✅ FONDO BLANCO */}
                 <div className="relative h-48 bg-white overflow-hidden">
                   {producto.imagen ? (
-                    <img
-                      src={getSupabaseImageUrl(producto.imagen, 'productos-imagenes') || ''}
+                    <OptimizedImage
+                      src={producto.imagen}
                       alt={producto.nombre}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      bucket="productos-imagenes"
+                      className="w-full h-full group-hover:scale-110 transition-transform duration-500"
+                      width={400}
+                      height={300}
+                      quality={75}
+                      objectFit="cover"
+                      fallback={
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Package size={64} className="text-gray-300" />
+                        </div>
+                      }
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-gray-100 p-4 rounded-full">
-                        <Package size={48} className="text-gray-400" />
-                      </div>
+                      <Package size={64} className="text-gray-300" />
                     </div>
                   )}
                   {/* Overlay en hover */}
