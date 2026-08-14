@@ -1,4 +1,3 @@
-import { useChatConfig } from '@/hooks/useSiteConfig'
 import { useEffect } from 'react'
 
 // Declarar Tawk_API globalmente
@@ -10,28 +9,20 @@ declare global {
 }
 
 export function TawkTo() {
-  const { config } = useChatConfig()
+  // Leemos directamente de las variables de entorno
+  const propertyId = import.meta.env.VITE_TAWK_PROPERTY_ID
+  const widgetId = import.meta.env.VITE_TAWK_WIDGET_ID
 
   useEffect(() => {
-    // No cargar si no está activo o faltan IDs
-    if (
-      !config.tawk_activo ||
-      !config.tawk_property_id ||
-      !config.tawk_widget_id
-    ) {
+    // Si faltan los IDs, no hacemos nada
+    if (!propertyId || !widgetId) {
       return
     }
 
-    // No cargar en desarrollo (opcional)
-    if (import.meta.env.DEV) {
-      console.log('[Tawk.to] Chat desactivado en modo desarrollo')
-      return
-    }
-
-    // Verificar si el script ya fue cargado
+    // Verificar si el script ya fue cargado para evitar duplicados
     const existingScript = document.querySelector('script[src*="embed.tawk.to"]')
     if (existingScript) {
-      return // Ya está cargado
+      return
     }
 
     // Inicializar Tawk_API global
@@ -41,7 +32,7 @@ export function TawkTo() {
     // Crear e inyectar el script
     const script = document.createElement('script')
     script.async = true
-    script.src = `https://embed.tawk.to/${config.tawk_property_id}/${config.tawk_widget_id}`
+    script.src = `https://embed.tawk.to/${propertyId}/${widgetId}`
     script.charset = 'UTF-8'
     script.setAttribute('crossorigin', '*')
 
@@ -50,23 +41,14 @@ export function TawkTo() {
       console.error('[Tawk.to] Error al cargar el script')
     }
 
-    // Insertar antes del primer script existente (como en el código original)
+    // Insertar antes del primer script existente
     const firstScript = document.getElementsByTagName('script')[0]
     if (firstScript && firstScript.parentNode) {
       firstScript.parentNode.insertBefore(script, firstScript)
     } else {
       document.head.appendChild(script)
     }
+  }, [propertyId, widgetId])
 
-    // Cleanup
-    return () => {
-      // Opcional: limpiar si es necesario
-      // if (script.parentNode) {
-      //   script.parentNode.removeChild(script)
-      // }
-    }
-  }, [config.tawk_property_id, config.tawk_widget_id, config.tawk_activo])
-
-  // Este componente no renderiza nada visible
   return null
 }

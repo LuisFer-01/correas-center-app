@@ -1,9 +1,10 @@
+import { GoogleAnalytics } from '@/admin/components/analytics/GoogleAnalytics'
+import { TawkTo } from '@/admin/components/chat/TawkTo'
 import { useScrollToTop } from '@/hooks/useScrollToTop'
 import { Breadcrumbs } from '@/web/components/Breadcrumbs'
 import { Footer } from '@/web/components/Footer'
 import { Navigation } from '@/web/components/Navigation'
 import { WhatsAppFloat } from '@/web/components/WhatsAppFloat'
-import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 interface AppLayoutProps {
@@ -14,34 +15,22 @@ interface AppLayoutProps {
 export const AppLayout = ({ children, showBreadcrumbs = true }: AppLayoutProps) => {
   const location = useLocation()
 
-  // 2. Activar el scroll to top para toda la aplicación pública
+  // Activar el scroll to top para toda la aplicación pública
   useScrollToTop()
 
   // Rutas donde NO queremos mostrar breadcrumbs
   const hideBreadcrumbsRoutes = ['/']
   const shouldShowBreadcrumbs = showBreadcrumbs && !hideBreadcrumbsRoutes.includes(location.pathname)
 
-  // Google Analytics 4 - Tracking de páginas SPA
-  useEffect(() => {
-    const GA_ID = import.meta.env.VITE_GOOGLE_ANALYTICS_ID
-
-    // Solo ejecutar si hay un ID configurado y gtag está disponible
-    if (!GA_ID || GA_ID === 'G-XXXXXXXXXX') {
-      return
-    }
-
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      // Enviar pageview cada vez que cambia la URL
-      ;(window as any).gtag('config', GA_ID, {
-        page_path: location.pathname,
-        page_location: window.location.href,
-        page_title: document.title,
-      })
-    }
-  }, [location.pathname])
+  // Google Analytics 4 - Tracking de páginas SPA (ya no es necesario aquí, se maneja en el componente)
+  // El componente GoogleAnalytics se encarga de esto
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {/* Componentes que cargan diferidamente */}
+      <GoogleAnalytics />
+      <TawkTo />
+      
       <Navigation />
       <main className="flex-1 pt-16 sm:pt-18 md:pt-20">
         {shouldShowBreadcrumbs && <Breadcrumbs />}

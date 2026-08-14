@@ -64,3 +64,5 @@ export const Industries = () => {
     </section>
   )
 }
+
+export default Industries

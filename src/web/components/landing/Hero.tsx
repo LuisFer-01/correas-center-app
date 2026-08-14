@@ -1,6 +1,5 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
 import { getSupabaseImageUrl } from '@/lib/supabase'
-import { OptimizedImage } from '@/web/components/OptimizedImage'
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -31,17 +30,21 @@ export const Hero = () => {
 
   useEffect(() => {
     if (carouselSlides.length === 0) return
+    
     const timer = setInterval(() => {
       // Primero difuminar el contenido
       setContentVisible(false)
+      
       // Después de que el contenido se difumine, cambiar slide
       setTimeout(() => {
         setPreviousSlide(currentSlide)
         setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)
       }, 800)
+      
       // Mostrar el nuevo contenido después de que la imagen empiece a transicionar
       setTimeout(() => setContentVisible(true), 2000)
     }, 7000)
+
     return () => clearInterval(timer)
   }, [currentSlide, carouselSlides.length])
 
@@ -62,7 +65,7 @@ export const Hero = () => {
   }
 
   const currentSlideData = carouselSlides[currentSlide]
-  
+
   const handleSlideChange = (index: number) => {
     setContentVisible(false)
     setTimeout(() => {
@@ -74,43 +77,48 @@ export const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      {/* OPTIMIZACIÓN: Precargar la primera imagen del Hero */}
+      {currentSlide === 0 && carouselSlides[0]?.image && (
+        <link
+          rel="preload"
+          as="image"
+          href={carouselSlides[0].image}
+          fetchPriority="high"
+        />
+      )}
+
       {/* Fondo con imagen optimizada */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/15 to-black/10">
         <div className="absolute inset-0">
-          <OptimizedImage
-            src={currentSlideData.image}
+          <img
+            src={currentSlideData.image ?? undefined}
             alt="Industrial background"
-            bucket="secciones-imagenes"
-            className="absolute w-full h-full"
-            objectFit="cover"
-            quality={70}
-            priority={currentSlide === 0} // Solo el primer slide es priority
-            placeholder={
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 animate-pulse" />
-            }
+            className="absolute w-full h-full object-cover transition-opacity duration-[3000ms] ease-in-out"
+            loading={currentSlide === 0 ? 'eager' : 'lazy'}
+            fetchPriority={currentSlide === 0 ? 'high' : 'auto'}
+            style={{ opacity: 1 }}
           />
         </div>
         {previousSlide !== currentSlide && (
           <div className="absolute inset-0 opacity-0" aria-hidden="true">
-            <OptimizedImage
-              src={carouselSlides[previousSlide].image}
+            <img
+              src={carouselSlides[previousSlide].image ?? undefined}
               alt=""
-              bucket="secciones-imagenes"
-              className="absolute w-full h-full"
-              objectFit="cover"
-              quality={70}
+              className="absolute w-full h-full object-cover transition-opacity duration-[3000ms] ease-in-out"
+              loading="lazy"
+              style={{ opacity: 0 }}
             />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-black/15"></div>
       </div>
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-3xl">
           {/* Badge */}
           {currentSlideData.badge && (
             <div
-              className={`inline-block bg-white/10 border border-white/30 rounded-full px-4 py-2 mb-6 backdrop-blur-sm transition-all duration-[1500ms] ease-in-out ${
+              className={`inline-block bg-white/10 border border-white/30 rounded-full px-4 py-2 mb-6 backdrop-blur-sm transition-all duration-[1000ms] ease-in-out ${
                 contentVisible ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
               }`}
             >
@@ -119,23 +127,22 @@ export const Hero = () => {
               </p>
             </div>
           )}
-          
+
           {/* CONTENEDOR CON ALTURA FIJA para evitar saltos */}
           <div className="min-h-[280px] sm:min-h-[320px] lg:min-h-[360px] flex flex-col justify-center">
-            {/* ✅ CORREGIDO: !text-white fuerza el color blanco sobre los estilos globales de index.css */}
-            {/* ✅ CORREGIDO: font-extrabold hace que el texto se vea más grueso y legible */}
+            {/* Título optimizado */}
             <h1
-              className={`text-4xl sm:text-5xl lg:text-6xl font-extrabold !text-white mb-6 leading-tight tracking-tight transition-all duration-[1500ms] ease-in-out ${
+              className={`text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight transition-all duration-[1000ms] ease-in-out ${
                 contentVisible ? 'opacity-100 blur-0' : 'opacity-0 blur-lg'
               }`}
             >
               {currentSlideData.title}
             </h1>
-            
+
             {/* Subtítulo con difuminación suave */}
             {currentSlideData.subtitle && (
               <p
-                className={`text-xl !text-white/90 mb-8 leading-relaxed transition-all duration-[1500ms] ease-in-out delay-200 ${
+                className={`text-xl text-white/90 mb-8 leading-relaxed transition-all duration-[1000ms] ease-in-out delay-200 ${
                   contentVisible ? 'opacity-100 blur-0' : 'opacity-0 blur-lg'
                 }`}
               >
@@ -143,11 +150,11 @@ export const Hero = () => {
               </p>
             )}
           </div>
-          
+
           {/* Botones CTA */}
           {(currentSlideData.ctaPrimary?.text || currentSlideData.ctaSecondary?.text) && (
             <div
-              className={`flex flex-col sm:flex-row gap-4 mb-12 transition-all duration-[1500ms] ease-in-out delay-300 ${
+              className={`flex flex-col sm:flex-row gap-4 mb-12 transition-all duration-[1000ms] ease-in-out delay-300 ${
                 contentVisible ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
               }`}
             >
@@ -163,18 +170,18 @@ export const Hero = () => {
               {currentSlideData.ctaSecondary?.text && currentSlideData.ctaSecondary?.href && (
                 <a
                   href={currentSlideData.ctaSecondary.href}
-                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm !text-white px-8 py-4 rounded-md hover:bg-white/20 transition-all font-bold text-lg border border-white/30"
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-md hover:bg-white/20 transition-all font-bold text-lg border border-white/30"
                 >
                   {currentSlideData.ctaSecondary.text}
                 </a>
               )}
             </div>
           )}
-          
+
           {/* Indicadores - solo mostrar si hay más de 1 slide */}
           {carouselSlides.length > 1 && (
             <div
-              className={`flex gap-2 mt-8 justify-center sm:justify-start transition-all duration-[1500ms] ease-in-out delay-300 ${
+              className={`flex gap-2 mt-8 justify-center sm:justify-start transition-all duration-[1000ms] ease-in-out delay-300 ${
                 contentVisible ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
               }`}
             >
@@ -192,7 +199,10 @@ export const Hero = () => {
           )}
         </div>
       </div>
+
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent"></div>
     </section>
   )
 }
+
+export default Hero

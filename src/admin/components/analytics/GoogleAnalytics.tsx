@@ -1,27 +1,19 @@
-import { useAnalyticsConfig } from '@/hooks/useSiteConfig'
 import { useEffect } from 'react'
 
 export function GoogleAnalytics() {
-  const { config } = useAnalyticsConfig()
+  // Leemos directamente de las variables de entorno
+  const measurementId = import.meta.env.VITE_GOOGLE_ANALYTICS_ID
 
   useEffect(() => {
-    // No cargar si no está activo o no hay ID
-    if (!config.google_analytics_activo || !config.google_analytics_id) {
+    // Si no hay ID o es el placeholder, no hacemos nada
+    if (!measurementId || measurementId === 'G-XXXXXXXXXX') {
       return
     }
 
-    // No cargar en desarrollo (opcional, puedes quitar esta condición)
-    /* if (import.meta.env.DEV) {
-      console.log('[GA] Google Analytics desactivado en modo desarrollo')
-      return
-    } */
-
-    const measurementId = config.google_analytics_id
-
-    // Verificar si el script ya fue cargado
+    // Verificar si el script ya fue cargado para evitar duplicados
     const existingScript = document.querySelector(`script[src="https://www.googletagmanager.com/gtag/js?id=${measurementId}"]`)
     if (existingScript) {
-      return // Ya está cargado
+      return
     }
 
     // 1. Cargar el script de gtag.js
@@ -36,19 +28,15 @@ export function GoogleAnalytics() {
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', '${measurementId}');
+      gtag('config', '${measurementId}', {
+        page_path: window.location.pathname,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
     `
     document.head.appendChild(initScript)
 
-    // Cleanup: no removemos los scripts para evitar recargas, 
-    // pero podríamos hacerlo si el componente se desmonta
-    return () => {
-      // Opcional: limpiar si es necesario
-      // document.head.removeChild(script)
-      // document.head.removeChild(initScript)
-    }
-  }, [config.google_analytics_id, config.google_analytics_activo])
+  }, [measurementId])
 
-  // Este componente no renderiza nada visible
   return null
 }

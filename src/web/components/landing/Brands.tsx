@@ -106,3 +106,5 @@ export const Brands = () => {
     </section>
   )
 }
+
+export default Brands

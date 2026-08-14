@@ -474,3 +474,5 @@ export const ProductSelector = () => {
     </section>
   )
 }
+
+export default ProductSelector

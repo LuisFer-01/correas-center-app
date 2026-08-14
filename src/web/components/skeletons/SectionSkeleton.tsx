@@ -1,25 +1,36 @@
-import { Skeleton } from '@/components/ui/skeleton'
 
 interface SectionSkeletonProps {
-  title?: string
+  title?: boolean | string
   cards?: number
-  layout?: 'grid' | 'carousel'
+  layout?: 'grid' | 'carousel' | 'hero'
 }
 
 export const SectionSkeleton = ({ 
-  title = 'true', 
+  title = true, 
   cards = 4, 
   layout = 'grid' 
 }: SectionSkeletonProps) => {
+  if (layout === 'hero') {
+    return (
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gradient-to-br from-gray-900 to-gray-800 animate-pulse">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          <div className="h-8 w-48 bg-white/10 rounded-full mx-auto mb-6" />
+          <div className="h-16 w-128 bg-white/10 rounded mx-auto mb-6" />
+          <div className="h-6 w-96 bg-white/10 rounded mx-auto" />
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="py-16 md:py-24 bg-white animate-pulse">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         {title && (
           <div className="text-center mb-12">
-            <Skeleton className="h-4 w-32 mx-auto mb-4" />
-            <Skeleton className="h-10 w-96 mx-auto mb-4" />
-            <Skeleton className="h-5 w-128 mx-auto" />
+            <div className="h-4 w-32 bg-gray-200 rounded-full mx-auto mb-4" />
+            <div className="h-10 w-96 bg-gray-200 rounded mx-auto mb-4" />
+            <div className="h-5 w-128 bg-gray-200 rounded mx-auto" />
           </div>
         )}
         

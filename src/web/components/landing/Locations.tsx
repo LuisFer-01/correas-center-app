@@ -156,3 +156,5 @@ export const Locations = () => {
     </section>
   )
 }
+
+export default Locations

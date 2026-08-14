@@ -93,3 +93,5 @@ export const Infrastructure = () => {
     </section>
   )
 }
+
+export default Infrastructure
