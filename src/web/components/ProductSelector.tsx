@@ -1,5 +1,5 @@
 import { useGlobalData } from '@/hooks/useGlobalData'
-import { ArrowRight, Check, ChevronLeft, Filter, MessageCircle, RotateCcw, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, ChevronLeft, Filter, MessagesSquare, RotateCcw, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 export const ProductSelector = () => {
@@ -12,7 +12,7 @@ export const ProductSelector = () => {
   const [isAnimating, setIsAnimating] = useState(false)
   const [showResult, setShowResult] = useState(false)
 
-  // ✅ NUEVO: Ref para el contenedor del resultado final
+  // NUEVO: Ref para el contenedor del resultado final
   const resultContainerRef = useRef<HTMLDivElement>(null)
 
   // Configuración de WhatsApp
@@ -41,14 +41,14 @@ export const ProductSelector = () => {
     return () => clearTimeout(timer)
   }, [currentStep])
 
-  // ✅ NUEVO: Efecto para centrar la vista cuando se muestra el resultado
+  // NUEVO: Efecto para centrar la vista cuando se muestra el resultado
   useEffect(() => {
     if (showResult && resultContainerRef.current) {
       // Pequeño delay para asegurar que el DOM ya renderizó el resultado
       setTimeout(() => {
         resultContainerRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
-          block: 'center' // ✅ Esto centra el elemento en la pantalla
+          block: 'center' // Esto centra el elemento en la pantalla
         })
       }, 100)
     }
@@ -147,10 +147,10 @@ export const ProductSelector = () => {
     return (
       <section className="py-16 md:py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* ✅ NUEVO: Asignar ref al contenedor del resultado */}
+          {/* NUEVO: Asignar ref al contenedor del resultado */}
           <div 
             ref={resultContainerRef}
-            className="bg-gradient-to-br from-[#EA0A2A] to-[#c90825] rounded-3xl shadow-2xl p-8 md:p-12 text-white"
+            className="bg-gradient-to-br from-[#6b0010] to-[#c90825] rounded-3xl shadow-2xl p-8 md:p-12 text-white"
           >
             {/* Header */}
             <div className="text-center mb-10">
@@ -214,7 +214,7 @@ export const ProductSelector = () => {
                 onClick={handleConsultarWhatsApp}
                 className="flex-1 bg-white text-[#EA0A2A] px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-3 hover:scale-105 shadow-lg"
               >
-                <MessageCircle size={20} />
+                <MessagesSquare size={20} />
                 Consultar información
               </button>
               <button
@@ -251,7 +251,7 @@ export const ProductSelector = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Encuentra el Producto Perfecto
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-1xl mx-auto">
             Responde {pasosWizard.length} preguntas simples y te recomendaremos la mejor solución
           </p>
         </div>
@@ -265,9 +265,9 @@ export const ProductSelector = () => {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
                       index < currentStep
-                        ? 'bg-[#EA0A2A] text-white scale-100'
+                        ? 'bg-[#9b0017] text-white scale-100'
                         : index === currentStep
-                        ? 'bg-[#EA0A2A] text-white scale-110 ring-4 ring-[#EA0A2A]/20'
+                        ? 'bg-[#EA0A2A] text-white scale-110 ring-4 ring-[#9b0017]/20'
                         : 'bg-gray-200 text-gray-400'
                     }`}
                   >

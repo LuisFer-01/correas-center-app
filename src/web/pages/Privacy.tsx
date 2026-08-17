@@ -11,7 +11,7 @@ export const Privacy = () => {
             <span className="text-sm text-white font-semibold">Legal</span>
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Política de Privacidad
+            Políticas de Privacidad
           </h1>
           <p className="text-lg text-gray-300 max-w-1xl mx-auto">
             Tu privacidad es importante para nosotros
@@ -96,7 +96,7 @@ export const Privacy = () => {
                     <strong>Teléfono:</strong> +591 7 7306-576
                   </p>
                   <p className="text-gray-700">
-                    <strong>Dirección:</strong> Av. Grigotas 2do anillo, Santa Cruz de la Sierra, Bolivia
+                    <strong>Dirección:</strong> Av. Grigota 2do anillo, Santa Cruz de la Sierra, Bolivia
                   </p>
                 </div>
               </div>
