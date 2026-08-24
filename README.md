@@ -1,75 +1,84 @@
-# React + TypeScript + Vite
+# Correas Center - Plataforma de Soluciones Industriales
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. Problema que Resuelve
+Las PYMES industriales en Bolivia carecen de plataformas digitales centralizadas para:
+- Consultar productos industriales especializados
+- Encontrar aplicaciones específicas por sector
+- Contactar directamente con proveedores autorizados
+- Acceder a información técnica detallada
 
-Currently, two official plugins are available:
+## 2. Alcance del Proyecto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Incluye:
+- Catálogo digital de productos industriales
+- Sistema de búsqueda avanzada por categorías, marcas y usos
+- Selector interactivo de productos (wizard)
+- Panel de administración completo (CMS)
+- Integración con WhatsApp Business
+- Chat en vivo (Tawk.to)
+- Google Analytics
 
-## React Compiler
+### No Incluye:
+- E-commerce (carrito de compras/pasarela de pagos)
+- Sistema de inventario en tiempo real
+- App móvil nativa
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 3. Arquitectura
 
-## Expanding the ESLint configuration
+[Insertar diagrama de arquitectura]
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Capas:
+- **Frontend:** React + TypeScript + Vite (Cliente)
+- **Backend:** Supabase (BaaS - Backend as a Service)
+- **Base de Datos:** PostgreSQL (Supabase)
+- **Autenticación:** Supabase Auth
+- **Storage:** Supabase Storage (imágenes)
+- **Hosting:** Firebase Hosting
+- **CDN:** Firebase CDN
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 4. Justificación Tecnológica
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Frontend: React + TypeScript + Vite
+- **Alternativa descartada:** Angular
+- **Motivo:** React ofrece mejor rendimiento con Virtual DOM, comunidad más activa, y Vite proporciona build times 10-100x más rápidos que Webpack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Backend: Supabase
+- **Alternativa descartada:** Firebase Firestore
+- **Motivo:** Supabase ofrece PostgreSQL completo con relaciones SQL, mejor para datos estructurados complejos como catálogos de productos con múltiples relaciones
 
-```
+### Estilos: Tailwind CSS
+- **Alternativa descartada:** Bootstrap
+- **Motivo:** Tailwind permite diseños más personalizados, menor bundle size con PurgeCSS, y mejor DX (Developer Experience)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Hosting: Firebase Hosting
+- **Alternativa descartada:** Netlify
+- **Motivo:** Requisito del trabajo final + Firebase ofrece SSL automático, CDN global, y fácil integración con otras herramientas de Google
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 5. Instrucciones de Instalación
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerrequisitos:
+- Node.js >= 18.x
+- npm >= 9.x
+- Firebase CLI
 
-```
+### Instalación:
+```bash
+# 1. Clonar repositorio
+git clone https://github.com/LuisFer-01/correas-center-app.git
+cd correas-center
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales de Supabase y Firebase
+
+# 4. Ejecutar en desarrollo
+npm run dev
+
+# 5. Build para producción
+npm run build
+
+# 6. Desplegar a Firebase
+firebase deploy
